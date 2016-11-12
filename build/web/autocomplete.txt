@@ -1,0 +1,14 @@
+var ristoranti = {
+	 "0": "Ristorante Castel Flavon", 
+	 "1": "Via Castel Flavon, 48, 39100 Bolzano BZ, Italy", 
+	 "2": "Imbiss Kampill", 
+	 "3": "Via di Mezzo ai Piani, 22, 39100 Bolzano, Italia", 
+	 "4": "Osteria dai Carrettai", 
+	 "5": "Via Dr. Josef Streiter, 20, 39100 Bolzano BZ, Italy", 
+	 "6": "Walthers", 
+	 "7": "Piazza Walther, 39100 Bolzano BZ, Italy", 
+	 "8": "Ristorante Stuben", 
+	 "9": "Via Argentieri, 16, 39100 Bolzano BZ, Italy", 
+	 "10": "Ristorante", 
+	 "11": "Pizzeria", 
+}
