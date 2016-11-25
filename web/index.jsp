@@ -39,7 +39,6 @@
         <script type="text/javascript" src="src/jquery.autocomplete.js"></script>
         <script type="text/javascript" src="autocomplete.txt"></script>
         <script type="text/javascript" src="scripts/demo.js"></script>
-
     </head>
 
     <body id="page-top" class="index">
@@ -161,94 +160,159 @@
 
 
         <!-- Header -->
-        <!--<header>
+        <header>
             <div class="container">
                 <div class="row">
                     <div class="col-lg-12">
-                        <img class="img-responsive" src="img/profile.png" alt="">
+                        <img class="img-responsive" src="img/profile.jpeg" alt="" height="200" width="400">
                         <div class="intro-text">
-                            <span class="name">Start Bootstrap</span>
+                            <span class="name"><fmt:message key="index.spot"/></span>
                             <hr class="star-light">
-                            <span class="skills">Web Developer - Graphic Artist - User Experience Designer</span>
                         </div>
+                        <form role="search" method="POST" action="<%= request.getContextPath()%>/SearchServlet?tipo=Advanced_1">
+                            <div class="row">
+                                <div class="form-group">
+                                    <div class="form-group">
+                                        <input type="text" placeholder="<fmt:message key="cerca"/>" class="form-control" name="research"/>
+                                    </div>
+                                    <div class="radio">
+                                        <h5>
+                                            <label><input type="radio" name="spec" value="nome" checked="checked"><fmt:message key="name"/> | </label>
+                                            <label><input type="radio" name="spec" value="addr"><fmt:message key="address"/> | </label>
+                                            <label><input type="radio" name="spec" value="zona"><fmt:message key="geographic.zone"/> | </label>
+                                            <label><input type="radio" name="spec" value="spec"><fmt:message key="specialty"/></label>
+                                        </h5>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary"><fmt:message key="search"/></button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <div id="divSample" class="hideClass">
+                                        <input hidden type="text" id="Latitude" name="Latitude"/>
+                                        <input hidden type="text" id="Longitude" name="Longitude"/>
+                                    </div>
+                                    <div id="temp" style="display:none"><h5><fmt:message key="receiving"/></h5></div>
+                                    <div id="received" style="display:none"><h5><fmt:message key="received"/></h5></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <h5 class=""><fmt:message key="search.type"/></h5>
+                                    <div class="checkbox">
+                                        <h5>
+                                            <label><input type="checkbox" name="spec" value="Ristorante"><fmt:message key="restaurant"/> | </label>
+                                            <label><input type="checkbox" name="spec" value="Pizzeria"><fmt:message key="pizzeria"/> | </label>
+                                            <label><input type="checkbox" name="spec" value="Trattoria"><fmt:message key="tavern"/> | </label>
+                                            <label><input type="checkbox" name="spec" value="Polleria"><fmt:message key="polleria"/> | </label>
+                                            <label><input type="checkbox" name="spec" value="Chinese"><fmt:message key="chinese"/> | </label>
+                                            <label><input type="checkbox" name="spec" value="Japanese"><fmt:message key="japanese"/></label>
+                                        </h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <button class="btn btn-primary" id="getLoc" onclick="getLocationConstant()">
+                            <fmt:message key="getLoc"/>
+                        </button>
                     </div>
                 </div>
             </div>
-        </header>-->
+        </header>
 
-        <!-- Portfolio Grid Section -->
-        <!--<section id="portfolio">
+        <!-- Ristoranti più votati -->
+        <section id="portfolio">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-12 text-center">
-                        <h2>Portfolio</h2>
+                        <h2><fmt:message key="most.voted"/></h2>
                         <hr class="star-primary">
                     </div>
                 </div>
+
                 <div class="row">
-                    <div class="col-sm-4 portfolio-item">
-                        <a href="#portfolioModal1" class="portfolio-link" data-toggle="modal">
-                            <div class="caption">
-                                <div class="caption-content">
-                                    <i class="fa fa-search-plus fa-3x"></i>
-                                </div>
-                            </div>
-                            <img src="img/portfolio/cabin.png" class="img-responsive" alt="">
-                        </a>
-                    </div>
-                    <div class="col-sm-4 portfolio-item">
-                        <a href="#portfolioModal2" class="portfolio-link" data-toggle="modal">
-                            <div class="caption">
-                                <div class="caption-content">
-                                    <i class="fa fa-search-plus fa-3x"></i>
-                                </div>
-                            </div>
-                            <img src="img/portfolio/cake.png" class="img-responsive" alt="">
-                        </a>
-                    </div>
-                    <div class="col-sm-4 portfolio-item">
-                        <a href="#portfolioModal3" class="portfolio-link" data-toggle="modal">
-                            <div class="caption">
-                                <div class="caption-content">
-                                    <i class="fa fa-search-plus fa-3x"></i>
-                                </div>
-                            </div>
-                            <img src="img/portfolio/circus.png" class="img-responsive" alt="">
-                        </a>
-                    </div>
-                    <div class="col-sm-4 portfolio-item">
-                        <a href="#portfolioModal4" class="portfolio-link" data-toggle="modal">
-                            <div class="caption">
-                                <div class="caption-content">
-                                    <i class="fa fa-search-plus fa-3x"></i>
-                                </div>
-                            </div>
-                            <img src="img/portfolio/game.png" class="img-responsive" alt="">
-                        </a>
-                    </div>
-                    <div class="col-sm-4 portfolio-item">
-                        <a href="#portfolioModal5" class="portfolio-link" data-toggle="modal">
-                            <div class="caption">
-                                <div class="caption-content">
-                                    <i class="fa fa-search-plus fa-3x"></i>
-                                </div>
-                            </div>
-                            <img src="img/portfolio/safe.png" class="img-responsive" alt="">
-                        </a>
-                    </div>
-                    <div class="col-sm-4 portfolio-item">
-                        <a href="#portfolioModal6" class="portfolio-link" data-toggle="modal">
-                            <div class="caption">
-                                <div class="caption-content">
-                                    <i class="fa fa-search-plus fa-3x"></i>
-                                </div>
-                            </div>
-                            <img src="img/portfolio/submarine.png" class="img-responsive" alt="">
-                        </a>
-                    </div>
+                    <c:forEach var="ristorante" items="${mostVoted}">
+                        <div class="col-sm-4 portfolio-item">
+                            <h5>
+                                <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${ristorante.getId()}"/>" class="portfolio-link" data-toggle="modal">
+                                    <c:out value="${ristorante.getName()}"/><br>
+                                    <fmt:message key="users.vote"/>
+                                    <c:if test="${ristorante.getVoto() == 0.0}">
+                                        <fmt:message key="no.vote"/>
+                                    </c:if>
+                                    <c:if test="${ristorante.getVoto() > 0}">
+                                        <c:out value="${ristorante.getVoto()}"/>
+                                    </c:if>
+                                    <img src="<%= request.getContextPath()%><c:out value="${ristorante.getFoto().get(0).getFotopath()}"/>" class="img-responsive" alt="">
+                                </a>
+                            </h5>
+                        </div>
+                    </c:forEach>
                 </div>
             </div>
-        </section>-->
+        </section>
+
+
+        <!-- Ristoranti più visti -->
+        <section id="portfolio">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 text-center">
+                        <h2><fmt:message key="most.seen"/></h2>
+                        <hr class="star-primary">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <c:forEach var="ristorante" items="${mostSeen}">
+                        <div class="col-sm-4 portfolio-item">
+                            <h5>
+                                <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${ristorante.getId()}"/>o" class="portfolio-link" data-toggle="modal">
+                                    <c:out value="${ristorante.getName()}"/><br>
+                                    <fmt:message key="users.posClass"/>
+                                    <c:out value="${ristorante.getPosizioneClassifica()}"/>
+                                    <img src="<%= request.getContextPath()%><c:out value="${ristorante.getFoto().get(0).getFotopath()}"/>" class="img-responsive" alt="">
+                                </a>
+                            </h5>
+                        </div>
+                    </c:forEach>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Recensioni più utili -->
+        <section id="portfolio">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 text-center">
+                        <h2><fmt:message key="last.rec"/></h2>
+                        <hr class="star-primary">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <c:forEach var="rec" items="${lastRec}">
+                        <div class="col-sm-4 portfolio-item">
+                            <h5>
+                                <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${rec.getRistorante().getId()}"/>" class="portfolio-link" data-toggle="modal">
+                                    <fmt:message key="by"/> 
+                                    <c:out value="${rec.getUtente().getNomeCognome()}"/>
+                                    (<c:out value="${rec.getUtente().getReputazione()}"/>), 
+                                    <c:out value="${rec.getData()}"/><br>
+                                    <fmt:message key="val.media"/>: <c:out value="${rec.getMediaVoti()}"/><br>
+                                    <img src="<%= request.getContextPath()%><c:out value="${rec.getFotoPath()}"/>" class="img-responsive" alt="-"><br>
+                                    <i><c:out value="${rec.getTesto()}"/></i><br><br>
+                                    <c:if test="${rec.getCommento()!=null}">
+                                        <fmt:message key="answer"/><br><c:out value="${rec.getCommento()}"/>
+                                    </c:if>
+                                </a>
+                            </h5>
+                        </div>
+                    </c:forEach>
+                </div>
+            </div>
+        </section>
 
 
         <!-- Footer -->
@@ -512,6 +576,9 @@
             </div>
         </div>
         -->
+
+        <!-- Geolocation -->
+        <script src="js/geoloc.js" type="text/javascript"></script>
 
         <!-- jQuery -->
         <script src="vendor/jquery/jquery.min.js"></script>

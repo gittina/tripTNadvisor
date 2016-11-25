@@ -27,30 +27,7 @@
         <link href="assets/css/demo.css" rel="stylesheet" />
 
 
-        <script type="text/javascript">
-            function getLocationConstant() {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError);
-                    document.getElementById("temp").style.display = 'block';
-                } else {
-                    alert("Your browser or device doesn't support Geolocation");
-                }
-            }
-
-            // If we have a successful location update
-            function onGeoSuccess(event) {
-                document.getElementById("Latitude").value = event.coords.latitude;
-                document.getElementById("Longitude").value = event.coords.longitude;
-                document.getElementById("temp").style.display = 'none';
-                document.getElementById("received").style.display = 'block';
-                document.getElementById("getLoc").style.display = 'none';
-            }
-
-            // If something has gone wrong with the geolocation request
-            function onGeoError(event) {
-                alert("Error code " + event.code + ". " + event.message);
-            }
-        </script>
+        <script src="js/geoloc.js" type="text/javascript"></script>
 
         <script type="text/javascript" src="/scripts/jquery-1.8.2.min.js"></script>
         <script type="text/javascript" src="/scripts/jquery.mockjax.js"></script>
@@ -284,22 +261,15 @@
                         <div class="row">
                             <div class="col-md-3">
                                 <h3>
-                                    <fmt:message key="most.voted"/>
+                                    
                                 </h3>
                                 <c:forEach var="ristorante" items="${mostVoted}">
                                     <div class="row">
-                                        <h4>
-                                            <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${ristorante.getId()}"/>"><c:out value="${ristorante.getName()}"/></a>
-                                        </h4>
+                                        
                                         <div>
-                                            <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${ristorante.getId()}"/>"><img src="<%= request.getContextPath()%><c:out value="${ristorante.getFoto().get(0).getFotopath()}"/>" style="max-height: 100%; max-width: 100%"/></a>
+                                            <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${ristorante.getId()}"/>"><img src="" style="max-height: 100%; max-width: 100%"/></a>
                                                 <fmt:message key="users.vote"/> 
-                                                <c:if test="${ristorante.getVoto() == 0.0}">
-                                                    <fmt:message key="no.vote"/>
-                                                </c:if>
-                                                <c:if test="${ristorante.getVoto() > 0}">
-                                                    <c:out value="${ristorante.getVoto()}"/>
-                                                </c:if><br><br>
+                                                <br><br>
                                             <fmt:message key="cooking.type"/> <c:out value="${ristorante.getCucina()}"/> <br>
                                             <fmt:message key="economy.zone"/> <c:out value="${ristorante.getFascia()}"/> <br>
                                             <fmt:message key="web.site"/> <a href="<c:out value="${ristorante.getLinksito()}"/>"><c:out value="${ristorante.getName()}"/></a><br>           
@@ -315,10 +285,10 @@
                                 <c:forEach var="ristorante" items="${mostSeen}">
                                     <div class="row">
                                         <h4>
-                                            <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${ristorante.getId()}"/>"><c:out value="${ristorante.getName()}"/></a>
+                                            <a href=""><c:out value="${ristorante.getName()}"/></a>
                                         </h4>
                                         <div>
-                                            <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${ristorante.getId()}"/>"><img src="<%= request.getContextPath()%><c:out value="${ristorante.getFoto().get(0).getFotopath()}"/>" style="max-height: 100%; max-width: 100%"/></a>
+                                            <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${ristorante.getId()}"/>"><img src="" style="max-height: 100%; max-width: 100%"/></a>
                                                 <fmt:message key="users.vote"/> 
                                                 <c:if test="${ristorante.getVoto() == 0.0}">
                                                     <fmt:message key="no.vote"/>
@@ -342,17 +312,15 @@
                                 <c:forEach var="rec" items="${lastRec}">
                                     <div class="row">
                                         <h4>
-                                            <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${rec.getRistorante().getId()}"/>"><c:out value="${rec.getTitolo()}"/><br></a>
+                                            <a href=""><c:out value="${rec.getTitolo()}"/><br></a>
                                         </h4>
                                         <h6>
-                                            <fmt:message key="by"/> <c:out value="${rec.getUtente().getNomeCognome()}"/>(<c:out value="${rec.getUtente().getReputazione()}"/>), <c:out value="${rec.getData()}"/><br>
+                                            <br>
                                         </h6>
 
                                         <div>
-                                            <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${rec.getRistorante().getId()}"/>"><img src="<%= request.getContextPath()%><c:out value="${rec.getFotoPath()}"/>" style="max-height: 100%; max-width: 100%"/></a>
-                                            <fmt:message key="val.media"/>: <c:out value="${rec.getMediaVoti()}"/><br>
-                                            <p><c:out value="${rec.getTesto()}"/></p>
-                                            <fmt:message key="answer"/>:<p><c:out value="${rec.getCommento()}"/></p>         
+                                            <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${rec.getRistorante().getId()}"/>"><img src="" style="max-height: 100%; max-width: 100%"/></a>
+                                                    
                                         </div>
                                     </div>
                                     <div class="row"></div>
