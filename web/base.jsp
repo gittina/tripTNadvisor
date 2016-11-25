@@ -141,9 +141,9 @@
                         </c:choose>
                         <li>
                             <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-                                <img src="img/flags/US.png"/>
-                                Language
-                                <b class="caret"></b>
+                                <img src="<fmt:message key="bandiera"/>"/>
+                                <fmt:message key="language"/>
+                                <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=en_GB"><img src="img/flags/GB.png"/><fmt:message key="english"/></a></li>
@@ -161,7 +161,7 @@
 
 
         <!-- Header -->
-        <header>
+        <!--<header>
             <div class="container">
                 <div class="row">
                     <div class="col-lg-12">
@@ -174,10 +174,10 @@
                     </div>
                 </div>
             </div>
-        </header>
+        </header>-->
 
         <!-- Portfolio Grid Section -->
-        <section id="portfolio">
+        <!--<section id="portfolio">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-12 text-center">
@@ -248,7 +248,7 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </section>-->
 
 
         <!-- Footer -->
@@ -279,14 +279,16 @@
             </div>
         </footer>
 
+
         <!-- Scroll to Top Button (Only visible on small and extra-small screen sizes) -->
+
         <div class="scroll-top page-scroll hidden-sm hidden-xs hidden-lg hidden-md">
             <a class="btn btn-primary" href="#page-top">
                 <i class="fa fa-chevron-up"></i>
             </a>
         </div>
 
-        <!-- Portfolio Modals -->
+        <!-- Portfolio Modals --><!--
         <div class="portfolio-modal modal fade" id="portfolioModal1" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-content">
                 <div class="close-modal" data-dismiss="modal">
@@ -509,6 +511,7 @@
                 </div>
             </div>
         </div>
+        -->
 
         <!-- jQuery -->
         <script src="vendor/jquery/jquery.min.js"></script>

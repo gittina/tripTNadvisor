@@ -37,8 +37,6 @@
                             <div class="brand">
                                 Trip TN Advisor
                             </div>
-
-
                         </div>
                     </a>
                 </div>
