@@ -42,7 +42,6 @@ public class LanguageFilter implements Filter {
             lan = new Language();
             session.setAttribute("lan", lan);
         }
-        System.out.println("request");
     }
 
     private void doAfterProcessing(ServletRequest request, ServletResponse response) throws IOException, ServletException {
