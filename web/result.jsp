@@ -224,15 +224,17 @@
                         </div>
                         <div class="col-lg-4">
                             <c:out value="${ristorante.getName()}"/><br>
-                            <c:out value="${ristorante.getFascia()}"/><br>
-                            <c:out value="${ristorante.getCucina()}"/><br>
-                            <c:out value="${ristorante.getVoto()}"/><br>
-                            <c:out value="${ristorante.getPosizioneClassifica()}"/><br>
+                            <fmt:message key="fascia"/>: <c:out value="${ristorante.getFascia()}"/><br>
+                            <fmt:message key="cucina"/>: <c:out value="${ristorante.getCucina()}"/><br>
+                            <fmt:message key="voto"/>: <c:out value="${ristorante.getVoto()}"/><br>
+                            <fmt:message key="posClass"/>: <c:out value="${ristorante.getPosizioneClassifica()}"/><br>
                         </div>
                         <div class="col-lg-4">
-                            <img src="<%= request.getContextPath()%><c:out value="${ristorante.creaQR()}"/>" class="img-responsive" alt="">
+                            <img src="<%= request.getContextPath()%><c:out value="${ristorante.creaQR()}"/>" class="img-responsive" alt="" width="250" height="250">
                         </div>
+
                     </div>
+                        <div class="row"><hr></div>
                 </c:forEach>
             </div>
         </section>
