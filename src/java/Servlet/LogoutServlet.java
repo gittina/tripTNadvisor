@@ -31,9 +31,7 @@ public class LogoutServlet extends HttpServlet {
             session = req.getSession();
             session.setAttribute("lan", lan);
         } catch (IllegalStateException e) {
-
-        } finally {
-            req.getRequestDispatcher("/HomeServlet").forward(req, resp);
         }
+        req.getRequestDispatcher("/HomeServlet").forward(req, resp);
     }
 }

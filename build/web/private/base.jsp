@@ -39,7 +39,7 @@
         <script type="text/javascript" src="../autocomplete.txt"></script>
         <script type="text/javascript" src="../scripts/demo.js"></script>
     </head>
-
+    
     <body id="page-top" class="index">
 
         <!-- Navigation -->
@@ -175,59 +175,78 @@
         </header>-->
 
         <!-- Portfolio Grid Section -->
-        <!-- Portfolio Grid Section -->
-        <section>
+        <!--<section id="portfolio">
             <div class="container">
-                <c:forEach var="ristorante" items="${listaMyRist}">
-                    <div class="row"><hr></div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <a href="">
-                                <img src="<%= request.getContextPath()%><c:out value="${ristorante.getFoto().get(0).getFotopath()}"/>" class="img-responsive" alt="Image not available">
-                            </a>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="control-label"><a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${ristorante.getId()}"/>">
-                                    <c:out value="${ristorante.getName()}"/>
-                                </a>
-                            </label>
-                            <br>
-                            <label class="control-label"><fmt:message key="fascia"/>: <c:out value="${ristorante.getFascia()}"/></label>
-                            <br>
-                            <label class="control-label"><fmt:message key="cucina"/>: <c:out value="${ristorante.getCucina()}"/></label>
-                            <br>
-                            <label class="control-label"><fmt:message key="voto"/>: 
-                                <c:choose>
-                                    <c:when test="${r.getVoto() == 0.0}">
-                                        <fmt:message key="no.vote"/>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <c:out value="${ristorate.getVoto()}"/>
-                                    </c:otherwise>
-                                </c:choose>
-                            </label>
-                            <label class="control-label"><fmt:message key="posClass"/>: <c:out value="${ristorante.getPosizioneClassifica()}"/></label>
-                            <br>
-                            <label class="control-label"><fmt:message key="reviews"/> <c:out value="${ristorante.getRecensioni().size()}"/></label>
-                            <br>
-                            <label class="control-label"><a href="http://www.google.com/maps/?q=<c:out value="${ristorante.getLuogo().getAddress()}"/>"><fmt:message key="map"/></a></label>
-                            <br>
-                            <label class="control-label"><fmt:message key="web.site"/> <a href="<c:out value="${ristorante.getLinksito()}"/>"><c:out value="${ristorante.getLinksito()}"/></a></label>
-                        </div>
-                        <div class="col-md-4">
-                            <fmt:message key="actions.ristorante"/><br>
-                            <label class="control-label"><a href="<%= request.getContextPath()%>/privateRistoratore/ConfiguraOrariApertura?id_rist=<c:out value="${ristorante.getId()}"/>"><fmt:message key="gestisci.orari"/></a></label>
-                            <br>
-                            <label class="control-label"><a href="<%= request.getContextPath()%>/private/LoadRistoranteServlet?id_rist=<c:out value="${ristorante.getId()}"/>"><fmt:message key="modify.restaurant"/></a></label>
-                            <br>
-                            <label class="control-label"><a href="<%= request.getContextPath()%>/private/LoadRistoranteFotoServlet?id_rist=<c:out value="${ristorante.getId()}"/>"><fmt:message key="add.foto"/></a></label>
-                        </div>
-
+                <div class="row">
+                    <div class="col-lg-12 text-center">
+                        <h2>Portfolio</h2>
+                        <hr class="star-primary">
                     </div>
-                    <div class="row"><hr></div>
-                    </c:forEach>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 portfolio-item">
+                        <a href="#portfolioModal1" class="portfolio-link" data-toggle="modal">
+                            <div class="caption">
+                                <div class="caption-content">
+                                    <i class="fa fa-search-plus fa-3x"></i>
+                                </div>
+                            </div>
+                            <img src="img/portfolio/cabin.png" class="img-responsive" alt="">
+                        </a>
+                    </div>
+                    <div class="col-sm-4 portfolio-item">
+                        <a href="#portfolioModal2" class="portfolio-link" data-toggle="modal">
+                            <div class="caption">
+                                <div class="caption-content">
+                                    <i class="fa fa-search-plus fa-3x"></i>
+                                </div>
+                            </div>
+                            <img src="img/portfolio/cake.png" class="img-responsive" alt="">
+                        </a>
+                    </div>
+                    <div class="col-sm-4 portfolio-item">
+                        <a href="#portfolioModal3" class="portfolio-link" data-toggle="modal">
+                            <div class="caption">
+                                <div class="caption-content">
+                                    <i class="fa fa-search-plus fa-3x"></i>
+                                </div>
+                            </div>
+                            <img src="img/portfolio/circus.png" class="img-responsive" alt="">
+                        </a>
+                    </div>
+                    <div class="col-sm-4 portfolio-item">
+                        <a href="#portfolioModal4" class="portfolio-link" data-toggle="modal">
+                            <div class="caption">
+                                <div class="caption-content">
+                                    <i class="fa fa-search-plus fa-3x"></i>
+                                </div>
+                            </div>
+                            <img src="img/portfolio/game.png" class="img-responsive" alt="">
+                        </a>
+                    </div>
+                    <div class="col-sm-4 portfolio-item">
+                        <a href="#portfolioModal5" class="portfolio-link" data-toggle="modal">
+                            <div class="caption">
+                                <div class="caption-content">
+                                    <i class="fa fa-search-plus fa-3x"></i>
+                                </div>
+                            </div>
+                            <img src="img/portfolio/safe.png" class="img-responsive" alt="">
+                        </a>
+                    </div>
+                    <div class="col-sm-4 portfolio-item">
+                        <a href="#portfolioModal6" class="portfolio-link" data-toggle="modal">
+                            <div class="caption">
+                                <div class="caption-content">
+                                    <i class="fa fa-search-plus fa-3x"></i>
+                                </div>
+                            </div>
+                            <img src="img/portfolio/submarine.png" class="img-responsive" alt="">
+                        </a>
+                    </div>
+                </div>
             </div>
-        </section>
+        </section>-->
 
 
         <!-- Footer -->

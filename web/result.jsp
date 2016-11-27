@@ -16,6 +16,7 @@
         <meta name="author" content="">
 
         <title><c:out value="${title}"/></title>
+        <c:set value="/result.jsp" scope="session" var="lastPage"/>
 
         <!-- Bootstrap Core CSS -->
         <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -141,7 +142,7 @@
                         </c:choose>
                         <li>
                             <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-                                <img src="<fmt:message key="bandiera"/>"/>
+                                <img src="<fmt:message key="bandiera"/>" alt="- "/>
                                 <fmt:message key="language"/>
                                 <span class="caret"></span>
                             </button>
@@ -176,11 +177,9 @@
                             </select><br>
                             <input type="radio" name="ordine" value="1" checked>Crescente
                             <input type="radio" name="ordine" value="2">Decrescente
-
-
                         </div>
+                        
                         <div class="col-md-3">
-
                             Filtra per fascia:
                             <select class="form-group selectBar" name="fascia">
                                 <option value="TuttiFascia">Tutti</option>
@@ -188,11 +187,9 @@
                                 <option value="Normale">Normale</option>
                                 <option value="Lussuoso">Lussuoso</option>                                                    
                             </select>
-
-
                         </div>
+                        
                         <div class="col-md-3">
-
                             Filtra per specialità
                             <select class="form-group selectBar" name="spec">
                                 <option value="TuttiSpec">Tutti</option>
@@ -203,33 +200,37 @@
                                 <option value="Chinese">Chinese</option>
                                 <option value="Japanese">Japanese</option>                                                    
                             </select>
-
                         </div>
+                        
                         <div class="col-md-3">
                             <button class="btn btn-primary" type="submit">Filtra e Ordina</button>
                         </div>
                     </form>
-
                 </div>
             </div>
         </header>
 
         <!-- Portfolio Grid Section -->
-        <section id="portfolio">
+        <section>
             <div class="container">
                 <c:forEach var="ristorante" items="${result}">
                     <div class="row">
-                        <div class="col-lg-4">
-                            <img src="<%= request.getContextPath()%><c:out value="${ristorante.getFoto().get(0).getFotopath()}"/>" class="img-responsive" alt="">
+                        <div class="col-md-4">
+                            <a href="">
+                                <img src="<%= request.getContextPath()%><c:out value="${ristorante.getFoto().get(0).getFotopath()}"/>" class="img-responsive" alt="">
+                            </a>
                         </div>
-                        <div class="col-lg-4">
-                            <c:out value="${ristorante.getName()}"/><br>
+                        <div class="col-md-4">
+                            <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${ristorante.getId()}"/>">
+                                <c:out value="${ristorante.getName()}"/>
+                            </a>
+                            <br>
                             <fmt:message key="fascia"/>: <c:out value="${ristorante.getFascia()}"/><br>
                             <fmt:message key="cucina"/>: <c:out value="${ristorante.getCucina()}"/><br>
                             <fmt:message key="voto"/>: <c:out value="${ristorante.getVoto()}"/><br>
                             <fmt:message key="posClass"/>: <c:out value="${ristorante.getPosizioneClassifica()}"/><br>
                         </div>
-                        <div class="col-lg-4">
+                        <div class="col-md-4">
                             <img src="<%= request.getContextPath()%><c:out value="${ristorante.creaQR()}"/>" class="img-responsive" alt="" width="250" height="250">
                         </div>
 

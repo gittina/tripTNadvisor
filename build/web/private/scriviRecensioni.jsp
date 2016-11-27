@@ -147,8 +147,8 @@
                         <div id="jumbosearch" class="descrMessage">
 
                             Recensione per <c:out value="${ristorante.getName()}"/><hr><br>
-                            <font class="errMessage"><c:out value="${recMessage1}"/></font><br>
-                            <font class="errMessage"><c:out value="${recMessage2}"/></font>
+                            <label class="label label-warning"><c:out value="${recMessage1}"/></font><br>
+                            <label class="label label-warning"><c:out value="${recMessage2}"/></font>
                             <form enctype='multipart/form-data' method="POST" action="<%= request.getContextPath()%>/private/InserisciRecensioniServlet">
                                 <input type="text" name="titolo" placeholder="Titolo"><br>
                                 <textarea cols="50" rows="5" name="rec" placeholder="<fmt:message key="insert.review"/>"></textarea><br>

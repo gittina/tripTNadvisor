@@ -612,7 +612,7 @@ public class Ristorante implements Serializable {
      */
     public String creaQR() throws SQLException {
 
-        String pos = "/qr/" + name + ".jpg";
+        String pos = "/qr/" + name.replace(' ', '_') + ".jpg";
         String savePath = manager.completePath + pos;
 
         ArrayList<Orario> orari = getOrario();

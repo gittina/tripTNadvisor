@@ -16,6 +16,7 @@
         <meta name="author" content="">
 
         <title><c:out value="${title}"/></title>
+        <c:set value="/index.jsp" scope="session" var="lastPage"/>
 
         <!-- Bootstrap Core CSS -->
         <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -140,13 +141,13 @@
                         </c:choose>
                         <li>
                             <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-                                <img src="<fmt:message key="bandiera"/>"/>
+                                <img src="<fmt:message key="bandiera"/>" alt="- "/>
                                 <fmt:message key="language"/>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=en_GB"><img src="img/flags/GB.png"/><fmt:message key="english"/></a></li>
-                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=it_IT"><img src="img/flags/IT.png"/><fmt:message key="italian"/></a></li>
+                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=en_GB"><img src="img/flags/GB.png" alt="- "/><fmt:message key="english"/></a></li>
+                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=it_IT"><img src="img/flags/IT.png" alt="- "/><fmt:message key="italian"/></a></li>
                             </ul>
                         </li>
                     </ul>
@@ -163,12 +164,13 @@
         <header>
             <div class="container">
                 <div class="row">
-                    <div class="col-lg-12">
-                        <img class="img-responsive" src="img/profile.jpeg" alt="" height="200" width="400">
-                        <div class="intro-text">
-                            <span class="name"><fmt:message key="index.spot"/></span>
-                            <hr class="star-light">
-                        </div>
+                    <img class="img-responsive" src="img/profile.jpeg" alt="" height="200" width="400">
+                    <div class="intro-text">
+                        <span class="name"><fmt:message key="index.spot"/></span>
+                    </div>
+                    <hr class="star-light">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-8">
                         <form role="search" method="POST" action="<%= request.getContextPath()%>/SearchServlet?tipo=Advanced_1">
                             <div class="row">
                                 <div class="form-group">
@@ -216,15 +218,16 @@
                             <fmt:message key="getLoc"/>
                         </button>
                     </div>
+                    <div class="col-md-2"></div>
                 </div>
             </div>
         </header>
 
         <!-- Ristoranti più votati -->
-        <section id="portfolio">
+        <section>
             <div class="container">
                 <div class="row">
-                    <div class="col-lg-12 text-center">
+                    <div class="col-md-12 text-center">
                         <h2><fmt:message key="most.voted"/></h2>
                         <hr class="star-primary">
                     </div>
@@ -232,7 +235,7 @@
 
                 <div class="row">
                     <c:forEach var="ristorante" items="${mostVoted}">
-                        <div class="col-sm-4 portfolio-item">
+                        <div class="col-md-4">
                             <h5>
                                 <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${ristorante.getId()}"/>" class="portfolio-link" data-toggle="modal">
                                     <c:out value="${ristorante.getName()}"/><br>
@@ -254,10 +257,10 @@
 
 
         <!-- Ristoranti più visti -->
-        <section id="portfolio">
+        <section>
             <div class="container">
                 <div class="row">
-                    <div class="col-lg-12 text-center">
+                    <div class="col-md-12 text-center">
                         <h2><fmt:message key="most.seen"/></h2>
                         <hr class="star-primary">
                     </div>
@@ -265,7 +268,7 @@
 
                 <div class="row">
                     <c:forEach var="ristorante" items="${mostSeen}">
-                        <div class="col-sm-4 portfolio-item">
+                        <div class="col-md-4">
                             <h5>
                                 <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${ristorante.getId()}"/>o" class="portfolio-link" data-toggle="modal">
                                     <c:out value="${ristorante.getName()}"/><br>
@@ -282,10 +285,10 @@
 
 
         <!-- Recensioni più utili -->
-        <section id="portfolio">
+        <section>
             <div class="container">
                 <div class="row">
-                    <div class="col-lg-12 text-center">
+                    <div class="col-md-12 text-center">
                         <h2><fmt:message key="last.rec"/></h2>
                         <hr class="star-primary">
                     </div>
@@ -293,7 +296,7 @@
 
                 <div class="row">
                     <c:forEach var="rec" items="${lastRec}">
-                        <div class="col-sm-4 portfolio-item">
+                        <div class="col-md-4">
                             <h5>
                                 <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${rec.getRistorante().getId()}"/>" class="portfolio-link" data-toggle="modal">
                                     <fmt:message key="by"/> 

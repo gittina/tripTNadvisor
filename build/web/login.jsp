@@ -16,6 +16,7 @@
         <meta name="author" content="">
 
         <title><c:out value="${title}"/></title>
+        <c:set value="/login.jsp" scope="session" var="lastPage"/>
 
         <!-- Bootstrap Core CSS -->
         <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -163,22 +164,23 @@
         <header>
             <div class="container">
                 <div class="row">
-                    <div class="col-lg-12">
+                    <div class="col-md-12">
                         <div class="intro-text">
                             <span class="name">Login</span>
                             <hr class="star-light">
-                            <div class="col-lg-4"></div>
-                            <div class=" col-lg-4">
+                            <div class="col-md-4"></div>
+                            <div class=" col-md-4">
                                 <form method="POST" action="LoginServlet">
-                                    <p><font class="errMessage"><c:out value="${message}"/></font></p>
+                                    <label class="label-danger label"><c:out value="${message}"/></label>
                                     <h5>Email</h5>
                                     <input type="text" name="mail" size="50" placeholder="Email" class="form-control"/>
                                     <h5>Password</h5>
                                     <input type="password" name="password" placeholder="Password"  size="50" class="form-control"/><br><br>
-                                    <button type="submit" id="user" class="btn btn-primary"><fmt:message key="vai"/></button> <button type="reset" id="user" class="btn btn-primary" onclick="history.go(-1);">Annulla</button>
+                                    <button type="submit" class="btn btn-primary"><fmt:message key="vai"/></button>
+                                    <button type="reset" id="user" class="btn btn-primary" onclick="history.go(-1);">Annulla</button>
                                 </form>
                             </div>
-                            <div class="col-lg-4"></div>
+                            <div class="col-md-4"></div>
                         </div>
                     </div>
                 </div>

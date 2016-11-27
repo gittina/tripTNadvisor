@@ -6,9 +6,7 @@
 <fmt:setBundle basename="Resources.string" />
 
 <html lang="en">
-
     <head>
-
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,6 +14,7 @@
         <meta name="author" content="">
 
         <title><c:out value="${title}"/></title>
+        <c:set value="/base.jsp" scope="session" var="lastPage"/>
 
         <!-- Bootstrap Core CSS -->
         <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -39,9 +38,8 @@
         <script type="text/javascript" src="src/jquery.autocomplete.js"></script>
         <script type="text/javascript" src="autocomplete.txt"></script>
         <script type="text/javascript" src="scripts/demo.js"></script>
-
     </head>
-
+    
     <body id="page-top" class="index">
 
         <!-- Navigation -->
@@ -141,13 +139,13 @@
                         </c:choose>
                         <li>
                             <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-                                <img src="<fmt:message key="bandiera"/>"/>
+                                <img src="<fmt:message key="bandiera"/>" alt="- "/>
                                 <fmt:message key="language"/>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=en_GB"><img src="img/flags/GB.png"/><fmt:message key="english"/></a></li>
-                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=it_IT"><img src="img/flags/IT.png"/><fmt:message key="italian"/></a></li>
+                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=en_GB"><img src="img/flags/GB.png" alt="- "/><fmt:message key="english"/></a></li>
+                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=it_IT"><img src="img/flags/IT.png" alt="- "/><fmt:message key="italian"/></a></li>
                             </ul>
                         </li>
                     </ul>
@@ -164,7 +162,7 @@
         <!--<header>
             <div class="container">
                 <div class="row">
-                    <div class="col-lg-12">
+                    <div class="col-md-12">
                         <img class="img-responsive" src="img/profile.png" alt="">
                         <div class="intro-text">
                             <span class="name">Start Bootstrap</span>

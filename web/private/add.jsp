@@ -16,6 +16,7 @@
         <meta name="author" content="">
 
         <title><c:out value="${title}"/></title>
+        <c:set value="/private/add.jsp" scope="session" var="lastPage"/>
 
         <!-- Bootstrap Core CSS -->
         <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -141,13 +142,13 @@
                         </c:choose>
                         <li>
                             <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-                                <img src="<fmt:message key="bandiera"/>"/>
+                                <img src="../<fmt:message key="bandiera"/>" alt="- "/>
                                 <fmt:message key="language"/>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=en_GB"><img src="img/flags/GB.png"/><fmt:message key="english"/></a></li>
-                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=it_IT"><img src="img/flags/IT.png"/><fmt:message key="italian"/></a></li>
+                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=en_GB"><img src="../img/flags/GB.png" alt="- "/><fmt:message key="english"/></a></li>
+                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=it_IT"><img src="../img/flags/IT.png" alt="- "/><fmt:message key="italian"/></a></li>
                             </ul>
                         </li>
                     </ul>
@@ -164,116 +165,59 @@
         <header>
             <div class="container">
                 <div class="row">
+                    <div class="intro-text">
+                        <span class="name">
+                            <fmt:message key="page.add.restaurant"/><br>
+                        </span>
+                    </div>
+                    <hr class="star-light">
                     <div class="col-md-3"></div>
                     <div class="col-md-6">
-                        <div class="intro-text">
-                            <span class="name">
-                                <fmt:message key="page.add.restaurant"/><br>
-                            </span>
-                            <hr class="star-light">
+                        <form enctype='multipart/form-data' method="POST" action="<%= request.getContextPath()%>/private/AddRistorante">
+                            <label class="label label-warning"><c:out value="${errMessageAdd}"/></label>
+                            <br>
+                            <label class="control-label"><fmt:message key="name"/></label>
+                            <input type="text" placeholder="<fmt:message key="cerca"/>" class="form-control" name="nome"/>
+                            <label class="label label-warning"><c:out value="${nomeError}"/></label>
+                            <br>
+                            <label class="control-label"><fmt:message key="description"/></label>
+                            <textarea class="form-control" cols="80" rows="5" name="desc" placeholder="Inserisci una breve descrizione del ristorante"></textarea>
+                            <br>
+                            <label class="control-label"><fmt:message key="web.site"/></label>
+                            <input type="text" name="linkSito" placeholder="Link al sito del ristorante" class="form-control"/> 
+                            <label class="label label-warning"><c:out value="${linkError}"/></label>
+                            <br>
+                            <label class="control-label"><fmt:message key="address"/></label>
+                            <input type="text" name="addr" placeholder="Indirizzo del ristorante" class="form-control"/>
+                            <label class="label label-warning"><c:out value="${addrError}"/></label>
+                            <br>
+                            <br>
+                            <label class="control-label"><fmt:message key="specialty"/></label>:
+                            <select class="form-group selectBar" name="spec">
+                                <option value="Ristorante"><fmt:message key="restaurant"/></option>
+                                <option value="Pizzeria"><fmt:message key="pizzeria"/></option>
+                                <option value="Trattoria"><fmt:message key="tavern"/></option>
+                                <option value="Polleria"><fmt:message key="polleria"/></option>
+                                <option value="Chinese"><fmt:message key="chinese"/></option>
+                                <option value="Japanese"><fmt:message key="giapponese"/></option>                                                    
+                            </select>
+                            <br>
+                            <label class="control-label"><fmt:message key="economy.zone"/></label>:
+                            <select class="form-group selectBar" name="fascia">
+                                <option value="Economico"><fmt:message key="economy"/></option>
+                                <option value="Normale"><fmt:message key="normal"/></option>
+                                <option value="Lussuoso"><fmt:message key="luxury"/></option>                                                    
+                            </select>
 
-                            <font class="errMessage"><c:out value="${error}"/></font>
-
-                            <form enctype='multipart/form-data' method="POST" action="<%= request.getContextPath()%>/private/AddRistorante">
-                                <font class="errMessage"><c:out value="${errMessageAdd}"/></font>
-
-                                <div class="row">
-                                    <div class="form-group">
-                                        <fmt:message key="name"/>
-                                        <div class="form-group">
-                                            <input type="text" placeholder="<fmt:message key="cerca"/>" class="form-control" name="nome"/>
-                                        </div>
-                                        <font class="errMessage"><c:out value="${nomeError}"/></font>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="form-group">
-                                        <fmt:message key="description"/>
-                                        <div class="form-group">
-                                            <textarea cols="80" rows="5" name="desc" placeholder="Inserisci una breve descrizione del ristorante"></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="form-group">
-                                        <fmt:message key="web.site"/>
-                                        <div class="form-group">
-                                            <input type="text" name="linkSito" placeholder="Link al sito del ristorante" class="form-control"/> 
-                                        </div>
-                                        <font class="errMessage"><c:out value="${linkError}"/></font>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="form-group">
-                                        <fmt:message key="address"/>
-                                        <div class="form-group">
-                                            <input type="text" name="addr" placeholder="Indirizzo del ristorante" class="form-control"/>
-                                        </div>
-                                        <font class="errMessage"><c:out value="${addrError}"/></font>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="form-group">
-                                        <fmt:message key="specialty"/>
-                                        <div class="form-group">
-                                            <select class="form-control" name="spec">
-                                                <option value="Ristorante"><fmt:message key="restaurant"/></option>
-                                                <option value="Pizzeria"><fmt:message key="pizzeria"/></option>
-                                                <option value="Trattoria"><fmt:message key="tavern"/></option>
-                                                <option value="Polleria"><fmt:message key="polleria"/></option>
-                                                <option value="Chinese"><fmt:message key="chinese"/></option>
-                                                <option value="Japanese"><fmt:message key="giapponese"/></option>                                                    
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="form-group">
-                                        <fmt:message key="economy.zone"/>
-                                        <div class="form-group">
-                                            <select class="form-control" name="fascia">
-                                                <option value="Economico"><fmt:message key="economy"/></option>
-                                                <option value="Normale"><fmt:message key="normal"/></option>
-                                                <option value="Lussuoso"><fmt:message key="luxury"/></option>                                                    
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="form-group">
-                                        <fmt:message key="upload.main.photo"/>
-                                        <div class="form-group">
-                                            <input type='file' name='img1'>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="form-group">
-                                        <fmt:message key="photo.description"/>
-                                        <div class="form-group">
-                                            <input type='text' name="fotoDescr" placeholder="Breve descrizione della fotografia" class="form-control"/>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="form-group">
-
-                                        <div class="form-group">
-                                            <button class="btn btn-primary" type="submit">Registra</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </form>   
-                        </div>
+                            <br>
+                            <label class="control-label"><fmt:message key="upload.main.photo"/></label>
+                            <input type='file' name='img1'>
+                            <br>
+                            <label class="control-label"><fmt:message key="photo.description"/></label>
+                            <input type='text' name="fotoDescr" placeholder="Breve descrizione della fotografia" class="form-control"/>
+                            <br>
+                            <button class="btn btn-primary" type="submit">Registra</button>
+                        </form>   
                     </div>
                     <div class="col-md-3"></div>
                 </div>

@@ -166,7 +166,7 @@
                         <div id="jumbosearch" class="descrMessage">
 
                             <fmt:message key="orari.di"/> <c:out value="${ristorante.getName().toUpperCase()}"/><hr><br>
-                            <font class="errMessage"><c:out value="${errOrario}"/></font>
+                            <label class="label label-warning"><c:out value="${errOrario}"/></font>
                             <table>
                                 <c:forEach var="orario" items="${ristorante.getOrario()}">
                                     <tr>

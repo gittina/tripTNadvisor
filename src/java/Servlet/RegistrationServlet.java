@@ -54,6 +54,7 @@ public class RegistrationServlet extends HttpServlet {
         String pass1 = request.getParameter("pass1");
         String pass2 = request.getParameter("pass2");
         String check = request.getParameter("check");
+
         boolean tornaIndietro = false;
         Utente user;
         HttpSession session = request.getSession();

@@ -16,6 +16,7 @@
         <meta name="author" content="">
 
         <title><c:out value="${title}"/></title>
+        <c:set value="/registration.jsp" scope="session" var="lastPage"/>
 
         <!-- Bootstrap Core CSS -->
         <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -164,62 +165,62 @@
         <header>
             <div class="container">
                 <div class="row">
-                    <div class="col-lg-12">
+                    <div class="col-md-12">
                         <div class="intro-text">
                             <span class="name"><fmt:message key="register"/></span>
-                            <hr class="star-light">
-                            <div class="col-lg-4"></div>
-                            <div class="col-lg-4">
-                                <form method="POST" action="<%= request.getContextPath()%>/RegistrationServlet">
-                                    <span class="label label-danger"><c:out value="${problemMessage}"/></span>
-                                    <br>
-
-                                    <label class="control-label">Name</label>
-                                    <input type="text" name="name" class="form-control">                                              
-                                    <span class="label label-danger"><c:out value="${nomeMessage}"/></span>
-                                    <br>
-
-                                    <label class="control-label">Surname</label>
-                                    <input type="text" name="surname" class="form-control">                                             
-                                    <span class="label label-danger"><c:out value="${cognomeMessage}"/></span>
-                                    <br>
-
-                                    <label class="control-label">Email</label>
-                                    <input type="email" name="mail1" class="form-control">
-                                    <span class="label label-danger"><c:out value="${doppioneMessage}"/></span>
-                                    <br>
-
-                                    <label class="control-label">Confirm Email</label>
-                                    <input type="email" name="mail2" class="form-control">
-                                    <span class="label label-danger"><c:out value="${mailmessage}"/></span>
-                                    <br>
-
-                                    <label class="control-label">Password</label>
-                                    <input type="password" name="pass1" class="form-control">
-                                    <span class="label label-danger"><c:out value="${passMessage}"/></span>
-                                    <br>
-
-                                    <label class="control-label">Repeat Password</label>
-                                    <input type="password" name="pass2" class="form-control">
-                                    <br>
-                                    
-                                    <input type="checkbox" name="check"/>
-                                    <fmt:message key="terms.accept"/>
-                                    <span class="label label-danger"><c:out value="${checkMessage}"/></span>
-                                    <br><br>
-
-                                    <button type="submit" class="btn btn-primary"><fmt:message key="register"/></button>
-                                    <button type="submit" class="btn btn-primary" onclick="history.go(-1);"><fmt:message key="cancel"/></button>
-                                </form>
-                            </div>
-                            <div class="col-lg-4"></div>
                         </div>
+                        <hr class="star-light">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <form method="POST" action="<%= request.getContextPath()%>/RegistrationServlet">
+                                <span class="label label-danger"><c:out value="${problemMessage}"/></span>
+                                <br>
+
+                                <label class="control-label">Name</label>
+                                <input type="text" name="name" class="form-control">                                              
+                                <span class="label label-danger"><c:out value="${nomeMessage}"/></span>
+                                <br>
+
+                                <label class="control-label">Surname</label>
+                                <input type="text" name="surname" class="form-control">                                             
+                                <span class="label label-danger"><c:out value="${cognomeMessage}"/></span>
+                                <br>
+
+                                <label class="control-label">Email</label>
+                                <input type="email" name="mail1" class="form-control">
+                                <span class="label label-danger"><c:out value="${doppioneMessage}"/></span>
+                                <span class="label label-danger"><c:out value="${mailMessage}"/></span>
+                                <br>
+
+                                <label class="control-label">Confirm Email</label>
+                                <input type="email" name="mail2" class="form-control">
+                                <br>
+
+                                <label class="control-label">Password</label>
+                                <input type="password" name="pass1" class="form-control">
+                                <span class="label label-danger"><c:out value="${passMessage}"/></span>
+                                <br>
+
+                                <label class="control-label">Repeat Password</label>
+                                <input type="password" name="pass2" class="form-control">
+                                <br>
+
+                                <input type="checkbox" name="check"/>
+                                <fmt:message key="terms.accept"/>
+                                <span class="label label-danger"><c:out value="${checkMessage}"/></span>
+                                <br><br>
+
+                                <button type="submit" class="btn btn-primary"><fmt:message key="register"/></button>
+                                <button type="reset" id="user" class="btn btn-primary" onclick="history.go(-1);"><fmt:message key="cancel"/></button>
+                            </form>
+                        </div>
+                        <div class="col-md-4"></div>
                     </div>
                 </div>
             </div>
         </header>
 
-                                
+
 
         <!-- Footer -->
         <footer class="text-center">
@@ -241,7 +242,7 @@
             <div class="footer-below">
                 <div class="container">
                     <div class="row">
-                        <div class="col-lg-12">
+                        <div class="col-md-12">
                             Copyright &copy; TRIPTNADVISOR 2016
                         </div>
                     </div>
