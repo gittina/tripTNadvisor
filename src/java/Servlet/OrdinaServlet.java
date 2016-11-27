@@ -28,12 +28,11 @@ public class OrdinaServlet extends HttpServlet {
     private DBManager manager;
 
     @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
+    public void init() throws ServletException {
+        // inizializza il DBManager dagli attributi di Application
         this.manager = (DBManager) super.getServletContext().getAttribute("dbmanager");
-
     }
-
+    
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             HttpSession session = request.getSession(true);
@@ -41,7 +40,6 @@ public class OrdinaServlet extends HttpServlet {
 
             String research = (String) session.getAttribute("research");
             ArrayList<Ristorante> res = manager.simpleSearch(research);
-            System.out.println("Size:" + res.size());
             Comparator c;
 
             String tipo = (String) request.getParameter("tipo");
