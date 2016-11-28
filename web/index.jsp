@@ -18,13 +18,13 @@
         <c:set value="/index.jsp" scope="session" var="lastPage"/>
 
         <!-- Bootstrap Core CSS -->
-        <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link href="<%= request.getContextPath()%>/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
         <!-- Theme CSS -->
-        <link href="css/freelancer.min.css" rel="stylesheet">
+        <link href="<%= request.getContextPath()%>/css/freelancer.min.css" rel="stylesheet">
 
         <!-- Custom Fonts -->
-        <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href="<%= request.getContextPath()%>/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
         <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
         <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
 
@@ -34,11 +34,11 @@
             <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
             <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
         <![endif]-->
-        <script type="text/javascript" src="scripts/jquery-1.8.2.min.js"></script>
-        <script type="text/javascript" src="scripts/jquery.mockjax.js"></script>
-        <script type="text/javascript" src="src/jquery.autocomplete.js"></script>
-        <script type="text/javascript" src="autocomplete.txt"></script>
-        <script type="text/javascript" src="scripts/demo.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/jquery-1.8.2.min.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/jquery.mockjax.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/src/jquery.autocomplete.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/autocomplete.txt"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/demo.js"></script>
     </head>
 
     <body id="page-top" class="index">
@@ -140,13 +140,13 @@
                         </c:choose>
                         <li>
                             <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-                                <img src="<fmt:message key="bandiera"/>" alt="- "/>
+                                <img src="<%= request.getContextPath()%><fmt:message key="bandiera"/>" alt="- "/>
                                 <fmt:message key="language"/>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=en_GB"><img src="img/flags/GB.png" alt="- "/><fmt:message key="english"/></a></li>
-                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=it_IT"><img src="img/flags/IT.png" alt="- "/><fmt:message key="italian"/></a></li>
+                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=en_GB"><img src="<%= request.getContextPath()%>/img/flags/GB.png" alt="- "/><fmt:message key="english"/></a></li>
+                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=it_IT"><img src="<%= request.getContextPath()%>/img/flags/IT.png" alt="- "/><fmt:message key="italian"/></a></li>
                             </ul>
                         </li>
                     </ul>
@@ -163,7 +163,7 @@
         <header>
             <div class="container">
                 <div class="row">
-                    <img class="img-responsive" src="img/profile.jpeg" alt="" height="200" width="400">
+                    <img class="img-responsive" src="<%= request.getContextPath()%>/img/profile.jpeg" alt="" height="200" width="400">
                     <div class="intro-text">
                         <span class="name"><fmt:message key="index.spot"/></span>
                     </div>
@@ -356,19 +356,19 @@
 
 
         <!-- Geolocation -->
-        <script src="js/geoloc.js" type="text/javascript"></script>
+        <script src="<%= request.getContextPath()%>/js/geoloc.js" type="text/javascript"></script>
 
         <!-- jQuery -->
-        <script src="vendor/jquery/jquery.min.js"></script>
+        <script src="<%= request.getContextPath()%>/vendor/jquery/jquery.min.js"></script>
 
         <!-- Bootstrap Core JavaScript -->
-        <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+        <script src="<%= request.getContextPath()%>/vendor/bootstrap/js/bootstrap.min.js"></script>
 
         <!-- Plugin JavaScript -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
 
         <!-- Theme JavaScript -->
-        <script src="js/freelancer.min.js"></script>
+        <script src="<%= request.getContextPath()%>/js/freelancer.min.js"></script>
 
     </body>
 
