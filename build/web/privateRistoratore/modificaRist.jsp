@@ -154,7 +154,7 @@
                             </h3>
                             <c:if test="${not empty message}">
                                 <br>
-                                <font class="errMessage">
+                                <label class="label label-warning">
                                 <c:out value="${message}"/>
                                 </font>
                             </c:if>

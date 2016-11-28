@@ -26,11 +26,11 @@ import net.glxn.qrgen.image.ImageType;
  *
  * @author Luca
  */
-public class Ristorante implements Serializable{
+public class Ristorante implements Serializable {
 
     private final DBManager manager;
     private final Connection con;
-  
+
     public int getId() {
         return id;
     }
@@ -326,11 +326,9 @@ public class Ristorante implements Serializable{
             rs = stm.executeQuery();
             int counter = 0;
             while (rs.next()) {
-                if (rs.getFloat("media") != 0) {
-                    counter++;
-                    if (rs.getInt("id_rist") == id) {
-                        return counter;
-                    }
+                counter++;
+                if (rs.getInt("id_rist") == id) {
+                    return counter;
                 }
             }
             stm.close();
@@ -403,10 +401,9 @@ public class Ristorante implements Serializable{
         }
         return res;
     }
-    
 
-    public ArrayList<Ristorante> getVicini(){
-        return manager.advSearch2(this.getLuogo().getLat(),this.getLuogo().getLng());
+    public ArrayList<Ristorante> getVicini() {
+        return manager.advSearch2(this.getLuogo().getLat(), this.getLuogo().getLng());
     }
 
     /**
@@ -587,7 +584,7 @@ public class Ristorante implements Serializable{
             stm.setInt(1, id);
             ResultSet rs = stm.executeQuery();
             while (rs.next()) { //int id, String fotopath, String descr, Date data
-                res.add(new Foto(rs.getInt("id"), rs.getString("fotopath"), rs.getString("descr"), rs.getDate("data"), manager.getUtente(rs.getInt("id_utente")), manager.getRistorante(rs.getInt("id_rist")),manager));
+                res.add(new Foto(rs.getInt("id"), rs.getString("fotopath"), rs.getString("descr"), rs.getDate("data"), manager.getUtente(rs.getInt("id_utente")), manager.getRistorante(rs.getInt("id_rist")), manager));
             }
             Comparator c = (Comparator<Foto>) (Foto o1, Foto o2) -> {
                 if (o1.getData().after(o2.getData())) {
@@ -615,7 +612,7 @@ public class Ristorante implements Serializable{
      */
     public String creaQR() throws SQLException {
 
-        String pos = "/qr/" + name + ".jpg";
+        String pos = "/qr/" + name.replace(' ', '_') + ".jpg";
         String savePath = manager.completePath + pos;
 
         ArrayList<Orario> orari = getOrario();

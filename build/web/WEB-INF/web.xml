@@ -84,7 +84,7 @@
     </context-param>
     <context-param>
         <param-name>completePath</param-name>
-        <param-value>/Users/lucadiliello/Desktop/tripTNadvisor/web</param-value>
+        <param-value>/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web</param-value>
     </context-param>
     <welcome-file-list>
         <welcome-file>HomeServlet</welcome-file>
@@ -118,7 +118,7 @@
                 uploadDir
             </param-name>
             <param-value>
-                /Users/lucadiliello/NetBeansProjects/trippatnadvisor/web/fotoUtenti
+                /Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/fotoUtenti
             </param-value>
         </init-param>
     </servlet>
@@ -139,7 +139,7 @@
                 uploadDir
             </param-name>
             <param-value>
-                /Users/lucadiliello/NetBeansProjects/trippatnadvisor/web/fotoRistoranti
+                /Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/fotoRistoranti
             </param-value>
         </init-param>
     </servlet>
@@ -167,7 +167,7 @@
                 uploadDir
             </param-name>
             <param-value>
-                /Users/lucadiliello/NetBeansProjects/trippatnadvisor/web/fotoRistoranti
+                /Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/fotoRistoranti
             </param-value>
         </init-param>
     </servlet>
@@ -187,7 +187,7 @@
                 uploadDir
             </param-name>
             <param-value>
-                /Users/lucadiliello/NetBeansProjects/trippatnadvisor/web/fotoRecensioni
+                /Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/fotoRecensioni
             </param-value>
         </init-param>
     </servlet>

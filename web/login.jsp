@@ -1,99 +1,245 @@
-
-<%@page import="DataBase.Utente"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
+<fmt:setLocale value="${lan.getLanSelected()}" />
+<fmt:setBundle basename="Resources.string" />
+
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>
-        <c:out value="${title}"/>
-    </title>
+    <head>
 
-    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
-    
-    <link href="<%= request.getContextPath() %>/css/bootstrap.min.css" rel="stylesheet">
-    <link href="<%= request.getContextPath() %>/css/style.css" rel="stylesheet">
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:600,400' rel='stylesheet' type='text/css'>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
 
-</head>
-<body>
-    
-    <div class="container-fluid">
-	<div class="row">
-		<div class="col-md-12">
-			<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-                            <!--
-                                Da qui in poi inizia la navbar in posizione TOP.
-                            - navbar-header sempre visibile
-                            - collapse navbar-collapse rientra in un menù a cascata se la pagina è troppo stretta e contiene i prossimi punti
-                                - li active sono scritte normali (o link)
-                                - li dropdown (class) sono i dropdown, contenenti nell'ul altri li che sono i link visibili all'interno del menù
-                                -->
-                                
-				<div class="navbar-header">
-					 
-					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-						 <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
-                                        </button> <a class="navbar-brand" href="<%= request.getContextPath()%>/HomeServlet"><img src="<%= request.getContextPath()%>/img/logo.png" width="110" style="margin-top: -5px; margin-right: -25px; padding: 0"></a>
-				</div>
-				
-				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1"> 
-					<ul class="nav navbar-nav">
-						<li class="home" id="homelink">
-                                                    <a href="<%= request.getContextPath()%>/HomeServlet">Home</a>
-						</li>
-					</ul>
-                                                
-                                      
-                                    
-					<ul class="nav navbar-nav navbar-right" style="padding-right: 30px;">
+        <title><c:out value="${title}"/></title>
+        <c:set value="/login.jsp" scope="session" var="lastPage"/>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="<%= request.getContextPath()%>/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Theme CSS -->
+        <link href="<%= request.getContextPath()%>/css/freelancer.min.css" rel="stylesheet">
+
+        <!-- Custom Fonts -->
+        <link href="<%= request.getContextPath()%>/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+        <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/jquery-1.8.2.min.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/jquery.mockjax.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/src/jquery.autocomplete.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/autocomplete.txt"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/demo.js"></script>
+
+    </head>
+
+    <body id="page-top" class="index">
+
+        <!-- Navigation -->
+        <nav id="mainNav" class="navbar navbar-default navbar-fixed-top navbar-custom">
+            <div class="container">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header page-scroll">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span> Menu <i class="fa fa-bars"></i>
+                    </button>
+                    <a class="navbar-brand" href="<%= request.getContextPath()%>/HomeServlet">TRIPTNADVISOR</a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+                    <ul class="nav navbar-nav navbar-left">
+                        <c:choose>
+                            <c:when test="${utente == null}">
+                                <li>
+                                    <a href="<%= request.getContextPath()%>/registration.jsp"><fmt:message key="welcome.visitors"/></a>
+                                </li>
+                            </c:when>
+                            <c:when test="${utente.isAmministratore()}">
+                                <li>
+                                    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><img src="<%= request.getContextPath()%><c:out value="${utente.getAvpath()}"/>" HEIGHT="25" WIDTH="25" BORDER="0" align="center">  <c:out value="${utente.getNomeCognome()}"/>
+                                        <span class="caret"></span></button>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneProfilo"><fmt:message key="profile"/></a></li>
+                                        <li><a href="<%= request.getContextPath()%>/private/LogoutServlet"><fmt:message key="exit"/></a></li>
+                                    </ul>
+                                </li>
+                            </c:when>
+                            <c:when test="${utente.isRegistrato()}">
+                                <li>
+                                    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><img src="<%= request.getContextPath()%><c:out value="${utente.getAvpath()}"/>" HEIGHT="25" WIDTH="25" BORDER="0" align="center">  <c:out value="${utente.getNomeCognome()}"/>
+                                        <span class="caret"></span></button>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneProfilo"><fmt:message key="profile"/></a></li>
+                                        <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneAddRistorante"><fmt:message key="add.restaurant"/></a></li>
+                                        <li><a href="<%= request.getContextPath()%>/private/LogoutServlet"><fmt:message key="exit"/></a></li>
+                                    </ul>
+                                </li>
+                            </c:when>
+                            <c:when test="${utente.isRistoratore()}">
+                                <li>
+                                    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><img src="<%= request.getContextPath()%><c:out value="${utente.getAvpath()}"/>" HEIGHT="25" WIDTH="25" BORDER="0" align="center">  <c:out value="${utente.getNomeCognome()}"/>
+                                        <span class="caret"></span></button>            
+                                    <ul class="dropdown-menu">
+                                        <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneProfilo"><font class="dropdown-line"><fmt:message key="profile"/></font></a></li>
+                                        <li><a href="<%= request.getContextPath()%>/privateRistoratore/ConfigurazioneRistoranti"><fmt:message key="my.restaurant"/></a></li>
+                                        <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneAddRistorante"><fmt:message key="add.restaurant"/></a></li>
+                                        <li><a href="<%= request.getContextPath()%>/private/LogoutServlet"><fmt:message key="exit"/></a></li>
+                                    </ul>
+                                </li>
+                            </c:when>
+                        </c:choose>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <c:choose>
+                            <c:when test="${utente == null}">
+                                <li>
+                                    <a href="<%= request.getContextPath()%>/login.jsp">Login</a>
+                                </li>
+                                <li>
+                                    <a href="<%= request.getContextPath()%>/registration.jsp">
+                                        <fmt:message key="register"/>
+                                    </a>
+                                </li>
+                            </c:when>
+                            <c:when test="${utente.isRistoratore() || utente.isAmministratore()}">
+                                <li>
+                                    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><fmt:message key="notify"/>
+                                        <span class="caret"></span></button>
+                                    <ul class="dropdown-menu">
+                                        <c:choose>
+                                            <c:when test="${utente.getNotifiche().size()>0}">
+                                                <c:forEach var="notifica" items="${utente.getNotifiche()}">
+                                                    <li>
+                                                        <a href="<%=request.getContextPath()%>/private/PrepareNotificheServlet?id_not=<c:out value="${notifica.getId()}"/>">
+                                                            <c:out value="${notifica.toString()}"/>
+                                                        </a>
+                                                    </li>
+                                                </c:forEach>
+                                            </c:when>
+                                            <c:otherwise>
                                                 <li>
-                                                    <div class="dropdown">
-                                                        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Language
-                                                        <span class=" "></span></button>
-                                                        <ul class="dropdown-menu">
-                                                            <li><a href="<%= request.getContextPath()%>/ConfigLingua">Italiano</a></li>
-                                                            <li><a href="<%= request.getContextPath()%>/ConfigLingua">Inglese</a></li>
-                                                        </ul>
-                                                    </div>
+                                                    <a href="<%=request.getContextPath()%>/private/PrepareNotificheServlet?">
+                                                        Nessuna notifica
+                                                    </a>
                                                 </li>
-					</ul>
-				</div>	
-			</nav>
-		</div>
-	</div>
-        <br><br>
-	<div class="row" id="dividers_container" style="background: transparent">
-            <div class="col-md-12" id="regdiv">
-                <br>
-                <div class="regindiv">
-                    <form method="POST" action="LoginServlet">
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </ul>
+                                </li>
+                            </c:when>  
+                        </c:choose>
+                        <li>
+                            <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                                <img src="<%= request.getContextPath()%><fmt:message key="bandiera"/>" alt="- "/>
+                                <fmt:message key="language"/>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=en_GB"><img src="<%= request.getContextPath()%>/img/flags/GB.png" alt="- "/><fmt:message key="english"/></a></li>
+                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=it_IT"><img src="<%= request.getContextPath()%>/img/flags/IT.png" alt="- "/><fmt:message key="italian"/></a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.navbar-collapse -->
+            </div>
+            <!-- /.container-fluid -->
+        </nav>
 
-                        <h2>Login</h2>
-                        <p><font class="errMessage"><c:out value="${message}"/></font></p>
-                        <table>
-                            <tr>
-                                <td style="padding: 10px" class="txtreg">Email</td>
-                                <td style="padding: 10px"><input type="text" name="mail" class="form-control"></td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px" class="txtreg">Password</td>
-                                <td style="padding: 10px"><input type="password" name="password" class="form-control"></td>
-                            </tr>
-                            
-                        </table>
-                        <input type="submit" id="user" class="btn btn-warning"> <input type="reset" id="user" class="btn btn-warning" value="Annulla" onclick="history.go(-1);">
-                    </form>
+
+
+        <!-- Header -->
+        <header>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="intro-text">
+                            <span class="name">Login</span>
+                            <hr class="star-light">
+                            <div class="col-md-4"></div>
+                            <div class=" col-md-4">
+                                <form method="POST" action="LoginServlet">
+                                    <label class="label-danger label"><c:out value="${message}"/></label>
+                                    <h5>Email</h5>
+                                    <input type="text" name="mail" size="50" placeholder="Email" class="form-control"/>
+                                    <h5>Password</h5>
+                                    <input type="password" name="password" placeholder="Password"  size="50" class="form-control"/><br><br>
+                                    <button type="submit" class="btn btn-primary"><fmt:message key="vai"/></button>
+                                    <button type="reset" id="user" class="btn btn-primary" onclick="history.go(-1);">Annulla</button>
+                                </form>
+                            </div>
+                            <div class="col-md-4"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-	</div>
-</div>
+        </header>
 
-    <script src="<%= request.getContextPath()%>/js/jquery.min.js"></script>
-    <script src="<%= request.getContextPath()%>/js/bootstrap.min.js"></script>
-    <script src="<%= request.getContextPath()%>/js/scripts.js"></script>
-  </body>
+
+
+        <!-- Footer -->
+        <footer class="text-center">
+            <div class="footer-above">
+                <div class="container">
+                    <div class="row">
+                        <div class="footer-col col-md-6">
+                            <h3>Location</h3>
+                            <p>Polo Ferrari, Via Sommarive 5
+                                <br>TRENTO, TN 38100</p>
+                        </div>
+                        <div class="footer-col col-md-6">
+                            <h3>About TripTNadvisor</h3>
+                            <p>TripTNadvisor is free to use, developed by UNITN students on 2016</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-below">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            Copyright &copy; TRIPTNADVISOR 2016
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+
+        <!-- Scroll to Top Button (Only visible on small and extra-small screen sizes) -->
+
+        <div class="scroll-top page-scroll hidden-sm hidden-xs hidden-lg hidden-md">
+            <a class="btn btn-primary" href="#page-top">
+                <i class="fa fa-chevron-up"></i>
+            </a>
+        </div>
+
+
+
+        <!-- jQuery -->
+        <script src="<%= request.getContextPath()%>/vendor/jquery/jquery.min.js"></script>
+
+        <!-- Bootstrap Core JavaScript -->
+        <script src="<%= request.getContextPath()%>/vendor/bootstrap/js/bootstrap.min.js"></script>
+
+        <!-- Plugin JavaScript -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+
+        <!-- Theme JavaScript -->
+        <script src="<%= request.getContextPath()%>/js/freelancer.min.js"></script>
+
+    </body>
+
 </html>

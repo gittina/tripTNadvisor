@@ -34,8 +34,8 @@ public class HomeServlet extends HttpServlet {
     
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        HttpSession session = request.getSession();
+        System.out.println("Inizio la HomeServlet");
+        HttpSession session = request.getSession(true);
         Utente utente = (Utente) session.getAttribute("utente");
         Language lan = (Language) session.getAttribute("lan");
        
@@ -48,9 +48,7 @@ public class HomeServlet extends HttpServlet {
         session.setAttribute("mostVoted", manager.getRistorantiPiuVotati());
         session.setAttribute("mostSeen", manager.getRistorantiPiuVisitati());
         session.setAttribute("lastRec", manager.getUltimeRecensioni());
-        RequestDispatcher rd = request.getRequestDispatcher("/index.jsp");
-        rd.forward(request, response);
-        
+        request.getRequestDispatcher("/index.jsp").forward(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
