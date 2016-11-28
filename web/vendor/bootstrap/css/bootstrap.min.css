@@ -7,3 +7,14 @@
 .selectBar{
     color: black;
 }
+
+.peopleCarouselImg {
+    width: auto;
+    height: 450px;
+    max-height: 450px;
+}
+
+div#gmaps-canvas {
+    width:auto;	
+    height:450px;
+}

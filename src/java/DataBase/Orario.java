@@ -56,29 +56,15 @@ public class Orario {
     
     @Override
     public String toString(){
-        return getGiornoString() + ": " + getApertura() + " - " + getChiusura() + "\n";
+        return getGiornoString() + ": ";
     }
     
     public int getGiorno(){
         return giorno;
     }
 
-    public Time getApertura() {
-        return apertura;
-    }
 
-    public void setApertura(Time apertura) {
-        this.apertura = apertura;
-    }
-
-    public Time getChiusura() {
-        return chiusura;
-    }
-
-    public void setChiusura(Time chiusura) {
-        this.chiusura = chiusura;
-    }
     
-    private Time apertura;
-    private Time chiusura;
+    
+    
 }

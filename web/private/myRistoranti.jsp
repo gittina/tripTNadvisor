@@ -215,7 +215,8 @@
                             <label class="control-label"><fmt:message key="web.site"/> <a href="<c:out value="${ristorante.getLinksito()}"/>"><c:out value="${ristorante.getLinksito()}"/></a></label>
                         </div>
                         <div class="col-md-4">
-                            <fmt:message key="actions.ristorante"/><br>
+                            <label class="control-label"><fmt:message key="actions.ristorante"/></label>
+                            <br>
                             <label class="control-label"><a href="<%= request.getContextPath()%>/privateRistoratore/ConfiguraOrariApertura?id_rist=<c:out value="${ristorante.getId()}"/>"><fmt:message key="gestisci.orari"/></a></label>
                             <br>
                             <label class="control-label"><a href="<%= request.getContextPath()%>/private/LoadRistoranteServlet?id_rist=<c:out value="${ristorante.getId()}"/>"><fmt:message key="modify.restaurant"/></a></label>

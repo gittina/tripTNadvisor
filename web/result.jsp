@@ -178,7 +178,7 @@
                             <input type="radio" name="ordine" value="1" checked>Crescente
                             <input type="radio" name="ordine" value="2">Decrescente
                         </div>
-                        
+
                         <div class="col-md-3">
                             Filtra per fascia:
                             <select class="form-group selectBar" name="fascia">
@@ -188,7 +188,7 @@
                                 <option value="Lussuoso">Lussuoso</option>                                                    
                             </select>
                         </div>
-                        
+
                         <div class="col-md-3">
                             Filtra per specialità
                             <select class="form-group selectBar" name="spec">
@@ -201,7 +201,7 @@
                                 <option value="Japanese">Japanese</option>                                                    
                             </select>
                         </div>
-                        
+
                         <div class="col-md-3">
                             <button class="btn btn-primary" type="submit">Filtra e Ordina</button>
                         </div>
@@ -231,12 +231,11 @@
                             <fmt:message key="posClass"/>: <c:out value="${ristorante.getPosizioneClassifica()}"/><br>
                         </div>
                         <div class="col-md-4">
-                            <img src="<%= request.getContextPath()%><c:out value="${ristorante.creaQR()}"/>" class="img-responsive" alt="" width="250" height="250">
+                            <img src="<%= request.getContextPath()%><c:out value="${ristorante.creaQR()}"/>" class="img-responsive" alt="Error creating QR Code" width="250" height="250">
                         </div>
-
                     </div>
-                        <div class="row"><hr></div>
-                </c:forEach>
+                    <div class="row"><hr></div>
+                    </c:forEach>
             </div>
         </section>
 

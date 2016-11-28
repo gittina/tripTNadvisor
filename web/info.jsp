@@ -14,7 +14,7 @@
         <meta name="author" content="">
 
         <title><c:out value="${title}"/></title>
-        <c:set value="/base.jsp" scope="session" var="lastPage"/>
+        <c:set value="/info.jsp" scope="session" var="lastPage"/>
 
         <!-- Bootstrap Core CSS -->
         <link href="<%= request.getContextPath()%>/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -38,9 +38,49 @@
         <script type="text/javascript" src="<%= request.getContextPath()%>/src/jquery.autocomplete.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/autocomplete.txt"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/demo.js"></script>
+
+        <!-- javascript file specific for this page-->
+        <script type="text/javascript" src="<%= request.getContextPath()%>/personalScript/show_hidden.js"></script>
+
+        <!-- maps scripts-->
+        <script type="text/javascript">
+            function initialize() {
+
+                var myLatLng = new google.maps.LatLng(<c:out value="${ristorante.getLuogo().getLat()}"/>, <c:out value="${ristorante.getLuogo().getLng()}"/>);
+                var myOptions = {
+                    zoom: 14,
+                    center: myLatLng,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                };
+
+                var map = new google.maps.Map(document.getElementById("gmaps-canvas"), myOptions);
+
+            <c:forEach items="${ristorante.getVicini()}" var="rist">
+
+                var marker<c:out value="${rist.getId()}"/> = new google.maps.Marker({
+                    position: new google.maps.LatLng(<c:out value="${rist.getLuogo().getLat()}"/>, <c:out value="${rist.getLuogo().getLng()}"/>),
+                    map: map,
+                    title: "<c:out value="${rist.getName()}"/>"
+                });
+
+                var contentString<c:out value="${rist.getId()}"/> = '<c:out value="${rist.getName()}"/>';
+                var infoWindow<c:out value="${rist.getId()}"/> = new google.maps.InfoWindow({
+                    content: contentString<c:out value="${rist.getId()}"/>
+                });
+
+                google.maps.event.addListener(marker<c:out value="${rist.getId()}"/>, 'click', function () {
+                    infoWindow<c:out value="${rist.getId()}"/>.open(map, marker<c:out value="${rist.getId()}"/>);
+                });
+
+            </c:forEach>
+
+            }
+        </script>
+        <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7spDhgAtLeyh6b0F6MQI2I5fldqrR6oM&callback=initMap"></script>
     </head>
 
-    <body id="page-top" class="index">
+    <body id="page-top" class="index" onload="initialize()">
 
         <!-- Navigation -->
         <nav id="mainNav" class="navbar navbar-default navbar-fixed-top navbar-custom">
@@ -163,38 +203,29 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-12">
-                        <img class="img-responsive" src="img/profile.png" alt="">
                         <div class="intro-text">
                             <span class="name"><c:out value="${ristorante.getName()}"/></span>
                             <hr class="star-light">
                             <div id="myCarousel" class="carousel slide" data-ride="carousel">
                                 <!-- Indicators -->
+                                <c:set var="first" value="${true}" scope="session"/>
+
                                 <ol class="carousel-indicators">
-                                    <c:forEach var="foto" items="${ristorante.getFoto()}">
-                                        <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-                                        <li data-target="#myCarousel" data-slide-to="1"></li>
-                                        <li data-target="#myCarousel" data-slide-to="2"></li>
-                                        <li data-target="#myCarousel" data-slide-to="3"></li>
-                                    </c:forEach>
+                                    <li data-target="#myCarousel" data-slide-to="<c:out value="${i}"/>" class="active"></li>
+                                        <c:forEach var="i" begin="1" end="${ristorante.getFoto().size()-1}">
+                                        <li data-target="#myCarousel" data-slide-to="<c:out value="${i}"/>"></li>
+                                        </c:forEach>
                                 </ol>
 
                                 <!-- Wrapper for slides -->
                                 <div class="carousel-inner" role="listbox">
-                                    <div class="item active">
-                                        <img src="img_chania.jpg" alt="Chania">
-                                    </div>
+                                    <c:set var="first" value="${true}" scope="session"/>
+                                    <c:forEach var="foto" items="${ristorante.getFoto()}">
+                                        <div class="item <c:if test="${first}"> active<c:set var="first" value="${false}" scope="session"/></c:if>">
+                                            <img class="peopleCarouselImg" src="<%= request.getContextPath()%><c:out value="${foto.getFotopath()}"/>" alt="Chania">
+                                        </div>
+                                    </c:forEach>
 
-                                    <div class="item">
-                                        <img src="img_chania2.jpg" alt="Chania">
-                                    </div>
-
-                                    <div class="item">
-                                        <img src="img_flower.jpg" alt="Flower">
-                                    </div>
-
-                                    <div class="item">
-                                        <img src="img_flower2.jpg" alt="Flower">
-                                    </div>
                                 </div>
 
                                 <!-- Left and right controls -->
@@ -213,80 +244,243 @@
             </div>
         </header>
 
-        <!-- Portfolio Grid Section -->
-        <!--<section id="portfolio">
+        <!-- Ristorante info Section -->
+        <section id="portfolio">
             <div class="container">
                 <div class="row">
-                    <div class="col-lg-12 text-center">
-                        <h2>Portfolio</h2>
-                        <hr class="star-primary">
+                    <div class="col-sm-4">
+                        <div class="caption">
+                            <div class="caption-content">
+                                <label class="control-label"><a href="<c:out value="${ristorante.getLinksito()}"/>"><fmt:message key="web.site"/></a></label>
+                                <br>
+                                <label class="control-label"><fmt:message key="cooking.type"/>: <c:out value="${ristorante.getCucina()}"/></label>
+                                <br>
+                                <label class="control-label"><fmt:message key="economy.zone"/>: <c:out value="${ristorante.getFascia()}"/></label>
+                                <br>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="caption">
+                            <div class="caption-content">
+                                <i><label class="control-label"><c:out value="${ristorante.getDescr()}"/></label></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="caption">
+                            <div class="caption-content">
+                                <label class="control-label"><fmt:message key="ranking"/>: <c:out value="${ristorante.getPosizioneClassifica()}"/></label>
+                                <br>
+                                <label class="control-label">
+                                    <fmt:message key="users.vote"/>:
+                                    <c:if test="${ristorante.getVoto() == 0.0}">
+                                        <fmt:message key="no.vote"/>
+                                    </c:if>
+                                    <c:if test="${ristorante.getVoto() > 0}">
+                                        <c:out value="${ristorante.getVoto()}"/>
+                                    </c:if></label>
+                                <br>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-sm-4 portfolio-item">
-                        <a href="#portfolioModal1" class="portfolio-link" data-toggle="modal">
-                            <div class="caption">
-                                <div class="caption-content">
-                                    <i class="fa fa-search-plus fa-3x"></i>
-                                </div>
-                            </div>
-                            <img src="img/portfolio/cabin.png" class="img-responsive" alt="">
-                        </a>
+
+                    <br><br>
+                    <div class="col-md-4">
+                        <c:if test="${utente.isLogged()}">
+                            <label class="control-label"><fmt:message key="actions.ristorante"/></label>
+                            <br>
+                            <label class="control-label"><a href="<%= request.getContextPath()%>/private/choose.jsp"><fmt:message key="add.foto"/></a></label>
+                            <br>
+                            <c:choose>
+                                <c:when test="${utente.proprietario(ristorante)}">
+                                    <label class="control-label"><a href="<%= request.getContextPath()%>/privateRistoratore/modificaRist.jsp"><fmt:message key="modify.restaurant"/></a></label>
+                                    <br>
+                                    <label class="control-label"><a href="<%= request.getContextPath()%>/privateRistoratore/orari.jsp"><fmt:message key="gestisci.orari"/></a></label>
+                                    <br>
+                                </c:when>
+                                <c:otherwise>
+                                    <label class="label-danger"><c:out value="${notMessage}"/></label>
+                                    <c:if test="${!ristorante.reclamato()}">
+                                        <label class="control-label"><fmt:message key="is.your.restaurant"/> <a href="<%= request.getContextPath()%>/private/ReclamaRistoranteServlet"><fmt:message key="reclaim"/></a></label>
+                                        </c:if>
+                                    <br>
+                                    <c:if test="${!utente.justRecensito(ristorante)}">
+                                        <label class="control-label"><fmt:message key="wanna.review"/> <a href="<%= request.getContextPath()%>/private/ConfiguraRecensioniServlet"><fmt:message key="click"/></a></label>
+                                        </c:if>
+                                    <label class="label-danger"><c:out value="${messConfiguraRecensioni}"/></label>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:if>
                     </div>
-                    <div class="col-sm-4 portfolio-item">
-                        <a href="#portfolioModal2" class="portfolio-link" data-toggle="modal">
-                            <div class="caption">
-                                <div class="caption-content">
-                                    <i class="fa fa-search-plus fa-3x"></i>
-                                </div>
+
+                    <div class="col-md-4">
+                        <c:if test="${utente != null && !utente.justVotatoOggi(ristorante) && !utente.proprietario(ristorante)}">
+                            <button class="btn btn-primary" onClick="visualizza('nomediv')"><fmt:message key="vote"/></button>
+                            <br><br>
+                            <div id="nomediv" hidden>
+                                <form method="post" action="<%= request.getContextPath()%>/private/VotaRistoranteServlet?">
+                                    <label><input type="radio" name="rating" value="1"> 1 |</label>
+                                    <label><input type="radio" name="rating" value="2"> 2 |</label>
+                                    <label><input type="radio" name="rating" value="3" checked> 3 |</label> 
+                                    <label><input type="radio" name="rating" value="4"> 4 | </label>
+                                    <label><input type="radio" name="rating" value="5"> 5</label>
+                                    <br><br>
+                                    <button class="btn btn-primary" type="submit"><fmt:message key="go"/></button>
+                                </form>
                             </div>
-                            <img src="img/portfolio/cake.png" class="img-responsive" alt="">
-                        </a>
+                        </c:if>
+                        <label class="label-danger"><c:out value="${errMessageVoto}"/></label>
+                        <br>
+                        <label class="control-label"><c:out value="${messageVoto}"/></label>
                     </div>
-                    <div class="col-sm-4 portfolio-item">
-                        <a href="#portfolioModal3" class="portfolio-link" data-toggle="modal">
-                            <div class="caption">
-                                <div class="caption-content">
-                                    <i class="fa fa-search-plus fa-3x"></i>
-                                </div>
-                            </div>
-                            <img src="img/portfolio/circus.png" class="img-responsive" alt="">
-                        </a>
-                    </div>
-                    <div class="col-sm-4 portfolio-item">
-                        <a href="#portfolioModal4" class="portfolio-link" data-toggle="modal">
-                            <div class="caption">
-                                <div class="caption-content">
-                                    <i class="fa fa-search-plus fa-3x"></i>
-                                </div>
-                            </div>
-                            <img src="img/portfolio/game.png" class="img-responsive" alt="">
-                        </a>
-                    </div>
-                    <div class="col-sm-4 portfolio-item">
-                        <a href="#portfolioModal5" class="portfolio-link" data-toggle="modal">
-                            <div class="caption">
-                                <div class="caption-content">
-                                    <i class="fa fa-search-plus fa-3x"></i>
-                                </div>
-                            </div>
-                            <img src="img/portfolio/safe.png" class="img-responsive" alt="">
-                        </a>
-                    </div>
-                    <div class="col-sm-4 portfolio-item">
-                        <a href="#portfolioModal6" class="portfolio-link" data-toggle="modal">
-                            <div class="caption">
-                                <div class="caption-content">
-                                    <i class="fa fa-search-plus fa-3x"></i>
-                                </div>
-                            </div>
-                            <img src="img/portfolio/submarine.png" class="img-responsive" alt="">
-                        </a>
+                    <div class="col-md-4">
+                        <label class="control-label"><fmt:message key="orari.aperura"/></label>
+                        <br>
+                        <c:forEach var="orario" items="${ristorante.getOrario()}">
+                            <label class="control-label">
+                                <c:out value="${orario.toString()}"/>
+                            </label><br>
+                        </c:forEach>
                     </div>
                 </div>
             </div>
-        </section>-->
+        </section>
 
+        <!-- Mappa ristorante -->
+        <section>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <h2>Map</h2>
+                        <hr class="star-primary">
+                        <div id="gmaps-canvas"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recensioni ristorante Section -->
+        <section>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <h2>Recensioni</h2>
+                        <hr class="star-primary">
+                    </div>
+                </div>
+                <c:set var="recensioni" value="${ristorante.getRecensioni()}"/>
+                <c:choose>
+                    <c:when test="${recensioni.size()<=0}">
+                        <label class="control-form">Nessuna recensione disponibile</label>
+                    </c:when>
+                    <c:otherwise>
+                        <c:forEach var="rec" items="${recensioni}">
+                            <div class="row">
+                                <hr>
+                                <div class="col-md-4">
+                                    <div class="caption">
+                                        <div class="caption-content">
+                                            <img src="<%= request.getContextPath()%><c:out value="${rec.getFotoPath()}"/>" alt=" This review has kein image "/>
+                                            <br>
+                                            <c:if test="${utente.proprietario(ristorante) && !rec.justSegnalato()}">
+                                                <label class="control-form">
+                                                    <a href="<%= request.getContextPath()%>/privateRistoratore/SegnalaFotoServlet?id_rec=<c:out value="${rec.getId()}"/>&type=rec">
+                                                </label>
+                                                <label class="label-warning"><fmt:message key="photo.report"/></label>
+                                                </a>
+                                            </c:if>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="caption">
+                                        <div class="caption-content">
+                                            <label class="control-form"><c:out value="${rec.getUtente().getNomeCognome()}"/>(<c:out value="${rec.getUtente().getReputazione()}"/>) - <c:out value="${rec.getData()}"/></label>
+                                            <br>
+                                            <label class="control-form"><fmt:message key="voto"/>: 
+                                                <c:choose>
+                                                    <c:when test="${rec.getMediaVoti()==0}">
+                                                        <fmt:message key="not.voted"/>
+                                                    </c:when>
+                                                    <c:otherwise><c:out value="${rec.getMediaVoti()}"/></c:otherwise>
+                                                </c:choose>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="caption">
+                                        <div class="caption-content">
+                                            <label class="control-form"><fmt:message key="titolo"/></label>
+                                            <br>
+                                            <label class="control-form"><c:out value="${rec.getTitolo()}"/></label>
+                                            <br>
+                                            <label class="control-form"><fmt:message key="testo"/></label>
+                                            <br>
+                                            <label class="control-form"><i><c:out value="${rec.getTesto()}"/></i></label>
+                                            <br><br>
+                                            <label class="control-form"><fmt:message key="king.response"/></label>
+                                            <br>
+                                            <label class="control-form"><i><c:out value="${rec.getCommento()}"/></i></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="caption">
+
+                                        <div class="caption-content">
+                                            <c:if test="${utente.proprietario(ristorante)}">
+                                                <td>
+                                                    <button type="submit" class="btn btn-primary" onClick="visualizza('nomediv<c:out value="${rec.getId()}"/>1')">
+                                                        <c:choose>
+                                                            <c:when test='${rec.getCommento() != null && !rec.getCommento().equals("")}'>
+                                                                <fmt:message key="ri.comment"/>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <fmt:message key="comment"/>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </button>
+                                                    <div id='nomediv<c:out value="${rec.getId()}"/>1' hidden>
+                                                        <form method="post" action="<%= request.getContextPath()%>/private/InserisciCommentoServlet?id_rec=<c:out value="${rec.getId()}"/>">
+                                                            <input type="text" name="commento" class="form-control"/>
+                                                            <button class="btn btn-primary" type="submit"><fmt:message key="go"/></button>
+                                                        </form>
+                                                    </div>
+                                                </c:if>
+
+                                                <br><br>
+
+                                                <c:if test="${utente != null && !utente.proprietario(rec)}">
+                                                <td>
+                                                    <button type="submit" value="Pulsante" onClick="visualizza('nomediv<c:out value="${rec.getId()}"/>2');"><fmt:message key="vote"/></button>
+                                                    <div id='nomediv<c:out value="${rec.getId()}"/>2' hidden>
+                                                        <form method="post" action="<%= request.getContextPath()%>/private/VotaRecensioneServlet?id_rec=<c:out value="${rec.getId()}"/>">
+                                                            <label><input type="radio" name="rating" value="1"> 1 |</label>
+                                                            <label><input type="radio" name="rating" value="2"> 2 |</label>
+                                                            <label><input type="radio" name="rating" value="3" checked> 3 |</label> 
+                                                            <label><input type="radio" name="rating" value="4"> 4 | </label>
+                                                            <label><input type="radio" name="rating" value="5"> 5</label>
+                                                            <br><br>
+                                                            <button class="btn btn-primary" type="submit"><fmt:message key="go"/></button>
+                                                        </form>
+                                                    </div>
+                                                </c:if>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </c:forEach>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+
+        </section>
 
         <!-- Footer -->
         <footer class="text-center">
@@ -325,230 +519,7 @@
             </a>
         </div>
 
-        <!-- Portfolio Modals --><!--
-        <div class="portfolio-modal modal fade" id="portfolioModal1" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-content">
-                <div class="close-modal" data-dismiss="modal">
-                    <div class="lr">
-                        <div class="rl">
-                        </div>
-                    </div>
-                </div>
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-8 col-lg-offset-2">
-                            <div class="modal-body">
-                                <h2>Project Title</h2>
-                                <hr class="star-primary">
-                                <img src="img/portfolio/cabin.png" class="img-responsive img-centered" alt="">
-                                <p>Use this area of the page to describe your project. The icon above is part of a free icon set by <a href="https://sellfy.com/p/8Q9P/jV3VZ/">Flat Icons</a>. On their website, you can download their free set with 16 icons, or you can purchase the entire set with 146 icons for only $12!</p>
-                                <ul class="list-inline item-details">
-                                    <li>Client:
-                                        <strong><a href="http://startbootstrap.com">Start Bootstrap</a>
-                                        </strong>
-                                    </li>
-                                    <li>Date:
-                                        <strong><a href="http://startbootstrap.com">April 2014</a>
-                                        </strong>
-                                    </li>
-                                    <li>Service:
-                                        <strong><a href="http://startbootstrap.com">Web Development</a>
-                                        </strong>
-                                    </li>
-                                </ul>
-                                <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="portfolio-modal modal fade" id="portfolioModal2" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-content">
-                <div class="close-modal" data-dismiss="modal">
-                    <div class="lr">
-                        <div class="rl">
-                        </div>
-                    </div>
-                </div>
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-8 col-lg-offset-2">
-                            <div class="modal-body">
-                                <h2>Project Title</h2>
-                                <hr class="star-primary">
-                                <img src="img/portfolio/cake.png" class="img-responsive img-centered" alt="">
-                                <p>Use this area of the page to describe your project. The icon above is part of a free icon set by <a href="https://sellfy.com/p/8Q9P/jV3VZ/">Flat Icons</a>. On their website, you can download their free set with 16 icons, or you can purchase the entire set with 146 icons for only $12!</p>
-                                <ul class="list-inline item-details">
-                                    <li>Client:
-                                        <strong><a href="http://startbootstrap.com">Start Bootstrap</a>
-                                        </strong>
-                                    </li>
-                                    <li>Date:
-                                        <strong><a href="http://startbootstrap.com">April 2014</a>
-                                        </strong>
-                                    </li>
-                                    <li>Service:
-                                        <strong><a href="http://startbootstrap.com">Web Development</a>
-                                        </strong>
-                                    </li>
-                                </ul>
-                                <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="portfolio-modal modal fade" id="portfolioModal3" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-content">
-                <div class="close-modal" data-dismiss="modal">
-                    <div class="lr">
-                        <div class="rl">
-                        </div>
-                    </div>
-                </div>
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-8 col-lg-offset-2">
-                            <div class="modal-body">
-                                <h2>Project Title</h2>
-                                <hr class="star-primary">
-                                <img src="img/portfolio/circus.png" class="img-responsive img-centered" alt="">
-                                <p>Use this area of the page to describe your project. The icon above is part of a free icon set by <a href="https://sellfy.com/p/8Q9P/jV3VZ/">Flat Icons</a>. On their website, you can download their free set with 16 icons, or you can purchase the entire set with 146 icons for only $12!</p>
-                                <ul class="list-inline item-details">
-                                    <li>Client:
-                                        <strong><a href="http://startbootstrap.com">Start Bootstrap</a>
-                                        </strong>
-                                    </li>
-                                    <li>Date:
-                                        <strong><a href="http://startbootstrap.com">April 2014</a>
-                                        </strong>
-                                    </li>
-                                    <li>Service:
-                                        <strong><a href="http://startbootstrap.com">Web Development</a>
-                                        </strong>
-                                    </li>
-                                </ul>
-                                <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="portfolio-modal modal fade" id="portfolioModal4" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-content">
-                <div class="close-modal" data-dismiss="modal">
-                    <div class="lr">
-                        <div class="rl">
-                        </div>
-                    </div>
-                </div>
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-8 col-lg-offset-2">
-                            <div class="modal-body">
-                                <h2>Project Title</h2>
-                                <hr class="star-primary">
-                                <img src="img/portfolio/game.png" class="img-responsive img-centered" alt="">
-                                <p>Use this area of the page to describe your project. The icon above is part of a free icon set by <a href="https://sellfy.com/p/8Q9P/jV3VZ/">Flat Icons</a>. On their website, you can download their free set with 16 icons, or you can purchase the entire set with 146 icons for only $12!</p>
-                                <ul class="list-inline item-details">
-                                    <li>Client:
-                                        <strong><a href="http://startbootstrap.com">Start Bootstrap</a>
-                                        </strong>
-                                    </li>
-                                    <li>Date:
-                                        <strong><a href="http://startbootstrap.com">April 2014</a>
-                                        </strong>
-                                    </li>
-                                    <li>Service:
-                                        <strong><a href="http://startbootstrap.com">Web Development</a>
-                                        </strong>
-                                    </li>
-                                </ul>
-                                <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="portfolio-modal modal fade" id="portfolioModal5" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-content">
-                <div class="close-modal" data-dismiss="modal">
-                    <div class="lr">
-                        <div class="rl">
-                        </div>
-                    </div>
-                </div>
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-8 col-lg-offset-2">
-                            <div class="modal-body">
-                                <h2>Project Title</h2>
-                                <hr class="star-primary">
-                                <img src="img/portfolio/safe.png" class="img-responsive img-centered" alt="">
-                                <p>Use this area of the page to describe your project. The icon above is part of a free icon set by <a href="https://sellfy.com/p/8Q9P/jV3VZ/">Flat Icons</a>. On their website, you can download their free set with 16 icons, or you can purchase the entire set with 146 icons for only $12!</p>
-                                <ul class="list-inline item-details">
-                                    <li>Client:
-                                        <strong><a href="http://startbootstrap.com">Start Bootstrap</a>
-                                        </strong>
-                                    </li>
-                                    <li>Date:
-                                        <strong><a href="http://startbootstrap.com">April 2014</a>
-                                        </strong>
-                                    </li>
-                                    <li>Service:
-                                        <strong><a href="http://startbootstrap.com">Web Development</a>
-                                        </strong>
-                                    </li>
-                                </ul>
-                                <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="portfolio-modal modal fade" id="portfolioModal6" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-content">
-                <div class="close-modal" data-dismiss="modal">
-                    <div class="lr">
-                        <div class="rl">
-                        </div>
-                    </div>
-                </div>
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-8 col-lg-offset-2">
-                            <div class="modal-body">
-                                <h2>Project Title</h2>
-                                <hr class="star-primary">
-                                <img src="img/portfolio/submarine.png" class="img-responsive img-centered" alt="">
-                                <p>Use this area of the page to describe your project. The icon above is part of a free icon set by <a href="https://sellfy.com/p/8Q9P/jV3VZ/">Flat Icons</a>. On their website, you can download their free set with 16 icons, or you can purchase the entire set with 146 icons for only $12!</p>
-                                <ul class="list-inline item-details">
-                                    <li>Client:
-                                        <strong><a href="http://startbootstrap.com">Start Bootstrap</a>
-                                        </strong>
-                                    </li>
-                                    <li>Date:
-                                        <strong><a href="http://startbootstrap.com">April 2014</a>
-                                        </strong>
-                                    </li>
-                                    <li>Service:
-                                        <strong><a href="http://startbootstrap.com">Web Development</a>
-                                        </strong>
-                                    </li>
-                                </ul>
-                                <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        -->
+
 
         <!-- jQuery -->
         <script src="<%= request.getContextPath()%>/vendor/jquery/jquery.min.js"></script>
