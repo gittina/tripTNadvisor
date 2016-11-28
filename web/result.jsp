@@ -166,7 +166,7 @@
             <div class="container">
                 <div class="row">
 
-                    <form action="<%= request.getContextPath()%>/OrdinaServlet" method="POST">
+                    <form action="<%= request.getContextPath()%>/SearchServlet" method="GET">
                         <div class="col-md-3">
                             Ordina per: 
                             <select class="form-group selectBar" name="tipo">

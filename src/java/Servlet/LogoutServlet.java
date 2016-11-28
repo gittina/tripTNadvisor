@@ -28,16 +28,14 @@ public class LogoutServlet extends HttpServlet {
         HttpSession session = req.getSession(false);
         if (session != null) {
             try {
+                System.out.println("Inizio il logout");
                 Language lan = (Language) session.getAttribute("lan");
-                String s = (String) session.getAttribute("lastPage");
                 session.invalidate();
                 session = req.getSession();
                 session.setAttribute("lan", lan);
-                if(s!=null){
-                    req.getRequestDispatcher(s).forward(req, resp);
-                } else req.getRequestDispatcher("/HomeServlet").forward(req, resp);
             } catch (IllegalStateException e) {
             }
-        } else req.getRequestDispatcher("/HomeServlet").forward(req, resp);
+        }
+        req.getRequestDispatcher("/HomeServlet").forward(req, resp);
     }
 }
