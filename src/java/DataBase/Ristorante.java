@@ -348,32 +348,62 @@ public class Ristorante implements Serializable {
      * @return
      * @throws SQLException
      */
-    public boolean addOrario(int giorno, Time inizio, Time fine) throws SQLException {
+    public boolean addTimes(int giorno, Time inizio, Time fine) throws SQLException {
+        System.out.println("Inizio aggiunta times");
         PreparedStatement stm;
+        ResultSet rs;
         try {
-            stm = con.prepareStatement("insert into orario (id_rist,giorno,apertura,chiusura) values (?,?,?,?)");
-            stm.setInt(1, id);
+            stm = con.prepareStatement("select * from day where id_rist = ? AND giorno = ?");
+            stm.setInt(1, this.id);
             stm.setInt(2, giorno);
-            stm.setTime(3, inizio);
-            stm.setTime(4, fine);
-            stm.executeUpdate();
+            rs = stm.executeQuery();
+            System.out.println("ok");
+            if (rs.next()) {
+                System.out.println("ok");
+                Day d = new Day(rs.getInt("id"), manager.getRistorante(rs.getInt("id_rist")), rs.getInt("giorno"), manager);
+                d.addTimes(inizio, fine);
+            } else if (addDay(giorno)) {
+                stm = con.prepareStatement("select * from day where id_rist = ? AND giorno = ?");
+                stm.setInt(1, this.id);
+                stm.setInt(2, giorno);
+                rs = stm.executeQuery();
+                Day d = new Day(rs.getInt("id"), manager.getRistorante(rs.getInt("id_rist")), rs.getInt("giorno"), manager);
+                d.addTimes(inizio, fine);
+            }
+            rs.close();
             stm.close();
         } catch (SQLException ex) {
-            System.out.println("problema aggiunta orario");
+            System.out.println("problema aggiunta times");
             return false;
         }
         return true;
     }
 
-    public boolean removeOrario(int id_orario) {
+    public boolean addDay(int giorno) {
         PreparedStatement stm;
         try {
-            stm = con.prepareStatement("delete from orario where id = ?");
-            stm.setInt(1, id_orario);
+            stm = con.prepareStatement("insert into day (giorno, id_rist) values (?,?)");
+            stm.setInt(1, giorno);
+            stm.setInt(2, this.id);
             stm.executeUpdate();
             stm.close();
         } catch (SQLException ex) {
-            System.out.println("problema rimozione orario con id: " + id_orario);
+            System.out.println("problema aggiunta day");
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean removeTimes(int id_times) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("delete from times where id = ?");
+            stm.setInt(1, id_times);
+            stm.executeUpdate();
+            stm.close();
+        } catch (SQLException ex) {
+            System.out.println("problema rimozione times con id: " + id_times);
             return false;
         }
         return true;
@@ -412,33 +442,29 @@ public class Ristorante implements Serializable {
      * @return tutti gli orari del ristorante
      * @throws SQLException
      */
-    public ArrayList<Orario> getOrario() throws SQLException {
+    public ArrayList<Day> getDay() throws SQLException {
         PreparedStatement stm;
-        ArrayList<Orario> res = new ArrayList<>();
+        ArrayList<Day> res = new ArrayList<>();
         ResultSet rs;
 
         try {
-            stm = con.prepareStatement("SELECT * FROM Orario WHERE id_rist = ? ORDER BY giorno ASC");
+            stm = con.prepareStatement("SELECT * FROM Day WHERE id_rist = ?");
             stm.setInt(1, id);
             rs = stm.executeQuery();
 
             while (rs.next()) {
-                res.add(new Orario(rs.getInt("id"), manager.getRistorante(rs.getInt("id_rist")), rs.getInt("giorno"), rs.getTime("apertura"), rs.getTime("chiusura")));
+                res.add(new Day(rs.getInt("id"), manager.getRistorante(rs.getInt("id_rist")), rs.getInt("giorno"), manager));
             }
             rs.close();
             stm.close();
         } catch (SQLException ex) {
-            System.out.println("Fallita estrazione orari");
+            System.out.println("Fallita estrazione days");
             return null;
         }
-        Comparator c = (Comparator<Orario>) new Comparator<Orario>() {
+        Comparator c = (Comparator<Day>) new Comparator<Day>() {
             @Override
-            public int compare(Orario o1, Orario o2) {
-                if (o1.getGiorno() == o2.getGiorno()) {
-                    return o1.getApertura().after(o2.getApertura()) ? 1 : -1;
-                } else {
-                    return o1.getGiorno() > o2.getGiorno() ? 1 : -1;
-                }
+            public int compare(Day o1, Day o2) {
+                return o1.getGiorno() > o2.getGiorno() ? 1 : -1;
             }
         };
         res.sort(c);
@@ -615,12 +641,14 @@ public class Ristorante implements Serializable {
         String pos = "/qr/" + name.replace(' ', '_') + ".jpg";
         String savePath = manager.completePath + pos;
 
-        ArrayList<Orario> orari = getOrario();
+        ArrayList<Day> days = getDay();
 
         String forQR = "Nome ristorante: " + name.trim() + "\n" + "Indirizzo: " + getLuogo().getAddress() + "\n";
 
-        for (Orario o : orari) {
-            forQR = forQR + o.toString();
+        for (Day o : days) {
+            for (Times t : o.getTimes()) {
+                forQR = forQR + t.toString();
+            }
         }
 
         ByteArrayOutputStream out = QRCode.from(forQR).to(ImageType.JPG).stream();

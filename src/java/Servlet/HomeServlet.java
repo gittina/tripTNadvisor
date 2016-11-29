@@ -24,7 +24,6 @@ import javax.servlet.http.HttpSession;
 public class HomeServlet extends HttpServlet {
 
     private DBManager manager;
-    private String dirName;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -34,10 +33,9 @@ public class HomeServlet extends HttpServlet {
     
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("Inizio la HomeServlet");
+
         HttpSession session = request.getSession(true);
         Utente utente = (Utente) session.getAttribute("utente");
-        Language lan = (Language) session.getAttribute("lan");
        
         if (utente == null) {
             session.setAttribute("title", "Home Page");

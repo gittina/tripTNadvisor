@@ -337,12 +337,16 @@
                         <label class="control-label"><c:out value="${messageVoto}"/></label>
                     </div>
                     <div class="col-md-4">
-                        <label class="control-label"><fmt:message key="orari.aperura"/></label>
+                        <label class="control-label"><fmt:message key="orari.apertura"/></label>
                         <br>
-                        <c:forEach var="orario" items="${ristorante.getOrario()}">
+                        <c:forEach var="day" items="${ristorante.getDay()}">
                             <label class="control-label">
-                                <c:out value="${orario.toString()}"/>
-                            </label><br>
+                                <c:out value="${day.getGiornoString()}"/>:
+                                <c:forEach var="times" items="${day.getTimes()}">
+                                    <c:out value="${times.toString()}"/>
+                                </c:forEach>, 
+                            </label>
+                            <br>
                         </c:forEach>
                     </div>
                 </div>

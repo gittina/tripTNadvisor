@@ -1,211 +1,290 @@
-<%@page import="java.sql.Date"%>
-<%@page import="Notify.*"%>
-<%@page import="DataBase.Ristoratore"%>
-<%@page import="Notify.Notifica"%>
-<%@page import="java.util.ArrayList"%>
-<%@page import="DataBase.*"%>
-<%@page import="DataBase.Recensione"%>
+<!DOCTYPE html>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <fmt:setLocale value="${lan.getLanSelected()}" />
 <fmt:setBundle basename="Resources.string" />
-<!DOCTYPE html>
+
 <html lang="en">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
 
-        <title>
-            <c:out value="${title}"/>
-        </title>
-
+        <title><c:out value="${title}"/></title>
         <c:set value="/privateRistoratore/orari.jsp" scope="session" var="lastPage"/>
-        <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
-        <script>
-            function visualizza(id) {
 
-                if (document.getElementById) {
-                    if (document.getElementById(id).style.display == 'none') {
-                        document.getElementById(id).style.display = 'block';
-                    } else {
-                        document.getElementById(id).style.display = 'none';
-                    }
-                }
-            }
-        </script>
-        <link href="<%= request.getContextPath()%>/css/bootstrap.min.css" rel="stylesheet">
-        <link href="<%= request.getContextPath()%>/css/style.css" rel="stylesheet">
-        <link href='https://fonts.googleapis.com/css?family=Open+Sans:600,400' rel='stylesheet' type='text/css'>
+        <!-- Bootstrap Core CSS -->
+        <link href="<%= request.getContextPath()%>/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
+        <!-- Theme CSS -->
+        <link href="<%= request.getContextPath()%>/css/freelancer.min.css" rel="stylesheet">
+
+        <!-- Custom Fonts -->
+        <link href="<%= request.getContextPath()%>/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+
+        <script type="text/javascript" src="<%= request.getContextPath()%>/personalScript/show_hidden.js"></script>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+        <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/jquery-1.8.2.min.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/jquery.mockjax.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/src/jquery.autocomplete.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/autocomplete.txt"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/demo.js"></script>
     </head>
-    <body>
 
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-12">
-                    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-                        <!--
-                            Da qui in poi inizia la navbar in posizione TOP.
-                        - navbar-header sempre visibile
-                        - collapse navbar-collapse rientra in un menù a cascata se la pagina è troppo stretta e contiene i prossimi punti
-                            - li active sono scritte normali (o link)
-                            - li dropdown (class) sono i dropdown, contenenti nell'ul altri li che sono i link visibili all'interno del menù
-                        -->
+    <body id="page-top" class="index">
 
-                        <div class="navbar-header">
+        <!-- Navigation -->
+        <nav id="mainNav" class="navbar navbar-default navbar-fixed-top navbar-custom">
+            <div class="container">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header page-scroll">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span> Menu <i class="fa fa-bars"></i>
+                    </button>
+                    <a class="navbar-brand" href="<%= request.getContextPath()%>/HomeServlet">TRIPTNADVISOR</a>
+                </div>
 
-                            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-                                <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
-                            </button> <a class="navbar-brand" href="<%= request.getContextPath()%>/HomeServlet"><img src="<%= request.getContextPath()%>/img/logo.png" width="110" style="margin-top: -5px; margin-right: -25px; padding: 0"></a>
-                        </div>
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 
-                        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1"> 
-                            <ul class="nav navbar-nav">
-                                <li class="home" id="homelink">
-                                    <a href="<%= request.getContextPath()%>/HomeServlet">Home</a>
+                    <ul class="nav navbar-nav navbar-left">
+                        <c:choose>
+                            <c:when test="${utente == null}">
+                                <li>
+                                    <a href="<%= request.getContextPath()%>/registration.jsp"><fmt:message key="welcome.visitors"/></a>
+                                </li>
+                            </c:when>
+                            <c:when test="${utente.isAmministratore()}">
+                                <li>
+                                    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><img src="<%= request.getContextPath()%><c:out value="${utente.getAvpath()}"/>" HEIGHT="25" WIDTH="25" BORDER="0" align="center">  <c:out value="${utente.getNomeCognome()}"/>
+                                        <span class="caret"></span></button>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneProfilo"><fmt:message key="profile"/></a></li>
+                                        <li><a href="<%= request.getContextPath()%>/private/LogoutServlet"><fmt:message key="exit"/></a></li>
+                                    </ul>
+                                </li>
+                            </c:when>
+                            <c:when test="${utente.isRegistrato()}">
+                                <li>
+                                    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><img src="<%= request.getContextPath()%><c:out value="${utente.getAvpath()}"/>" HEIGHT="25" WIDTH="25" BORDER="0" align="center">  <c:out value="${utente.getNomeCognome()}"/>
+                                        <span class="caret"></span></button>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneProfilo"><fmt:message key="profile"/></a></li>
+                                        <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneAddRistorante"><fmt:message key="add.restaurant"/></a></li>
+                                        <li><a href="<%= request.getContextPath()%>/private/LogoutServlet"><fmt:message key="exit"/></a></li>
+                                    </ul>
+                                </li>
+                            </c:when>
+                            <c:when test="${utente.isRistoratore()}">
+                                <li>
+                                    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><img src="<%= request.getContextPath()%><c:out value="${utente.getAvpath()}"/>" HEIGHT="25" WIDTH="25" BORDER="0" align="center">  <c:out value="${utente.getNomeCognome()}"/>
+                                        <span class="caret"></span></button>            
+                                    <ul class="dropdown-menu">
+                                        <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneProfilo"><font class="dropdown-line"><fmt:message key="profile"/></font></a></li>
+                                        <li><a href="<%= request.getContextPath()%>/privateRistoratore/ConfigurazioneRistoranti"><fmt:message key="my.restaurant"/></a></li>
+                                        <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneAddRistorante"><fmt:message key="add.restaurant"/></a></li>
+                                        <li><a href="<%= request.getContextPath()%>/private/LogoutServlet"><fmt:message key="exit"/></a></li>
+                                    </ul>
+                                </li>
+                            </c:when>
+                        </c:choose>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <c:choose>
+                            <c:when test="${utente == null}">
+                                <li>
+                                    <a href="<%= request.getContextPath()%>/login.jsp">Login</a>
                                 </li>
                                 <li>
-
-                                    <c:choose>
-                                        <c:when test="${utente==null}">
-                                            <a href="<%= request.getContextPath()%>/registration.jsp"><fmt:message key="welcome.visitors"/></a>
-                                        </c:when>
-                                        <c:when test="${utente.isAmministratore()}">
-                                            <div class="dropdown">
-                                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"> <img src="<%= request.getContextPath()%><c:out value="${utente.getAvpath()}"/>" HEIGHT="25" WIDTH="25" BORDER="0" align="center">  <c:out value="${utente.getNomeCognome()}"/>
-                                                    <span class="caret"></span></button>
-                                                <ul class="dropdown-menu">
-                                                    <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneProfilo"><fmt:message key="profile"/></a></li>
-                                                    <li><a href="<%= request.getContextPath()%>/private/LogoutServlet"><fmt:message key="exit"/></a></li>
-                                                </ul>
-                                            </div>
-                                        </c:when>
-                                        <c:when test="${utente.isRegistrato()}}">
-                                            <div class="dropdown">
-                                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"> <img src="<%= request.getContextPath()%><c:out value="${utente.getAvpath()}"/>" HEIGHT="25" WIDTH="25" BORDER="0" align="center">  <c:out value="${utente.getNomeCognome()}"/>
-                                                    <span class="caret"></span></button>
-                                                <ul class="dropdown-menu">
-                                                    <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneProfilo"><fmt:message key="profile"/></a></li>
-                                                    <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneAddRistorante"><fmt:message key="add.restaurant"/></a></li>
-                                                    <li><a href="<%= request.getContextPath()%>/private/LogoutServlet"><fmt:message key="exit"/></a></li>
-                                                </ul>
-                                            </div>      
-                                        </c:when>
-                                        <c:when test="${utente.isRistoratore()}">
-                                            <div class="dropdown">
-                                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"> <img src="<%= request.getContextPath()%><c:out value="${utente.getAvpath()}"/>" HEIGHT="25" WIDTH="25" BORDER="0" align="center">  <c:out value="${utente.getNomeCognome()}"/>
-                                                    <span class="caret"></span></button>
-                                                <ul class="dropdown-menu">
-                                                    <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneProfilo"><fmt:message key="profile"/></a></li>
-                                                    <li><a href="<%= request.getContextPath()%>/privateRistoratore/ConfigurazioneRistoranti"><fmt:message key="my.restaurant"/></a></li>
-                                                    <li><a href="<%= request.getContextPath()%>/private/LogoutServlet"><fmt:message key="exit"/></a></li>
-                                                </ul>
-                                            </div>      
-                                        </c:when>
-                                    </c:choose>
-
+                                    <a href="<%= request.getContextPath()%>/registration.jsp">
+                                        <fmt:message key="register"/>
+                                    </a>
                                 </li>
-                            </ul>
-
-                            <form class="navbar-form navbar-left" role="search" action="<%= request.getContextPath()%>/SearchServlet?tipo=Simple" method="POST">
-                                <div class="form-group">
-                                    <input type="text" class="form-control input-sm" placeholder="Search" name="research">
-                                </div>
-                                <button type="submit" class="btn btn-sm"><fmt:message key="submit"/></button>
-                            </form>
-
-                            <ul class="nav navbar-nav navbar-right" style="padding-right: 30px;">
-
-                                <c:choose>
-                                    <c:when test="${utente==null}">
-                                        <li>
-                                            <div class="dropdown">
-                                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"> Login
-                                                    <span class="caret"></span></button>
-                                                <ul class="dropdown-menu">
-                                                    <li><form method="POST" action="<%= request.getContextPath()%>/LoginServlet"> 
-                                                            <input name="username" id="username" type="text" placeholder="Username" > 
-                                                            <input name="password" id="password" type="password" placeholder="Password"><br>
-                                                            <button type="submit" class="btn btn-warning"><fmt:message key="login"/></button>
-                                                        </form>
+                            </c:when>
+                            <c:when test="${utente.isRistoratore() || utente.isAmministratore()}">
+                                <li>
+                                    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><fmt:message key="notify"/>
+                                        <span class="caret"></span></button>
+                                    <ul class="dropdown-menu">
+                                        <c:choose>
+                                            <c:when test="${utente.getNotifiche().size()>0}">
+                                                <c:forEach var="notifica" items="${utente.getNotifiche()}">
+                                                    <li>
+                                                        <a href="<%=request.getContextPath()%>/private/PrepareNotificheServlet?id_not=<c:out value="${notifica.getId()}"/>">
+                                                            <c:out value="${notifica.toString()}"/>
+                                                        </a>
                                                     </li>
-                                                </ul>
-                                            </div>
-                                        </li>
-                                        <li><a href="<%= request.getContextPath()%>/registration.jsp"><fmt:message key="register"/></a></li>
-                                        </c:when>
-                                        <c:when test="${utente.isRistoratore() || utente.isAmministratore()}">
-                                        <li>
-                                            <div class="dropdown">
-                                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"><a href="<%=request.getContextPath()%>/ConfigurazioneNotifiche"><fmt:message key="notify"/></a>
-                                                    <span class="caret"></span></button>
-                                                <ul class="dropdown-menu">
-                                                    <!-- lista delle notifiche -->
-                                                </ul>
-                                            </div>
-                                        </li>
-                                    </c:when>
-                                </c:choose>  
-                                <li>
-                                    <div class="dropdown">
-                                        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"><fmt:message key="language"/>
-                                            <span class=" "></span></button>
-                                        <ul class="dropdown-menu">
-                                            <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=it_IT"><fmt:message key="italian"/></a></li>
-                                            <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=en_GB"><fmt:message key="english"/></a></li>
-                                        </ul>
-                                    </div>
+                                                </c:forEach>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <li>
+                                                    <a href="<%=request.getContextPath()%>/private/PrepareNotificheServlet?">
+                                                        Nessuna notifica
+                                                    </a>
+                                                </li>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </ul>
                                 </li>
+                            </c:when>  
+                        </c:choose>
+                        <li>
+                            <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                                <img src="<%= request.getContextPath()%><fmt:message key="bandiera"/>" alt="- "/>
+                                <fmt:message key="language"/>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=en_GB"><img src="<%= request.getContextPath()%>/img/flags/GB.png" alt="- "/><fmt:message key="english"/></a></li>
+                                <li><a href="<%= request.getContextPath()%>/ConfigLingua?l=it_IT"><img src="<%= request.getContextPath()%>/img/flags/IT.png" alt="- "/><fmt:message key="italian"/></a></li>
                             </ul>
-                        </div>	
-                    </nav>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.navbar-collapse -->
+            </div>
+            <!-- /.container-fluid -->
+        </nav>
 
-                    <div class="jumbotron well" style="margin-top: 50px; background-image: url(<%= request.getContextPath()%>/img/sfondo2.jpg)">
-                        <div id="jumbosearch" class="descrMessage">
 
-                            <fmt:message key="orari.di"/> <c:out value="${ristorante.getName().toUpperCase()}"/><hr><br>
-                            <label class="label label-warning"><c:out value="${errOrario}"/></font>
-                            <table>
-                                <c:forEach var="orario" items="${ristorante.getOrario()}">
-                                    <tr>
-                                        <c:out value="${orario.getGiornoString()}"/> : <c:out value="${orario.getApertura()}"/> - <c:out value="${orario.getChiusura()}"/> <a href="<%= request.getContextPath()%>/privateRistoratore/CambiaOrariServlet?id_orario=<c:out value="${orario.getId()}"/>"><fmt:message key="rimuovi.orario"/></a><br>
-                                    </tr>
-                                </c:forEach>
-                                <tr>
-                                <button onclick="visualizza('mario')"><fmt:message key="add.orario"/></button>
-                                <div id="mario" style='display: none'>
-                                    <form method="POST" action="<%= request.getContextPath()%>/privateRistoratore/CambiaOrariServlet">
-                                        <select class='form-control' style='width: 100px' name='day'>
-                                            <option value='0'><fmt:message key="monday"/></option>
-                                            <option value='1'><fmt:message key="tuesday"/></option>
-                                            <option value='2'><fmt:message key="wednesday"/></option>
-                                            <option value='3'><fmt:message key="thursday"/></option>
-                                            <option value='4'><fmt:message key="friday"/></option>
-                                            <option value='5'><fmt:message key="saturday"/></option>
-                                            <option value='6'><fmt:message key="sunday"/></option>
-                                        </select>
-                                        <font class='descrMessage'>
-                                        <fmt:message key="add.from"/> <input type='text' name='apH' size='1' maxlength='2'/> : <input type='text' name='apM' size='1' maxlength='2'/> <br>
-                                        <fmt:message key="add.to"/> <input type='text' name='chH' size='1' maxlength='2'/> : <input type='text' name='chM' size='1' maxlength='2'/> <br>
-                                        </font>
-                                        <button type="submit"><fmt:message key="submit"/></button>
-                                    </form>
-                                    <br><br>
-                                </div>
-                                </tr>
-                            </table>
-                        </div> 
+
+
+        <!-- Header -->
+        <header>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="intro-text">
+                            <span class="name"><fmt:message key="orari.di"/> <c:out value="${ristorante.getName()}"/></span>
+                            <hr class="star-light">
+                            <label class="label-danger"><c:out value="${errOrario}"/></label>
+                            
+                            <c:forEach var="day" items="${ristorante.getDay()}">
+                                <label class="control-label">
+                                    <c:forEach var="times" items="${day.getTimes()}">
+                                        <c:out value="${day.getGiornoString()}"/>: <c:out value="${times.toString()}"/>
+                                        <a href="<%= request.getContextPath()%>/privateRistoratore/CambiaOrariServlet?id_orario=<c:out value="${times.getId()}"/>">
+                                            <fmt:message key="rimuovi.orario"/>
+                                        </a>
+                                    </c:forEach>
+                                    <br>
+                                </label>
+                                <br>
+                            </c:forEach>
+
+                            <button class="btn btn-primary" onclick="visualizza('formDay')"><fmt:message key="add.orario"/></button>
+                            <div id="formDay" style='display: none'>
+                                <br>
+                                <form method="POST" action="<%= request.getContextPath()%>/privateRistoratore/CambiaOrariServlet">
+                                    <div class="row">
+                                        <div class="col-md-4"></div>
+                                        <div class="col-md-4">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <select class='form-group selectBar' name='day'>
+                                                        <option value='0'><fmt:message key="monday"/></option>
+                                                        <option value='1'><fmt:message key="tuesday"/></option>
+                                                        <option value='2'><fmt:message key="wednesday"/></option>
+                                                        <option value='3'><fmt:message key="thursday"/></option>
+                                                        <option value='4'><fmt:message key="friday"/></option>
+                                                        <option value='5'><fmt:message key="saturday"/></option>
+                                                        <option value='6'><fmt:message key="sunday"/></option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="row">
+                                                        <div class="col-md-2"><label class="control-form"><fmt:message key="add.from"/></label></div>
+                                                        <div class="col-md-4"><input type='text' name='apH' maxlength='2' class="form-control"/></div>
+                                                        <div class="col-md-1"><label class="control-label"> : </label></div>
+                                                        <div class="col-md-4"><input type='text' name='apM' maxlength='2' class="form-control"/></div>
+                                                    </div>
+                                                    <hr>
+                                                    <div class="row">
+                                                        <div class="col-md-2"><label class="control-form"><fmt:message key="add.to"/></label></div>
+                                                        <div class="col-md-4"><input type='text' name='chH' maxlength='2' class="form-control"/></div>
+                                                        <div class="col-md-1"><label class="control-label"> : </label></div>
+                                                        <div class="col-md-4"><input type='text' name='chM' maxlength='2' class="form-control"/></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4"></div>
+                                    </div>
+                                    <br>
+                                    <button class="btn btn-primary" type="submit"><fmt:message key="submit"/></button>
+                                </form>
+
+                            </div>
+                        </div>
                     </div>
                 </div>
-               
-
             </div>
+        </header>
 
+
+
+        <!-- Footer -->
+        <footer class="text-center">
+            <div class="footer-above">
+                <div class="container">
+                    <div class="row">
+                        <div class="footer-col col-md-6">
+                            <h3>Location</h3>
+                            <p>Polo Ferrari, Via Sommarive 5
+                                <br>TRENTO, TN 38100</p>
+                        </div>
+                        <div class="footer-col col-md-6">
+                            <h3>About TripTNadvisor</h3>
+                            <p>TripTNadvisor is free to use, developed by UNITN students on 2016</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-below">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            Copyright &copy; TRIPTNADVISOR 2016
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+
+        <!-- Scroll to Top Button (Only visible on small and extra-small screen sizes) -->
+
+        <div class="scroll-top page-scroll hidden-sm hidden-xs hidden-lg hidden-md">
+            <a class="btn btn-primary" href="#page-top">
+                <i class="fa fa-chevron-up"></i>
+            </a>
         </div>
-        <script src="<%= request.getContextPath()%>/js/jquery.min.js"></script>
-        <script src="<%= request.getContextPath()%>/js/bootstrap.min.js"></script>
-        <script src="<%= request.getContextPath()%>/js/scripts.js"></script>
+
+
+
+        <!-- jQuery -->
+        <script src="<%= request.getContextPath()%>/vendor/jquery/jquery.min.js"></script>
+
+        <!-- Bootstrap Core JavaScript -->
+        <script src="<%= request.getContextPath()%>/vendor/bootstrap/js/bootstrap.min.js"></script>
+
+        <!-- Plugin JavaScript -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+
+        <!-- Theme JavaScript -->
+        <script src="<%= request.getContextPath()%>/js/freelancer.min.js"></script>
+
     </body>
+
 </html>

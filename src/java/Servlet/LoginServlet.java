@@ -43,9 +43,7 @@ public class LoginServlet extends HttpServlet {
                 req.getRequestDispatcher("/login.jsp").forward(req, resp);
             } else if (utente.isActivate()) {
                 session.setAttribute("utente", utente);
-                String s = (String) session.getAttribute("lastPage");
-                if(s!=null) req.getRequestDispatcher(s);
-                else req.getRequestDispatcher("/HomeServlet").forward(req, resp);
+                req.getRequestDispatcher("/HomeServlet").forward(req, resp);
             } else {
                 req.setAttribute("message", labels.getString("err.activate.account"));
                 req.getRequestDispatcher("/login.jsp").forward(req, resp);
