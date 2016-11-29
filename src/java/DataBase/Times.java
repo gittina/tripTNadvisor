@@ -66,7 +66,10 @@ public class Times {
     
     @Override
     public String toString(){
-        return apertura.toString() + " - " + chiusura.toString();
+        String a = "", b = "";
+        if(apertura.getMinutes()<10) a = "0";
+        if(chiusura.getMinutes()<10) b = "0";
+        return apertura.getHours() + ":" + apertura.getMinutes() + a +" - " + chiusura.getHours() + ":" + chiusura.getMinutes() + b;
     }
 }
 

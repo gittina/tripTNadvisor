@@ -339,12 +339,12 @@
                     <div class="col-md-4">
                         <label class="control-label"><fmt:message key="orari.apertura"/></label>
                         <br>
-                        <c:forEach var="day" items="${ristorante.getDay()}">
+                        <c:forEach var="days" items="${ristorante.getDays()}">
                             <label class="control-label">
-                                <c:out value="${day.getGiornoString()}"/>:
-                                <c:forEach var="times" items="${day.getTimes()}">
-                                    <c:out value="${times.toString()}"/>
-                                </c:forEach>, 
+                                <c:out value="${days.getGiornoString()}"/>:
+                                <c:forEach var="times" items="${days.getTimes()}">
+                                    <c:out value="${times.toString()}"/>,
+                                </c:forEach>
                             </label>
                             <br>
                         </c:forEach>

@@ -170,21 +170,22 @@
                             <hr class="star-light">
                             <label class="label-danger"><c:out value="${errOrario}"/></label>
                             
-                            <c:forEach var="day" items="${ristorante.getDay()}">
+                            <c:forEach var="days" items="${ristorante.getDays()}">
                                 <label class="control-label">
-                                    <c:forEach var="times" items="${day.getTimes()}">
-                                        <c:out value="${day.getGiornoString()}"/>: <c:out value="${times.toString()}"/>
+                                    <c:out value="${days.getGiornoString()}"/>: 
+                                    <c:forEach var="times" items="${days.getTimes()}">
+                                        <c:out value="${times.toString()}"/>
                                         <a href="<%= request.getContextPath()%>/privateRistoratore/CambiaOrariServlet?id_orario=<c:out value="${times.getId()}"/>">
                                             <fmt:message key="rimuovi.orario"/>
-                                        </a>
+                                        </a>,
                                     </c:forEach>
                                     <br>
                                 </label>
                                 <br>
                             </c:forEach>
 
-                            <button class="btn btn-primary" onclick="visualizza('formDay')"><fmt:message key="add.orario"/></button>
-                            <div id="formDay" style='display: none'>
+                            <button class="btn btn-primary" onclick="visualizza('formDays')"><fmt:message key="add.orario"/></button>
+                            <div id="formDays" style='display: none'>
                                 <br>
                                 <form method="POST" action="<%= request.getContextPath()%>/privateRistoratore/CambiaOrariServlet">
                                     <div class="row">

@@ -17,7 +17,7 @@ import java.util.Comparator;
  * @author Luca
  */
 //giorni della settimana da 1 a 7
-public class Day {
+public class Days {
 
     private final DBManager manager;
     private final int giorno;
@@ -38,7 +38,7 @@ public class Day {
      * = Lunedì, 2 = Martedì, ... , 7 = Domenica
      * @param manager per eseguire operazioni sul database
      */
-    public Day(int id, Ristorante ristorante, int giorno, DBManager manager) {
+    public Days(int id, Ristorante ristorante, int giorno, DBManager manager) {
         this.giorno = giorno;
         this.id = id;
         this.ristorante = ristorante;
@@ -72,11 +72,6 @@ public class Day {
         return null;
     }
 
-    @Override //da completare !!!!
-    public String toString() {
-        return getGiornoString() + ": ";
-    }
-
     public int getGiorno() {
         return giorno;
     }
@@ -86,7 +81,7 @@ public class Day {
         ResultSet rs;
 
         try {
-            stm = manager.con.prepareStatement("SELECT * from Times WHERE id_day = ?");
+            stm = manager.con.prepareStatement("SELECT * from Times WHERE id_days = ?");
             stm.setInt(1, id);
             rs = stm.executeQuery();
 
@@ -98,29 +93,29 @@ public class Day {
         } catch (SQLException ex) {
             System.out.println("Fallita estrazione tempi");
         }
-        Comparator c = (Comparator<Times>) new Comparator<Times>() {
-            @Override
-            public int compare(Times o1, Times o2) {
-                return o1.getApertura().before(o2.getApertura()) ? 1 : -1;
-            }
-        };
-        tempi.sort(c);
     }
 
     public ArrayList<Times> getTimes() {
+        Comparator c = (Comparator<Times>) new Comparator<Times>() {
+            @Override
+            public int compare(Times o1, Times o2) {
+                return o1.getApertura().after(o2.getApertura()) ? 1 : -1;
+            }
+        };
+        tempi.sort(c);
         return tempi;
     }
 
     public void addTimes(Time apertura, Time chiusura) {
         PreparedStatement stm;
         try {
-            stm = manager.con.prepareStatement("insert into times (id_day,apertura,chiusura) values (?,?,?)");
+            stm = manager.con.prepareStatement("insert into times (id_days,apertura,chiusura) values (?,?,?)");
             stm.setInt(1, this.id);
             stm.setTime(2, apertura);
             stm.setTime(3, chiusura);
             stm.executeUpdate();
         } catch (SQLException ex){
-            System.out.println("Failed to add times to day");
+            System.out.println("Failed to add times to days");
         }
     }
 }

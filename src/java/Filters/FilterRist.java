@@ -39,17 +39,13 @@ public class FilterRist implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpSession session = req.getSession(false);
         try {
-            Utente utente;
-
-            if (session.getAttribute("utente") == null) {
+            Utente utente = (Utente) session.getAttribute("utente");
+            if (utente == null) {
                 ((HttpServletRequest) request).getRequestDispatcher("/notLogged").forward(request, response);
             } else {
-                utente = (Utente) session.getAttribute("utente");
-                if(!utente.isAmministratore() && !utente.isRistoratore()){
+                if (!utente.isAmministratore() && !utente.isRistoratore()) {
                     ((HttpServletRequest) request).getRequestDispatcher("/notAuthorized").forward(request, response);
                 }
-         
-                
             }
         } catch (NullPointerException e) {
             ((HttpServletRequest) request).getRequestDispatcher("/notLogged").forward(request, response);

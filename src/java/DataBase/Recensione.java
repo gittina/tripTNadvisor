@@ -5,7 +5,6 @@
  */
 package DataBase;
 
-import java.io.Serializable;
 import java.sql.*;
 import java.time.LocalDate;
 
@@ -13,7 +12,7 @@ import java.time.LocalDate;
  *
  * @author Luca
  */
-public class Recensione implements Serializable{
+public class Recensione {
 
     private int id;
     private String titolo;
