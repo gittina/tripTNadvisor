@@ -34,11 +34,11 @@ public class CambiaOrariServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int id_orario = Integer.parseInt(request.getParameter("id_orario"));
+        int id_times = Integer.parseInt(request.getParameter("id_orario"));
         HttpSession session = request.getSession();
         Ristorante ristorante = (Ristorante) session.getAttribute("ristorante");
         if (ristorante != null) {
-            ristorante.removeOrario(id_orario);
+            ristorante.removeTimes(id_times);
             request.getRequestDispatcher("/privateRistoratore/orari.jsp").forward(request, response);
         } else {
             request.setAttribute("errOrario", "Errore interno, riprova");
@@ -60,8 +60,9 @@ public class CambiaOrariServlet extends HttpServlet {
         chiusura = new Time(Integer.parseInt(request.getParameter("chH")), Integer.parseInt(request.getParameter("chM")), 0);
         int day = Integer.parseInt(request.getParameter("day"));
         if (ristorante != null) {
+            System.out.println("Ristorante valido times");
             try {
-                ristorante.addOrario(day, apertura, chiusura);
+                ristorante.addTimes(day, apertura, chiusura);
             } catch (SQLException ex) {
                 System.out.println("Errore aggiunta orario al ristorante " + ristorante.toString());
             }

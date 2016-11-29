@@ -14,7 +14,7 @@
         <meta name="author" content="">
 
         <title><c:out value="${title}"/></title>
-        <c:set value="/base.jsp" scope="session" var="lastPage"/>
+        <c:set value="/HomeSerlvet" scope="session" var="lastPage"/>
 
         <!-- Bootstrap Core CSS -->
         <link href="<%= request.getContextPath()%>/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
