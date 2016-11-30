@@ -166,27 +166,29 @@
                         <div class="intro-text">
                             <span class="name"><fmt:message key="notify"/></span>
                             <hr class="star-light">
-                            <label class="label label-warning"><c:out value="${errMessageNotifica}"/></label>
-                            <div class="col-md-2"></div>
-                            <div class="col-md-8">
-                                <c:forEach var="notif" items="${notifiche}">
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <img src="<%= request.getContextPath()%><c:out value="${notif.getFotoPath()}"/>" alt="<fmt:message key="no.image"/>">
+                            <div class="row"><label class="label label-warning"><c:out value="${errMessageNotifica}"/></label></div>
+                            <div class="row">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-8">
+                                    <c:forEach var="notifica" items="${notifiche}">
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <img src="<%= request.getContextPath()%><c:out value="${notifica.getFotoPath()}"/>" alt="<fmt:message key="no.image"/>">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="control-label"><c:out value="${notifica.getData()}"/></label>
+                                                <label class="control-label"><c:out value="${notifica.toString()}"/></label>
+                                            </div>
+                                            <div class="col-md-4">
+                                                id: <c:out value="${notifica.getId()}"/> <form action="<%= request.getContextPath()%>/privateAdministrator/ApplicaNotificaServlet?accept=true&id_not=<c:out value="${notifica.getId()}"/>" method="get"><button class="btn btn-primary" type="submit"><fmt:message key="accept"/></button></form>
+                                                <br><form action="<%= request.getContextPath()%>/privateAdministrator/ApplicaNotificaServlet?accept=false&id_not=<c:out value="${notifica.getId()}"/>" method="get"><button class="btn btn-primary" type="submit"><fmt:message key="regret"/></button></form>
+                                            </div>
                                         </div>
-                                        <div class="col-md-4">
-                                            <label class="control-label"><c:out value="${notif.getData()}"/></label>
-                                            <label class="control-label"><c:out value="${notif.toString()}"/></label>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <form hidden action="<%= request.getContextPath()%>/privateAdministrator/ApplicaNotificaServlet?accept=true&id_not=<c:out value="${notif.getId()}"/>" method="get"><button class="btn btn-primary" type="submit"><fmt:message key="accept"/></button></form>
-                                            <form hidden action="<%= request.getContextPath()%>/privateAdministrator/ApplicaNotificaServlet?accept=false&id_not=<c:out value="${notif.getId()}"/>" method="get"><button class="btn btn-primary" type="submit"><fmt:message key="regret"/></button></form>
-                                        </div>
-                                    </div>
-                                </c:forEach>
+                                    </c:forEach>
+                                </div>
+                                <div class="col-md-2"></div>
                             </div>
-                            <div class="col-md-2"></div>
                         </div>
                     </div>
                 </div>

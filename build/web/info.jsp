@@ -298,7 +298,7 @@
                                 <c:when test="${utente.proprietario(ristorante)}">
                                     <label class="control-label"><a href="<%= request.getContextPath()%>/privateRistoratore/modificaRist.jsp"><fmt:message key="modify.restaurant"/></a></label>
                                     <br>
-                                    <label class="control-label"><a href="<%= request.getContextPath()%>/privateRistoratore/orari.jsp"><fmt:message key="gestisci.orari"/></a></label>
+                                    <label class="control-label"><a href="/privateRistoratore/ConfiguraOrariApertura?id_rist=<c:out value="${ristorante.getId()}"/>"><fmt:message key="gestisci.orari"/></a></label>
                                     <br>
                                 </c:when>
                                 <c:otherwise>

@@ -36,8 +36,9 @@ public class ApplicaNotificaServlet extends HttpServlet {
         String sc = request.getParameter("accept");
         String id = request.getParameter("id_not");
         ArrayList<Notifica> res = (ArrayList<Notifica>) session.getAttribute("notifiche");
+        System.out.println(sc + " " + id + " " + res);
         if (id == null || sc == null || res == null) {
-            session.setAttribute("errMessageNotifica", "errore applicazione notifica, riprova");
+            request.setAttribute("errMessageNotifica", "errore applicazione notifica, riprova");
         } else {
             boolean scelta = Boolean.parseBoolean(sc);
             int id_not = Integer.parseInt(request.getParameter("id_not"));

@@ -5,13 +5,14 @@
  */
 package DataBase;
 
+import java.io.Serializable;
 import java.sql.*;
 
 /**
  *
  * @author Luca
  */
-public class Recensione {
+public class Recensione implements Serializable{
 
     private int id;
     private String titolo;
