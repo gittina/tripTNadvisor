@@ -6,8 +6,6 @@
 package DataBase;
 
 import Notify.Notifica;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**
@@ -38,17 +36,7 @@ public class Registrato extends Utente {
      * @return true se l'attivazione è andata a buon fine, false altrimentie
      */
     public boolean attiva() {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("update utente set attivato = ? where id = ?");
-            stm.setBoolean(1, true);
-            stm.setInt(2, id);
-            stm.executeUpdate();
-            stm.close();
-            return true;
-        } catch (SQLException ex) {
-            return false;
-        }
+        return manager.attiva(this);
     }
     
     /*

@@ -44,16 +44,7 @@ public class SegnalaFotoRecensione extends Notifica{
 
     @Override
     public boolean done() {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("delete from segnalafotorecensione where id = ?");
-            stm.setInt(1, id);
-            stm.executeUpdate();
-            return true;
-        } catch (SQLException ex) {
-            System.out.println("Fallita eliminazione notifica SegnalaFotoRecensione");
-            return false;
-        }
+        return manager.done(this);
     }
 
     @Override

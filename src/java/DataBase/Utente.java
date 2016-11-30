@@ -6,12 +6,7 @@
 package DataBase;
 
 import Notify.Notifica;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -20,15 +15,14 @@ import java.util.Objects;
  *
  * @author Luca
  */
-public abstract class Utente {
+public abstract class Utente implements Serializable{
 
-    protected int id;
-    protected String nome;
-    protected String cognome;
-    protected String email;
-    protected String avpath;
+    private int id;
+    private String nome;
+    private String cognome;
+    private String email;
+    private String avpath;
     protected final DBManager manager;
-    protected final Connection con;
 
     public Utente(int id, String nome, String cognome, String email, String avpath, DBManager manager) {
         this.id = id;
@@ -37,7 +31,6 @@ public abstract class Utente {
         this.email = email;
         this.avpath = avpath;
         this.manager = manager;
-        con = manager.con;
     }
 
     /**
@@ -59,20 +52,7 @@ public abstract class Utente {
      * @return true se è andato tutto bene, false, altrimenti
      */
     public boolean modificaProfilo(String nome, String cognome, String email, String avpath) {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("update utente set nome = ?, cognome = ?, email = ?, avpath = ? where id = ?");
-            stm.setString(1, nome);
-            stm.setString(2, cognome);
-            stm.setString(3, email);
-            stm.setString(4, avpath);
-            stm.setInt(5, id);
-            stm.executeUpdate();
-            stm.close();
-        } catch (SQLException ex) {
-            return false;
-        }
-        return true;
+        return manager.modificaProfilo(this, nome, cognome, email, avpath);
     }
 
     /**
@@ -83,55 +63,17 @@ public abstract class Utente {
      * @throws SQLException
      */
     public boolean cambiaPassword(String nuovaPass) throws SQLException {
-        PreparedStatement stm;
-        ResultSet rs;
-        try {
-            stm = con.prepareStatement("UPDATE utente SET password = ? where id = ?");
-            stm.setString(1, nuovaPass);
-            stm.setInt(2, id);
-            stm.executeUpdate();
-            stm.close();
-        } catch (SQLException ex) {
-            return false;
-        }
-        return true;
+        return manager.cambiaPassword(this, nuovaPass);
     }
 
     
     public int numeroRecensioni(){
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("select count(*) as tot from recensione where id_utente = ?");
-            stm.setInt(1, id);
-            int res;
-            try (ResultSet rs = stm.executeQuery()) {
-                if (rs.next()) {
-                    res = rs.getInt("tot");
-                } else {
-                    res = -1;
-                }
-            }
-            stm.close();
-            return res;
-        } catch (SQLException ex) {
-            System.out.println("Fallita estrazione numero recensioni utente");
-            return -1;
-        }
+        return manager.numeroRecensioni(this);
     }
     
     
     public boolean justSegnalataFoto(Foto foto){
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("select ");
-            stm.setInt(1, id);
-            ResultSet rs = stm.executeQuery();
-            return rs.next();
-           
-        } catch (SQLException ex) {
-            System.out.println("Fallita estrazione justSegnalato utente " + this);
-            return true;
-        }
+        return manager.justSegnalataFoto(this, foto);
     }
     
     /**
@@ -141,23 +83,7 @@ public abstract class Utente {
      * @return un float tra 0 e 5 alle recensioni di questo utente
      */
     public float getReputazione() {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("select avg(res.parz) as media from( select avg(voto.rating) as parz from (select * from recensione where id_utente = ?) as rec, votorec as voto where rec.id = voto.ID_REC group by rec.id) as res group by res.parz");
-            stm.setInt(1, id);
-            ResultSet rs = stm.executeQuery();
-            float res;
-            if (rs.next()) {
-                res = rs.getFloat("media");
-            } else {
-                res = -1;
-            }
-            stm.close();
-            return res;
-        } catch (SQLException ex) {
-            System.out.println("Fallita estrazione reputazione utente");
-            return -1;
-        }
+        return manager.getReputazione(this);
     }
 
     /**
@@ -168,18 +94,7 @@ public abstract class Utente {
      * altrimenti
      */
     public boolean justRecensito(Ristorante ristorante) {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("select * from recensione where id_rist = ? AND id_utente = ?");
-            stm.setInt(1, ristorante.getId());
-            stm.setInt(2, id);
-            ResultSet rs = stm.executeQuery();
-            boolean res = rs.next();
-            stm.close();
-            return res;
-        } catch (Exception ex) {
-            return true;
-        }
+        return manager.justRecensito(this, ristorante);
     }
 
     /**
@@ -207,27 +122,7 @@ public abstract class Utente {
      * altrimenti
      */
     public boolean justVotatoOggi(Ristorante ristorante) {
-        PreparedStatement stm;
-        ResultSet rs;
-        boolean res;
-        try {
-            Date now = new Date(System.currentTimeMillis());
-            stm = con.prepareStatement("select data from votorist where id_utente = ? AND id_rist = ? order by data desc { limit 1 }");
-            stm.setInt(1, id);
-            stm.setInt(2, ristorante.getId());
-            rs = stm.executeQuery();
-            if (rs.next()) {
-                Date d = rs.getDate("data");
-                res = d.getDay() == now.getDay() && d.getMonth() == now.getMonth() && d.getYear() == now.getYear();
-            } else {
-                res = false;
-            }
-            rs.close();
-            stm.close();
-        } catch (SQLException ex) {
-            return true;
-        }
-        return res;
+        return manager.justVotatoOggi(this, ristorante);
     }
 
     /**
@@ -250,29 +145,7 @@ public abstract class Utente {
      * @throws SQLException
      */
     public boolean isActivate() throws SQLException {
-        if (this.getClass() == Amministratore.class) {
-            System.out.println("Sono amministratore dentro isActivate()");
-            return true;
-        }
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("select attivato from Utente where id = ?");
-            stm.setInt(1, getId());
-            ResultSet rs = stm.executeQuery();
-            boolean res;
-
-            if (rs.next()) {
-                res = rs.getBoolean("attivato");
-                
-            } else {
-                res = false;
-            }
-            System.out.println("isActivate().res: "+res);
-            stm.close();
-            return res;
-        } catch (SQLException ex) {
-            return false;
-        }
+        return manager.isActivate(this);
     }
 
     /**
@@ -288,70 +161,9 @@ public abstract class Utente {
      * @param fotoDescr descrizione della prima foto
      * @return true se la registrazione del ristorante sul db ha avuto successo,
      * false altrimenti
-     * @throws SQLException
-     * @throws FileNotFoundException
-     * @throws IOException
      */
-    public boolean addRistorante(String nome, String desc, String linkSito, String fascia, String spec, String address, String fotoPath, String fotoDescr) throws SQLException, FileNotFoundException, IOException {
-        PreparedStatement stm;
-        ResultSet rs;
-        try {
-
-            Luogo luogo = manager.getLuogo(address);
-
-            stm = con.prepareStatement("INSERT INTO Luogo (address,lat,lng) VALUES (?,?,?)");
-            stm.setString(1, luogo.getAddress());
-            stm.setDouble(2, luogo.getLat());
-            stm.setDouble(3, luogo.getLng());
-            stm.executeUpdate();
-
-            stm = con.prepareStatement("select id from Luogo where lat = ? AND lng = ?");
-            stm.setDouble(1, luogo.getLat());
-            stm.setDouble(2, luogo.getLng());
-            rs = stm.executeQuery();
-            int luogo_id;
-            if (rs.next()) {
-                luogo_id = rs.getInt("id");
-            } else {
-                throw new SQLException();
-            }
-
-            stm = con.prepareStatement("INSERT INTO Ristorante (nome,descr,linksito,cucina,fascia,id_luogo) VALUES (?,?,?,?,?,?)");
-            stm.setString(1, nome);
-            stm.setString(2, desc);
-            stm.setString(3, linkSito);
-            stm.setString(4, spec);
-            stm.setString(5, fascia);
-            stm.setInt(6, luogo_id);
-            stm.executeUpdate();
-
-            stm = con.prepareStatement("select id from Ristorante where nome = ? AND linkSito = ?");
-            stm.setString(1, nome);
-            stm.setString(2, linkSito);
-            rs = stm.executeQuery();
-            Ristorante res;
-            if (rs.next()) {
-                res = manager.getRistorante(rs.getInt("id"));
-            } else {
-                throw new SQLException();
-            }
-
-            stm = con.prepareStatement("INSERT INTO Foto (fotoPath,data,descr,id_rist,id_utente) VALUES (?,?,?,?,?)");
-            Date sqlDate = new Date(System.currentTimeMillis());
-            stm.setString(1, fotoPath);
-            stm.setDate(2, sqlDate);
-            stm.setString(3, fotoDescr);
-            stm.setInt(4, res.getId());
-            stm.setInt(5, id);
-            stm.executeUpdate();
-            rs.close();
-            stm.close();
-        } catch (SQLException ex) {
-            System.out.println("Fallita registrazione ristorante su DB");
-            return false;
-        }
-        manager.update();
-        return true;
+    public boolean addRistorante(String nome, String desc, String linkSito, String fascia, String spec, String address, String fotoPath, String fotoDescr) {
+        return manager.addRistorante(this, nome, desc, linkSito, fascia, spec, address, fotoPath, fotoDescr);
     }
 
     @Override

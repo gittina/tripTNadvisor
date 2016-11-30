@@ -1,5 +1,12 @@
 package DataBase;
 
+import Notify.CommentoRecensione;
+import Notify.NuovaFoto;
+import Notify.NuovaRecensione;
+import Notify.RichiestaRistorante;
+import Notify.SegnalaFotoRecensione;
+import Notify.SegnalaFotoRistorante;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -10,13 +17,17 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import net.glxn.qrgen.QRCode;
+import net.glxn.qrgen.image.ImageType;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -58,6 +69,10 @@ public class DBManager implements Serializable {
         }
     }
 
+    /////////////////// METODI GENERALI //////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
     /**
      * Metodo per verificare l'autenticazione di un utente
      *
@@ -85,152 +100,6 @@ public class DBManager implements Serializable {
             return null;
         }
         return null;
-    }
-
-    /**
-     * Crea una nuova notifica di tipo CommentoRecensione sul DB, verrà estratta
-     * poi da un utente amministratore per essere verificata
-     *
-     * @param recensione la recensione a cui un utente ristoratore vuole
-     * aggiungere il suo commento
-     * @param commento il commento da aggiungere alla recensione
-     * @return true se la notifica è stata registrata con successo sul DB, false
-     * altriementi
-     */
-    public boolean newNotCommentoRecensione(Recensione recensione, String commento) {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("insert into RispostaRecensione(id_rec, commento, data) values (?,?,?)");
-            stm.setInt(1, recensione.getId());
-            stm.setString(2, commento);
-            stm.setDate(3, new Date(System.currentTimeMillis()));
-            stm.executeUpdate();
-            stm.close();
-        } catch (SQLException ex) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Crea una nuova notifica di tipo ReclamaRistorante sul DB per permettere
-     * ad un amministratore di verificare se questo utente è il reale
-     * proprietario del ristorante
-     *
-     * @param ristorante il ristorante richiesto da un utente
-     * @param utente l'utente che vuole reclamare quel ristorante
-     * @return true se la notifica è stata registrata con successo sul DB, false
-     * altriementi
-     */
-    public boolean newNotReclamaRistorante(Ristorante ristorante, Utente utente) {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("insert into richiestaristorante(id_rist, id_utente, data) values (?,?,?)");
-            stm.setInt(1, ristorante.getId());
-            stm.setInt(2, utente.getId());
-            stm.setDate(3, new Date(System.currentTimeMillis()));
-            stm.executeUpdate();
-            stm.close();
-        } catch (SQLException ex) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Crea una nuova notifica di tipo SegnalaFotoRecensione sul DB, verrà
-     * estratta poi da un utente amministratore per essere verificata. Questa
-     * notifica permette di far decidere ad un amministratore se la foto di
-     * questa recensione è da togliere o meno
-     *
-     * @param recensione la recensione la cui foto vuole essere rimossa
-     * dall'utente proprietario del ristorante sul quale è inserita la
-     * recensione
-     * @return true se la notifica è stata registrata con successo sul DB, false
-     * altriementi
-     */
-    public boolean newNotSegnalaFotoRecensione(Recensione recensione) {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("insert into segnalafotorecensione(id_rec, data) values (?,?)");
-            stm.setInt(1, recensione.getId());
-            stm.setDate(2, new Date(System.currentTimeMillis()));
-            stm.executeUpdate();
-            stm.close();
-        } catch (SQLException ex) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Crea una nuova notifica di tipo SegnalaFotoRistorante sul DB, verrà
-     * estratta poi da un utente amministratore per essere verificata. Permette
-     * ad un utente Ristoratore di segnalare una fotografia non consona alla
-     * pagina del suo ristorante
-     *
-     * @param foto la fotografia del ristorante che si vuole segnalare
-     * @return true se la notifica è stata registrata con successo sul DB, false
-     * altriementi
-     */
-    public boolean newNotSegnalaFotoRistorante(Foto foto) {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("insert into segnalafotoristorante(id_foto, data) values (?,?)");
-            stm.setInt(1, foto.getId());
-            stm.setDate(2, new Date(System.currentTimeMillis()));
-            stm.executeUpdate();
-            stm.close();
-        } catch (SQLException ex) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Crea una nuova notifica di tipo NuovaRecensione sul DB, per notificare un
-     * utente ristoratore che un suo ristorante ha ricevuto una nuova recensione
-     *
-     * @param recensione la nuova recensione al suo ristorante
-     * @return true se la notifica è stata registrata con successo sul DB, false
-     * altriementi
-     */
-    public boolean newNotNuovaRecensione(Recensione recensione) {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("insert into nuovarecensione(id_rec, id_dest, data) values (?,?,?)");
-            stm.setInt(1, recensione.getId());
-            stm.setInt(2, recensione.getRistorante().getUtente().getId());
-            stm.setDate(3, new Date(System.currentTimeMillis()));
-            stm.executeUpdate();
-            stm.close();
-        } catch (SQLException ex) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Crea una nuova notifica di tipo NuovaRecensione sul DB, per notificare un
-     * utente ristoratore che un suo ristorante ha ricevuto una nuova foto
-     *
-     * @param foto la foto che è stata aggiunta al suo ristorante
-     * @return true se la notifica è stata registrata con successo sul DB, false
-     * altriementi
-     */
-    public boolean newNotNuovaFoto(Foto foto) {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("insert into nuovafoto(id_foto, id_dest, data) values (?,?,?)");
-            stm.setInt(1, foto.getId());
-            stm.setInt(2, foto.getRistorante().getUtente().getId());
-            stm.setDate(3, new Date(System.currentTimeMillis()));
-            stm.executeUpdate();
-            stm.close();
-        } catch (SQLException ex) {
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -887,14 +756,14 @@ public class DBManager implements Serializable {
                 content = content + "\t \"" + counter++ + "\": " + "\"" + rs.getString("nome") + "\", \n";
                 content = content + "\t \"" + counter++ + "\": " + "\"" + rs.getString("address") + "\", \n";
             }
-            
+
             stm = con.prepareStatement("select cucina from ristorante group by cucina");
             rs = stm.executeQuery();
-            
+
             while (rs.next()) {
                 content = content + "\t \"" + counter++ + "\": " + "\"" + rs.getString("cucina") + "\", \n";
             }
-            
+
             content = content + "}";
 
             // if file doesn't exists, then create it
@@ -918,10 +787,1548 @@ public class DBManager implements Serializable {
         } catch (SQLException e) {
             System.out.println("Errore SQL updating autocomplete.txt");
             return false;
-        } catch(IOException e){
+        } catch (IOException e) {
             System.out.println("Errore IOE updating autocomplete.txt");
             return false;
         }
 
     }
+
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //
+    //
+    //
+    ////////////// METODI PER RISTORANTE /////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    /**
+     * Aggiunge una visita al ristorante
+     *
+     * @param ristorante
+     */
+    public void addVisita(Ristorante ristorante) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("update ristorante set visite = visite+1 where id = ?");
+            stm.setInt(1, ristorante.getId());
+            stm.executeUpdate();
+            stm.close();
+        } catch (Exception ex) {
+        }
+    }
+
+    /**
+     *
+     * @param ristorante
+     * @param nome nuovo nome
+     * @param address nuovo indirizzo
+     * @param linksito nuovo sito web
+     * @param descr nuova descrizione
+     * @param cucina nuova cucina
+     * @param fascia nuova fascia
+     * @return true se i dati sono stati aggiornati correttamente, false
+     * altrimenti
+     */
+    public boolean updateData(Ristorante ristorante, String nome, String address, String linksito, String descr, String cucina, String fascia) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("update ristorante set nome = ?, linksito = ?, descr = ?, cucina = ?, fascia = ? where id = ?");
+            stm.setString(1, nome);
+            stm.setString(2, linksito);
+            stm.setString(3, descr);
+            stm.setString(4, cucina);
+            stm.setString(5, fascia);
+            stm.setInt(6, ristorante.getId());
+            stm.executeUpdate();
+            ristorante.setLuogo(address);
+            stm.close();
+
+        } catch (SQLException ex) {
+            System.out.println("Update non riuscito del profilo");
+            return false;
+        }
+        this.update();
+        return true;
+    }
+
+    /**
+     * Per settare l'indirizzo del ristorante
+     *
+     * @param ristorante
+     * @param address l'indirizzo del ristorante
+     * @return true se la posizione del ristorante è stata impostata
+     * correttamente, false altrimenti
+     */
+    public boolean setLuogo(Ristorante ristorante, String address) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("delete from Luogo where id = (select id_luogo from ristorante where id = ?)");
+            stm.executeUpdate();
+
+            Luogo luogo = getLuogo(address);
+
+            stm = con.prepareStatement("INSERT INTO Luogo (address,lat,lng) VALUES (?,?,?)");
+            stm.setString(1, luogo.getAddress());
+            stm.setDouble(2, luogo.getLat());
+            stm.setDouble(3, luogo.getLng());
+            stm.executeUpdate();
+
+            stm = con.prepareStatement("select id from Luogo where lat = ? AND lng = ?");
+            stm.setDouble(1, luogo.getLat());
+            stm.setDouble(2, luogo.getLng());
+            ResultSet rs = stm.executeQuery();
+            int luogo_id;
+            if (rs.next()) {
+                luogo_id = rs.getInt("id");
+            } else {
+                throw new SQLException();
+            }
+
+            stm = con.prepareStatement("update ristorante set id_luogo = ? where id = ?");
+            stm.setInt(1, luogo_id);
+            stm.setInt(2, ristorante.getId());
+            stm.executeUpdate();
+            stm.close();
+        } catch (SQLException ex) {
+            System.out.println("Impossibile modificare luogo");
+            return false;
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return true;
+    }
+
+    /**
+     * Funzione che calcola il voto del ristorante come media di tutte le
+     * valutazioni lasciate dagli utenti
+     *
+     * @param ristorante
+     * @return un float tra 0 e 5 che valuta la qualità del ristorante
+     */
+    public float getVoto(Ristorante ristorante) {
+        PreparedStatement stm;
+        ResultSet rs;
+        try {
+            stm = con.prepareStatement("SELECT avg(1.0 * rating) AS mediavoto FROM votorist WHERE id_rist=?");
+            stm.setInt(1, ristorante.getId());
+            rs = stm.executeQuery();
+            float res;
+            if (rs.next()) {
+                res = rs.getFloat("mediavoto");
+            } else {
+                res = 0;
+            }
+            stm.close();
+            return res;
+        } catch (SQLException ex) {
+            System.out.println("Fallita estrazione voto");
+            return 0;
+        }
+    }
+
+    /**
+     * Funzione che calcola la posizione in classifica instantanea di un
+     * ristorante
+     *
+     * @param ristorante
+     * @return la posizione in classifica del ristorante
+     */
+    public int getPosizioneClassifica(Ristorante ristorante) {
+        PreparedStatement stm;
+        ResultSet rs;
+        try {
+            stm = con.prepareStatement("select avg(1.0 * votorist.rating) as media, ristorante.ID as id_rist from (Ristorante) Left Join (votorist) on (ristorante.ID = votorist.ID_RIST) group by (ristorante.ID) order by media asc");
+            rs = stm.executeQuery();
+            int counter = 0;
+            while (rs.next()) {
+                counter++;
+                if (rs.getInt("id_rist") == ristorante.getId()) {
+                    return counter;
+                }
+            }
+            stm.close();
+        } catch (SQLException ex) {
+            return -1;
+        }
+
+        return -1;
+    }
+
+    /**
+     *
+     * @param ristorante
+     * @param giorno giorno a cui è riferito l'orario, 1 = Lunedì, 2 = Martedì,
+     * .... , 7 = Domenica
+     * @param inizio Time dell'inizio dell'orario di apertura
+     * @param fine Time della fine dell'orario di apertura
+     * @return
+     */
+    public boolean addTimesToRistorante(Ristorante ristorante, int giorno, Time inizio, Time fine) {
+        System.out.println("Inizio aggiunta times");
+        PreparedStatement stm;
+        ResultSet rs;
+        try {
+            stm = con.prepareStatement("select * from days where id_rist = ? AND giorno = ?");
+            stm.setInt(1, ristorante.getId());
+            stm.setInt(2, giorno);
+            rs = stm.executeQuery();
+            if (rs.next()) {
+                Days d = new Days(rs.getInt("id"), getRistorante(rs.getInt("id_rist")), rs.getInt("giorno"), this);
+                d.addTimes(inizio, fine);
+            } else if (addDays(ristorante, giorno)) {
+                stm = con.prepareStatement("select * from days where id_rist = ? AND giorno = ?");
+                stm.setInt(1, ristorante.getId());
+                stm.setInt(2, giorno);
+                rs = stm.executeQuery();
+                if (rs.next()) {
+                    Days d = new Days(rs.getInt("id"), getRistorante(rs.getInt("id_rist")), rs.getInt("giorno"), this);
+                    d.addTimes(inizio, fine);
+                } else {
+                    return false;
+                }
+            }
+            rs.close();
+            stm.close();
+        } catch (SQLException ex) {
+            System.out.println("problema aggiunta times");
+            return false;
+        }
+        return true;
+    }
+
+    public boolean addDays(Ristorante ristorante, int giorno) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("insert into days (giorno, id_rist) values (?,?)");
+            stm.setInt(1, giorno);
+            stm.setInt(2, ristorante.getId());
+            stm.executeUpdate();
+            stm.close();
+        } catch (SQLException ex) {
+            System.out.println("problema aggiunta days");
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean removeTimes(int id_times) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("delete from times where id = ?");
+            stm.setInt(1, id_times);
+            stm.executeUpdate();
+            stm.close();
+        } catch (SQLException ex) {
+            System.out.println("problema rimozione times con id: " + id_times);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Per ricevere l'oggetto Luogo riferito a questo ristorante
+     *
+     * @param ristorante
+     * @return L'oggetto Luogo riferito a questo ristorante
+     */
+    public Luogo getLuogo(Ristorante ristorante) {
+        PreparedStatement stm;
+        ResultSet rs;
+        Luogo res = null;
+        try {
+            stm = con.prepareStatement("select * from Luogo, Ristorante where ristorante.id = ? AND ristorante.id_luogo = luogo.id");
+            stm.setInt(1, ristorante.getId());
+            rs = stm.executeQuery();
+            if (rs.next()) {
+                res = new Luogo(rs.getDouble("lat"), rs.getDouble("lng"), rs.getString("address"));
+            }
+            stm.close();
+        } catch (SQLException ex) {
+            System.out.println("problema estrazione luogo");
+        }
+        return res;
+    }
+
+    /**
+     * Per ottenere tutti gli orari di questo ristorante
+     *
+     * @param ristorante
+     * @return tutti gli orari del ristorante
+     */
+    public ArrayList<Days> getDays(Ristorante ristorante) {
+        PreparedStatement stm;
+        ArrayList<Days> res = new ArrayList<>();
+        ResultSet rs;
+
+        try {
+            stm = con.prepareStatement("SELECT * FROM Days WHERE id_rist = ?");
+            stm.setInt(1, ristorante.getId());
+            rs = stm.executeQuery();
+
+            while (rs.next()) {
+                res.add(new Days(rs.getInt("id"), getRistorante(rs.getInt("id_rist")), rs.getInt("giorno"), this));
+            }
+            rs.close();
+            stm.close();
+        } catch (SQLException ex) {
+            System.out.println("Fallita estrazione days");
+            return null;
+        }
+        Comparator c = (Comparator<Days>) new Comparator<Days>() {
+            @Override
+            public int compare(Days o1, Days o2) {
+                return o1.getGiorno() > o2.getGiorno() ? 1 : -1;
+            }
+        };
+        res.sort(c);
+        return res;
+    }
+
+    /**
+     * Per ottenere tutte le recensioni lasciate dagli utenti a questo
+     * ristorante
+     *
+     * @param ristorante
+     * @return Lista di Recensioni
+     */
+    public ArrayList<Recensione> getRecensioni(Ristorante ristorante) {
+        PreparedStatement stm;
+        ArrayList<Recensione> res = new ArrayList<>();
+        ResultSet rs;
+        try {
+            stm = con.prepareStatement("SELECT * FROM RECENSIONE WHERE id_rist = ?");
+            stm.setInt(1, ristorante.getId());
+            rs = stm.executeQuery();
+
+            while (rs.next()) {
+                res.add(new Recensione(rs.getInt("id"), ristorante, getUtente(rs.getInt("id_utente")), rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), this));
+            }
+            Comparator c = (Comparator<Recensione>) (Recensione o1, Recensione o2) -> {
+                if (o1.getData().after(o2.getData())) {
+                    return -1;
+                } else if (o1.getData().equals(o2.getData())) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            };
+            res.sort(c);
+            rs.close();
+            stm.close();
+        } catch (SQLException ex) {
+            System.out.println("Fallita estrazione recensioni");
+            return null;
+        }
+        return res;
+    }
+
+    /**
+     * Questa funzione permette di aggiungere una recensione a questo ristorante
+     *
+     * @param ristorante
+     * @param titolo titolo della recensione
+     * @param testo testo o corpo della recensione
+     * @param utente utente che scrive la recensione
+     * @return l'oggetto recensione appena creato
+     */
+    public Recensione addRecensione(Ristorante ristorante, String titolo, String testo, Utente utente) {
+        Recensione res;
+        PreparedStatement stm;
+        ResultSet rs;
+        Date current = Date.valueOf(LocalDate.now());
+        try {
+            stm = con.prepareStatement("INSERT INTO RECENSIONE (titolo,testo,data,id_utente,id_rist) VALUES (?,?,?,?,?)");
+            stm.setString(1, titolo);
+            stm.setString(2, testo);
+            stm.setDate(3, current);
+            stm.setInt(4, utente.getId());
+            stm.setInt(5, ristorante.getId());
+            stm.executeUpdate();
+
+            stm = con.prepareStatement("SELECT * FROM RECENSIONE where id_utente = ? AND id_rist = ? ");
+            stm.setInt(1, utente.getId());
+            stm.setInt(2, ristorante.getId());
+            rs = stm.executeQuery();
+            rs.next();
+            res = new Recensione(rs.getInt("id"), ristorante, utente, rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), this);
+            rs.close();
+            stm.close();
+        } catch (SQLException ex) {
+            System.out.println("Fallita estrazione recensione su DB" + ex.toString());
+            return null;
+        }
+        return res;
+    }
+
+    /**
+     * Funzione per l'aggiunta di una foto a questo ristorante
+     *
+     * @param ristorante
+     * @param path path della foto da aggiungere
+     * @param descr piccola descrizione della foto
+     * @param utente utente che aggiunge la foto
+     * @return true se l'aggiunta ha avuto successo, false altrimenti
+     */
+    public boolean addFoto(Ristorante ristorante, String path, String descr, Utente utente) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("INSERT INTO FOTO (fotopath, descr, data, id_rist, id_utente) VALUES (?,?,?,?,?)");
+            stm.setString(1, path);
+            stm.setString(2, descr);
+            Date current = Date.valueOf(LocalDate.now());
+            stm.setDate(3, current);
+            stm.setInt(4, ristorante.getId());
+            stm.setInt(5, utente.getId());
+            stm.executeUpdate();
+            stm.close();
+            return true;
+        } catch (SQLException ex) {
+            System.out.println("Fallita aggiunta foto a ristorante su DB");
+            return false;
+        }
+    }
+
+    /**
+     * Funzione per rimuovere una foto da questo ristorante
+     *
+     * @param ristorante
+     * @param foto foto da rimuovere
+     * @return true se la rimozione ha avuto successo, false altrimenti
+     */
+    public boolean removeFoto(Ristorante ristorante, Foto foto) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("DELETE FROM FOTO WHERE id = ?");
+            stm.setInt(1, foto.getId());
+            stm.executeUpdate();
+            stm.close();
+            return true;
+        } catch (SQLException ex) {
+            System.out.println("Fallita rimozione foto id: " + ristorante.getId());
+            return false;
+        }
+    }
+
+    /**
+     * Funione per ottenere una lista di tutte le foto che sono state aggiunte a
+     * questo ristorante
+     *
+     * @param ristorante
+     * @return ArrayList di foto di questo ristorante
+     */
+    public ArrayList<Foto> getFoto(Ristorante ristorante) {
+        ArrayList<Foto> res = new ArrayList<>();
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("select * from foto where id_rist = ?");
+            stm.setInt(1, ristorante.getId());
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) { //int id, String fotopath, String descr, Date data
+                res.add(new Foto(rs.getInt("id"), rs.getString("fotopath"), rs.getString("descr"), rs.getDate("data"), getUtente(rs.getInt("id_utente")), getRistorante(rs.getInt("id_rist")), this));
+            }
+            Comparator c = (Comparator<Foto>) (Foto o1, Foto o2) -> {
+                if (o1.getData().after(o2.getData())) {
+                    return -1;
+                } else if (o1.getData().equals(o2.getData())) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            };
+            res.sort(c);
+            stm.close();
+        } catch (SQLException ex) {
+            return null;
+        }
+        return res;
+    }
+
+    /**
+     * Crea un immagine QR con le seguenti informazioni: - Nome - Indirizzo -
+     * Orari di apertura
+     *
+     * @param ristorante
+     * @return il path per accedere all'immagine creata
+     */
+    public String creaQR(Ristorante ristorante) {
+
+        String pos = "/qr/" + ristorante.getName().replace(' ', '_') + ".jpg";
+        String savePath = completePath + pos;
+
+        ArrayList<Days> days = getDays(ristorante);
+
+        String forQR = "Nome ristorante: " + ristorante.getName().trim() + "\n" + "Indirizzo: " + getLuogo(ristorante).getAddress() + "\n";
+
+        for (Days o : days) {
+            for (Times t : o.getTimes()) {
+                forQR = forQR + t.toString();
+            }
+        }
+
+        ByteArrayOutputStream out = QRCode.from(forQR).to(ImageType.JPG).stream();
+        FileOutputStream fout;
+        try {
+            fout = new FileOutputStream(new File(savePath));
+            fout.write(out.toByteArray());
+
+            fout.flush();
+            fout.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("Errore: " + e.toString());
+            System.out.println("Errore nella creazione dell'immagine QR");
+        } catch (IOException e) {
+            System.out.println("Errore nella creazione QR");
+        }
+
+        return pos;
+    }
+
+    /**
+     * Aggiunge un voto a questo ristorante
+     *
+     * @param ristorante
+     * @param user utente che aggiunge il voto
+     * @param rating voto da 0 a 5 compresi
+     * @return true se il voto è stato aggiunto con successo, false altrimenti
+     */
+    public boolean addVoto(Ristorante ristorante, Utente user, int rating) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("INSERT INTO votorist (id_utente, id_rist, data, rating) VALUES (?,?,?,?)");
+            stm.setInt(1, user.getId());
+            stm.setInt(2, ristorante.getId());
+            Date current = Date.valueOf(LocalDate.now());
+            if (user.justVotatoOggi(ristorante)) {
+                return false;
+            }
+            stm.setDate(3, current);
+            stm.setInt(4, rating);
+            stm.executeUpdate();
+            stm.close();
+            return true;
+        } catch (SQLException ex) {
+            System.out.println("Fallita aggiunta voto");
+            return false;
+        }
+    }
+
+    /**
+     * Crea una nuova notifica di tipo ReclamaRistorante sul DB per permettere
+     * ad un amministratore di verificare se questo utente è il reale
+     * proprietario del ristorante
+     *
+     * @param ristorante il ristorante richiesto da un utente
+     * @param utente l'utente che vuole reclamare quel ristorante
+     * @return true se la notifica è stata registrata con successo sul DB, false
+     * altriementi
+     */
+    public boolean newNotReclamaRistorante(Ristorante ristorante, Utente utente) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("insert into richiestaristorante(id_rist, id_utente, data) values (?,?,?)");
+            stm.setInt(1, ristorante.getId());
+            stm.setInt(2, utente.getId());
+            stm.setDate(3, new Date(System.currentTimeMillis()));
+            stm.executeUpdate();
+            stm.close();
+        } catch (SQLException ex) {
+            return false;
+        }
+        return true;
+    }
+
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //
+    //
+    //
+    /////////////////// METODI PER AMMINISTRATORE ////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    /*
+    * Per ricevere tutte le notifiche di avvenuto commento a recensione
+     */
+    ArrayList<CommentoRecensione> getCommentoRecensioneNotifiche() {
+        ArrayList<CommentoRecensione> res = new ArrayList<>();
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("select * from rispostarecensione");
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                res.add(new CommentoRecensione(this, rs.getInt("id"), getRecensione(rs.getInt("id_rec")), rs.getString("commento"), rs.getDate("data")));
+                System.out.println("Added notifica");
+            }
+            stm.close();
+        } catch (SQLException ex) {
+            return null;
+        }
+        return res;
+    }
+
+    /*
+    * Per ricevere tutte le notifiche di avvenuta richiesta di possesso ristorante da parte di un utente
+     */
+    ArrayList<RichiestaRistorante> getReclamaRistoranteNotifiche() {
+        ArrayList<RichiestaRistorante> res = new ArrayList<>();
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("select * from richiestaristorante");
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                res.add(new RichiestaRistorante(this, rs.getInt("id"), rs.getDate("data"), getUtente(rs.getInt("id_utente")), getRistorante(rs.getInt("id_rist"))));
+                System.out.println("Added notifica");
+            }
+            stm.close();
+        } catch (SQLException ex) {
+            return null;
+        }
+        return res;
+    }
+
+    /*
+    * Per ricevere tutte le notifiche di avvenuta segnalazione foto di un ristorante da parte del proprietario
+     */
+    ArrayList<SegnalaFotoRistorante> getSegnalaFotoRistoranteNotifiche() {
+        ArrayList<SegnalaFotoRistorante> res = new ArrayList<>();
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("select * from segnalafotoristorante");
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                Foto f = getFoto(rs.getInt("id_foto"));//DBManager manager, int id, Date data, Ristorante ristorante, Foto foto
+                res.add(new SegnalaFotoRistorante(this, rs.getInt("id"), rs.getDate("data"), getRistorante(f.getRistorante().getId()), f));
+                System.out.println("Added notifica");
+            }
+            stm.close();
+        } catch (SQLException ex) {
+            return null;
+        }
+        return res;
+    }
+
+    /*
+    * Per ricevere tutte le notifiche di avvenuta segnalazione della foto di una recensione da parte del proprietario del ristorante a cui riferisce la recensione
+     */
+    ArrayList<SegnalaFotoRecensione> getSegnalaFotoRecensioneNotifiche() {
+        ArrayList<SegnalaFotoRecensione> res = new ArrayList<>();
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("select * from segnalafotorecensione");
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                res.add(new SegnalaFotoRecensione(this, rs.getInt("id"), rs.getDate("data"), getRecensione(rs.getInt("id_rec"))));
+                System.out.println("Added notifica");
+            }
+            stm.close();
+        } catch (SQLException ex) {
+            return null;
+        }
+        return res;
+    }
+
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //
+    //
+    //
+    //////////////////// METODI PER DAYS /////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    public ArrayList<Times> getTimes(Days days) {
+        PreparedStatement stm;
+        ResultSet rs;
+        ArrayList<Times> res = new ArrayList<>();
+        try {
+            stm = con.prepareStatement("SELECT * from Times WHERE id_days = ?");
+            stm.setInt(1, days.getId());
+            rs = stm.executeQuery();
+
+            while (rs.next()) {
+                res.add(new Times(rs.getInt("id"), rs.getTime("apertura"), rs.getTime("chiusura")));
+            }
+            rs.close();
+            stm.close();
+        } catch (SQLException ex) {
+            System.out.println("Fallita estrazione tempi");
+            return null;
+        }
+        return res;
+    }
+
+    public boolean addTimes(Days days, Time apertura, Time chiusura) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("insert into times (id_days,apertura,chiusura) values (?,?,?)");
+            stm.setInt(1, days.getId());
+            stm.setTime(2, apertura);
+            stm.setTime(3, chiusura);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            System.out.println("Failed to add times to days");
+            return false;
+        }
+        return true;
+    }
+
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //
+    //
+    //
+    //////////////////// METODI PER FOTO /////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    public boolean justSegnalato(Foto foto) {
+        PreparedStatement stm;
+        ResultSet rs;
+        try {
+            stm = con.prepareStatement("select * from segnalafotoristorante where id_foto = ?");
+            stm.setInt(1, foto.getId());
+            rs = stm.executeQuery();
+            boolean res = rs.next();
+            rs.close();
+            stm.close();
+            return res;
+        } catch (SQLException ex) {
+            return true;
+        }
+    }
+
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //
+    //
+    //
+    /////////////////// METODI PER RECENSIONE ////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    /**
+     * Aggiunge un commento alla recensione, scritto dal proprietario del
+     * ristorante a cui è riferica
+     *
+     * @param recensione
+     * @param commento il commento da aggiungere
+     * @return true se il commento è stato inserito/aggiuornato con successo,
+     * false altrimenti
+     */
+    public boolean addComment(Recensione recensione, String commento) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("UPDATE RECENSIONE SET commento = ? WHERE id = ?");
+            stm.setString(1, commento);
+            stm.setInt(2, recensione.getId());
+            stm.executeUpdate();
+            stm.close();
+            recensione.setCommento(commento);
+            return true;
+        } catch (SQLException ex) {
+            return false;
+        }
+    }
+
+    public boolean justSegnalato(Recensione recensione) {
+        PreparedStatement stm;
+        ResultSet rs;
+        try {
+            stm = con.prepareStatement("select * from segnalafotorecensione where id_rec = ?");
+            stm.setInt(1, recensione.getId());
+            rs = stm.executeQuery();
+            boolean res = rs.next();
+            rs.close();
+            stm.close();
+            return res;
+        } catch (SQLException ex) {
+            return true;
+        }
+    }
+
+    /**
+     * Aggiunge/Aggiorna la foto di questa recensione
+     *
+     * @param recensione
+     * @param pathFoto il path della foto da aggiungere/aggiornare
+     * @return true se la foto è stata aggiunta/aggiornata con successo, false
+     * altrimenti
+     */
+    public boolean addFoto(Recensione recensione, String pathFoto) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("UPDATE RECENSIONE SET fotoPath = ? WHERE id = ?");
+            stm.setString(1, pathFoto);
+            stm.setInt(2, recensione.getId());
+            stm.executeUpdate();
+            stm.close();
+        } catch (SQLException ex) {
+            System.out.println("Fallita aggiunta foto a ristorante su DB");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Elimina la foto di questa recensione
+     *
+     * @param recensione
+     * @return true se la foto è stata eliminata con successo, false altrimenti
+     */
+    public boolean removeFoto(Recensione recensione) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("UPDATE RECENSIONE SET fotoPath = ? WHERE id = ?");
+            stm.setString(1, null);
+            stm.setInt(2, recensione.getId());
+            stm.executeUpdate();
+            stm.close();
+            recensione.setFotoPath(null);
+        } catch (SQLException ex) {
+            System.out.println("Fallita aggiunta foto a ristorante su DB");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Per ottenere la valutazione di questa recensione come media delle
+     * valutazioni lasciate dagli altri utenti
+     *
+     * @param recensione
+     * @return float tra 0 e 5 che indica la media delle valutazioni lasciate a
+     * questa recensione
+     */
+    public float getMediaVoti(Recensione recensione) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("select rating from votorec where id_rec = ?");
+            stm.setInt(1, recensione.getId());
+            ResultSet rs = stm.executeQuery();
+            int somma = 0;
+            int count = 0;
+            while (rs.next()) {
+                somma += rs.getInt("rating");
+                count++;
+            }
+            float res = count != 0 ? ((float) somma) / count : -1;
+            stm.close();
+            return res;
+        } catch (SQLException ex) {
+            System.out.println("Fallita estrazione voti recensione");
+            return -1;
+        }
+    }
+
+    /**
+     * Per aggiungere un voto alla recensione
+     *
+     * @param recensione
+     * @param utente utente che vota la recensione
+     * @param voto intero da 0 a 5
+     * @return
+     */
+    public boolean addVoto(Recensione recensione, Utente utente, int voto) {
+        PreparedStatement stm;
+        try {
+            Date current = Date.valueOf(LocalDate.now());
+            stm = con.prepareStatement("insert into votorec (id_utente,id_rec,rating,data) values (?,?,?,?)");
+            stm.setInt(1, utente.getId());
+            stm.setInt(2, recensione.getId());
+            stm.setInt(3, voto);
+            stm.setDate(4, current);
+            stm.executeUpdate();
+            stm.close();
+        } catch (SQLException ex) {
+            return false;
+        }
+        return true;
+    }
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //
+    //
+    //
+    /////////////// METODI PER REGISTRATO ////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+
+    /**
+     * Funzione per attivare un utente registrato non ancora verificato tramite
+     * mail
+     *
+     * @param utente
+     * @return true se l'attivazione è andata a buon fine, false altrimentie
+     */
+    public boolean attiva(Utente utente) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("update utente set attivato = ? where id = ?");
+            stm.setBoolean(1, true);
+            stm.setInt(2, utente.getId());
+            stm.executeUpdate();
+            stm.close();
+            return true;
+        } catch (SQLException ex) {
+            return false;
+        }
+    }
+
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //
+    //
+    //
+    /////////////// METODI PER RISTORATORE ///////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    /*
+    * Riceve tutte le notifiche di avvenuta aggiunta foto ad uno dei ristorante dell'utente
+     */
+    ArrayList<NuovaFoto> getNuovaFotoNotifiche(Ristoratore ristoratore) {
+        ArrayList<NuovaFoto> res = new ArrayList<>();
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("select * from nuovafoto where id_dest = ?");
+            stm.setInt(1, ristoratore.getId());
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) { //DBManager manager, int id, Date data, Foto foto
+                res.add(new NuovaFoto(this, rs.getInt("id"), rs.getDate("data"), getFoto(rs.getInt("id_foto"))));
+                System.out.println("Added notifica");
+            }
+            stm.close();
+        } catch (SQLException ex) {
+            return null;
+        }
+        return res;
+    }
+
+    /*
+    * Riceve tutte le notifiche di avvenuta aggiunta recensione ad uno dei ristorante dell'utente
+     */
+    ArrayList<NuovaRecensione> getNuovaRecensioneNotifiche(Ristoratore ristoratore) {
+        ArrayList<NuovaRecensione> res = new ArrayList<>();
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("select * from nuovafoto where id_dest = ?");
+            stm.setInt(1, ristoratore.getId());
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) { //DBManager manager, int id, Date data, Foto foto
+                res.add(new NuovaRecensione(this, rs.getInt("id"), rs.getDate("data"), getRecensione(rs.getInt("id_rec"))));
+                System.out.println("Added notifica");
+            }
+            stm.close();
+        } catch (SQLException ex) {
+            return null;
+        }
+        return res;
+    }
+
+    /**
+     * Per ottenere la lista dei ristoranti posseduti da un utente
+     *
+     * @param ristoratore
+     * @return Un ArrayList dei ristoranti dell'utente
+     */
+    public ArrayList<Ristorante> getRistoranti(Ristoratore ristoratore) {
+        ArrayList<Ristorante> res = new ArrayList<>();
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("select * from Ristorante where id_utente = ?");
+            stm.setInt(1, ristoratore.getId());
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
+            }
+            stm.close();
+        } catch (SQLException ex) {
+            return null;
+        }
+        return res;
+    }
+
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //
+    //
+    //
+    //////////////////// METODI PER UTENTE ///////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    /**
+     * Funzione per cambiare i dati registrati di un utente tranne la password,
+     * per quella di veda modificaPassword()
+     *
+     * @param utente
+     * @param nome nuovo nome
+     * @param cognome nuovo cognome
+     * @param email nuova email
+     * @param avpath nuovo path della foto del profilo
+     * @return true se è andato tutto bene, false, altrimenti
+     */
+    public boolean modificaProfilo(Utente utente, String nome, String cognome, String email, String avpath) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("update utente set nome = ?, cognome = ?, email = ?, avpath = ? where id = ?");
+            stm.setString(1, nome);
+            stm.setString(2, cognome);
+            stm.setString(3, email);
+            stm.setString(4, avpath);
+            stm.setInt(5, utente.getId());
+            stm.executeUpdate();
+            stm.close();
+        } catch (SQLException ex) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Serve a permettere ad un utente di cambiare la sua password
+     *
+     * @param utente
+     * @param nuovaPass nuova password dell'utente
+     * @return true se è andato tutto bene, false altrimenti
+     */
+    public boolean cambiaPassword(Utente utente, String nuovaPass) {
+        PreparedStatement stm;
+        ResultSet rs;
+        try {
+            stm = con.prepareStatement("UPDATE utente SET password = ? where id = ?");
+            stm.setString(1, nuovaPass);
+            stm.setInt(2, utente.getId());
+            stm.executeUpdate();
+            stm.close();
+        } catch (SQLException ex) {
+            return false;
+        }
+        return true;
+    }
+
+    public int numeroRecensioni(Utente utente) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("select count(*) as tot from recensione where id_utente = ?");
+            stm.setInt(1, utente.getId());
+            int res;
+            try (ResultSet rs = stm.executeQuery()) {
+                if (rs.next()) {
+                    res = rs.getInt("tot");
+                } else {
+                    res = -1;
+                }
+            }
+            stm.close();
+            return res;
+        } catch (SQLException ex) {
+            System.out.println("Fallita estrazione numero recensioni utente");
+            return -1;
+        }
+    }
+
+    public boolean justSegnalataFoto(Utente utente, Foto foto) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("select ");
+            stm.setInt(1, utente.getId());
+            ResultSet rs = stm.executeQuery();
+            return rs.next();
+
+        } catch (SQLException ex) {
+            System.out.println("Fallita estrazione justSegnalato utente " + this);
+            return true;
+        }
+    }
+
+    /**
+     * Calcola la reputazione di un utente sulla media dei voti delle recensioni
+     * che ha lasciato
+     *
+     * @param utente
+     * @return un float tra 0 e 5 alle recensioni di questo utente
+     */
+    public float getReputazione(Utente utente) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("select avg(res.parz) as media from( select avg(voto.rating) as parz from (select * from recensione where id_utente = ?) as rec, votorec as voto where rec.id = voto.ID_REC group by rec.id) as res group by res.parz");
+            stm.setInt(1, utente.getId());
+            ResultSet rs = stm.executeQuery();
+            float res;
+            if (rs.next()) {
+                res = rs.getFloat("media");
+            } else {
+                res = -1;
+            }
+            stm.close();
+            return res;
+        } catch (SQLException ex) {
+            System.out.println("Fallita estrazione reputazione utente");
+            return -1;
+        }
+    }
+
+    /**
+     *
+     * @param utente
+     * @param ristorante ristorante per cui ci vuole controllare se l'utente ha
+     * già rilasciato una recensione
+     * @return true se questo utente ha già recensito questo ristorante, false
+     * altrimenti
+     */
+    public boolean justRecensito(Utente utente, Ristorante ristorante) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("select * from recensione where id_rist = ? AND id_utente = ?");
+            stm.setInt(1, ristorante.getId());
+            stm.setInt(2, utente.getId());
+            ResultSet rs = stm.executeQuery();
+            boolean res = rs.next();
+            stm.close();
+            return res;
+        } catch (Exception ex) {
+            return true;
+        }
+    }
+
+    /**
+     * Serve a verificare se un utente ha già votato un ristorante oggi
+     *
+     * @param utente
+     * @param ristorante il ristorante in questione
+     * @return true se l'utente ha già votato quel ristorante oggi, false
+     * altrimenti
+     */
+    public boolean justVotatoOggi(Utente utente, Ristorante ristorante) {
+        PreparedStatement stm;
+        ResultSet rs;
+        boolean res;
+        try {
+            Date now = new Date(System.currentTimeMillis());
+            stm = con.prepareStatement("select data from votorist where id_utente = ? AND id_rist = ? order by data desc { limit 1 }");
+            stm.setInt(1, utente.getId());
+            stm.setInt(2, ristorante.getId());
+            rs = stm.executeQuery();
+            if (rs.next()) {
+                Date d = rs.getDate("data");
+                res = d.getDay() == now.getDay() && d.getMonth() == now.getMonth() && d.getYear() == now.getYear();
+            } else {
+                res = false;
+            }
+            rs.close();
+            stm.close();
+        } catch (SQLException ex) {
+            return true;
+        }
+        return res;
+    }
+
+    /**
+     * Per controllare se un utente è attivato, ovvero ha confermato la sua
+     * registrazione via mail Un amministratore è sempre verificato, quindi per
+     * utenti amministratori verrà ritornato sempre true
+     *
+     * @param utente
+     * @return true se l'utente è attivato, false altrimenti
+     */
+    public boolean isActivate(Utente utente) {
+        if (utente.getClass() == Amministratore.class) {
+            return true;
+        }
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("select attivato from Utente where id = ?");
+            stm.setInt(1, utente.getId());
+            ResultSet rs = stm.executeQuery();
+            boolean res;
+
+            if (rs.next()) {
+                res = rs.getBoolean("attivato");
+
+            } else {
+                res = false;
+            }
+            stm.close();
+            return res;
+        } catch (SQLException ex) {
+            return false;
+        }
+    }
+
+    /**
+     *
+     * @param utente
+     * @param nome nome completo del ristorante
+     * @param desc descrizione del ristorante
+     * @param linkSito link al sito web del ristorante
+     * @param fascia fascia del ristorante ("Economica","Normale","Lussuoso")
+     * @param spec specialità del ristorante
+     * @param address indirizzo del ristorante
+     * @param fotoPath prima foto del ristorante (sarà possibile aggiungerne
+     * altre)
+     * @param fotoDescr descrizione della prima foto
+     * @return true se la registrazione del ristorante sul db ha avuto successo,
+     * false altrimenti
+     */
+    public boolean addRistorante(Utente utente, String nome, String desc, String linkSito, String fascia, String spec, String address, String fotoPath, String fotoDescr) {
+        PreparedStatement stm;
+        ResultSet rs;
+        try {
+
+            Luogo luogo = getLuogo(address);
+
+            stm = con.prepareStatement("INSERT INTO Luogo (address,lat,lng) VALUES (?,?,?)");
+            stm.setString(1, luogo.getAddress());
+            stm.setDouble(2, luogo.getLat());
+            stm.setDouble(3, luogo.getLng());
+            stm.executeUpdate();
+
+            stm = con.prepareStatement("select id from Luogo where lat = ? AND lng = ?");
+            stm.setDouble(1, luogo.getLat());
+            stm.setDouble(2, luogo.getLng());
+            rs = stm.executeQuery();
+            int luogo_id;
+            if (rs.next()) {
+                luogo_id = rs.getInt("id");
+            } else {
+                throw new SQLException();
+            }
+
+            stm = con.prepareStatement("INSERT INTO Ristorante (nome,descr,linksito,cucina,fascia,id_luogo) VALUES (?,?,?,?,?,?)");
+            stm.setString(1, nome);
+            stm.setString(2, desc);
+            stm.setString(3, linkSito);
+            stm.setString(4, spec);
+            stm.setString(5, fascia);
+            stm.setInt(6, luogo_id);
+            stm.executeUpdate();
+
+            stm = con.prepareStatement("select id from Ristorante where nome = ? AND linkSito = ?");
+            stm.setString(1, nome);
+            stm.setString(2, linkSito);
+            rs = stm.executeQuery();
+            Ristorante res;
+            if (rs.next()) {
+                res = getRistorante(rs.getInt("id"));
+            } else {
+                throw new SQLException();
+            }
+
+            stm = con.prepareStatement("INSERT INTO Foto (fotoPath,data,descr,id_rist,id_utente) VALUES (?,?,?,?,?)");
+            Date sqlDate = new Date(System.currentTimeMillis());
+            stm.setString(1, fotoPath);
+            stm.setDate(2, sqlDate);
+            stm.setString(3, fotoDescr);
+            stm.setInt(4, res.getId());
+            stm.setInt(5, utente.getId());
+            stm.executeUpdate();
+            rs.close();
+            stm.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Fallita registrazione ristorante su DB");
+            return false;
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        } catch (IOException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+        update();
+        return true;
+    }
+
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //
+    //
+    //    
+    ///////////////// METODI PER NUOVAFOTO ///////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    public boolean done(NuovaFoto nuovafoto) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("remove from nuovafoto where id = ?");
+            stm.setInt(1, nuovafoto.getId());
+            stm.executeUpdate();
+            stm.close();
+        } catch (SQLException ex) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Crea una nuova notifica di tipo NuovaRecensione sul DB, per notificare un
+     * utente ristoratore che un suo ristorante ha ricevuto una nuova foto
+     *
+     * @param foto la foto che è stata aggiunta al suo ristorante
+     * @return true se la notifica è stata registrata con successo sul DB, false
+     * altriementi
+     */
+    public boolean newNotNuovaFoto(Foto foto) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("insert into nuovafoto(id_foto, id_dest, data) values (?,?,?)");
+            stm.setInt(1, foto.getId());
+            stm.setInt(2, foto.getRistorante().getUtente().getId());
+            stm.setDate(3, new Date(System.currentTimeMillis()));
+            stm.executeUpdate();
+            stm.close();
+        } catch (SQLException ex) {
+            return false;
+        }
+        return true;
+    }
+
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //
+    //
+    //    
+    ///////////////// METODI PER NUOVARECENSIONE /////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    public boolean done(NuovaRecensione nuovarecensione) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("remove from nuovarecensione where id = ?");
+            stm.setInt(1, nuovarecensione.getId());
+            stm.executeUpdate();
+            stm.close();
+        } catch (SQLException ex) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Crea una nuova notifica di tipo NuovaRecensione sul DB, per notificare un
+     * utente ristoratore che un suo ristorante ha ricevuto una nuova recensione
+     *
+     * @param recensione la nuova recensione al suo ristorante
+     * @return true se la notifica è stata registrata con successo sul DB, false
+     * altriementi
+     */
+    public boolean newNotNuovaRecensione(Recensione recensione) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("insert into nuovarecensione(id_rec, id_dest, data) values (?,?,?)");
+            stm.setInt(1, recensione.getId());
+            stm.setInt(2, recensione.getRistorante().getUtente().getId());
+            stm.setDate(3, new Date(System.currentTimeMillis()));
+            stm.executeUpdate();
+            stm.close();
+        } catch (SQLException ex) {
+            return false;
+        }
+        return true;
+    }
+
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //
+    //
+    //    
+    ////////// METODI PER RICHIESTARISTORANTE ////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    public boolean done(RichiestaRistorante richiestaristorante) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("delete from richiestaristorante where id = ?");
+            stm.setInt(1, richiestaristorante.getId());
+            stm.executeUpdate();
+            stm.close();
+            return true;
+        } catch (SQLException ex) {
+            System.out.println("Fallita eliminazione notifica RichiestaRistorante");
+            return false;
+        }
+    }
+
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //
+    //
+    //    
+    //////////// METODI PER SEGNALAFOTORECENSIONE ////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    public boolean done(SegnalaFotoRecensione segnalafotorecensione) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("delete from segnalafotorecensione where id = ?");
+            stm.setInt(1, segnalafotorecensione.getId());
+            stm.executeUpdate();
+            return true;
+        } catch (SQLException ex) {
+            System.out.println("Fallita eliminazione notifica SegnalaFotoRecensione");
+            return false;
+        }
+    }
+
+    /**
+     * Crea una nuova notifica di tipo SegnalaFotoRecensione sul DB, verrà
+     * estratta poi da un utente amministratore per essere verificata. Questa
+     * notifica permette di far decidere ad un amministratore se la foto di
+     * questa recensione è da togliere o meno
+     *
+     * @param recensione la recensione la cui foto vuole essere rimossa
+     * dall'utente proprietario del ristorante sul quale è inserita la
+     * recensione
+     * @return true se la notifica è stata registrata con successo sul DB, false
+     * altriementi
+     */
+    public boolean newNotSegnalaFotoRecensione(Recensione recensione) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("insert into segnalafotorecensione(id_rec, data) values (?,?)");
+            stm.setInt(1, recensione.getId());
+            stm.setDate(2, new Date(System.currentTimeMillis()));
+            stm.executeUpdate();
+            stm.close();
+        } catch (SQLException ex) {
+            return false;
+        }
+        return true;
+    }
+
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //
+    //
+    //    
+    /////////// METODI PER SEGNALAFOTORISTORANTE /////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    public boolean done(SegnalaFotoRistorante segnalafotoristorante) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("delete from segnalafotoristorante where id = ?");
+            stm.setInt(1, segnalafotoristorante.getId());
+            stm.executeUpdate();
+            return true;
+        } catch (SQLException ex) {
+            System.out.println("Fallita eliminazione notifica SegnalaFotoRistorante");
+            return false;
+        }
+    }
+
+    /**
+     * Crea una nuova notifica di tipo SegnalaFotoRistorante sul DB, verrà
+     * estratta poi da un utente amministratore per essere verificata. Permette
+     * ad un utente Ristoratore di segnalare una fotografia non consona alla
+     * pagina del suo ristorante
+     *
+     * @param foto la fotografia del ristorante che si vuole segnalare
+     * @return true se la notifica è stata registrata con successo sul DB, false
+     * altriementi
+     */
+    public boolean newNotSegnalaFotoRistorante(Foto foto) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("insert into segnalafotoristorante(id_foto, data) values (?,?)");
+            stm.setInt(1, foto.getId());
+            stm.setDate(2, new Date(System.currentTimeMillis()));
+            stm.executeUpdate();
+            stm.close();
+        } catch (SQLException ex) {
+            return false;
+        }
+        return true;
+    }
+
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //
+    //
+    //    
+    /////////// METODI PER COMMENTORECENSIONE ////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    public boolean done(CommentoRecensione commentorecensione) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("delete from rispostarecensione where id = ?");
+            stm.setInt(1, commentorecensione.getId());
+            stm.executeUpdate();
+            return true;
+        } catch (SQLException ex) {
+            System.out.println("Fallita eliminazione notifica CommentoRecensione");
+            return false;
+        }
+    }
+
+    /**
+     * Crea una nuova notifica di tipo CommentoRecensione sul DB, verrà estratta
+     * poi da un utente amministratore per essere verificata
+     *
+     * @param recensione la recensione a cui un utente ristoratore vuole
+     * aggiungere il suo commento
+     * @param commento il commento da aggiungere alla recensione
+     * @return true se la notifica è stata registrata con successo sul DB, false
+     * altriementi
+     */
+    public boolean newNotCommentoRecensione(Recensione recensione, String commento) {
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement("insert into RispostaRecensione(id_rec, commento, data) values (?,?,?)");
+            stm.setInt(1, recensione.getId());
+            stm.setString(2, commento);
+            stm.setDate(3, new Date(System.currentTimeMillis()));
+            stm.executeUpdate();
+            stm.close();
+        } catch (SQLException ex) {
+            return false;
+        }
+        return true;
+    }
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
 }

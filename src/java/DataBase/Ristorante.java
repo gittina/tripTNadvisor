@@ -5,21 +5,10 @@
  */
 package DataBase;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.Serializable;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Objects;
-import net.glxn.qrgen.QRCode;
-import net.glxn.qrgen.image.ImageType;
 
 /**
  *
@@ -92,7 +81,7 @@ public class Ristorante implements Serializable {
      *
      * @return
      */
-    public Utente getUtente() throws NullPointerException {
+    public Utente getUtente() {
         if (utente != null) {
             return (Ristoratore) utente;
         } else {
@@ -133,7 +122,6 @@ public class Ristorante implements Serializable {
         this.cucina = cucina;
         this.utente = utente;
         this.manager = manager;
-
         this.visite = visite;
 
     }
@@ -142,15 +130,8 @@ public class Ristorante implements Serializable {
      * Aggiunge una visita al ristorante
      */
     public void addVisita() {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("update ristorante set visite = visite+1 where id = ?");
-            stm.setInt(1, id);
-            stm.executeUpdate();
-            stm.close();
-            visite++;
-        } catch (Exception ex) {
-        }
+        manager.addVisita(this);
+        visite++;
     }
 
     /**
@@ -163,28 +144,9 @@ public class Ristorante implements Serializable {
      * @param fascia nuova fascia
      * @return true se i dati sono stati aggiornati correttamente, false
      * altrimenti
-     * @throws IOException
      */
-    public boolean updateData(String nome, String address, String linksito, String descr, String cucina, String fascia) throws IOException {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("update ristorante set nome = ?, linksito = ?, descr = ?, cucina = ?, fascia = ? where id = ?");
-            stm.setString(1, nome);
-            stm.setString(2, linksito);
-            stm.setString(3, descr);
-            stm.setString(4, cucina);
-            stm.setString(5, fascia);
-            stm.setInt(6, id);
-            stm.executeUpdate();
-            setLuogo(address);
-            stm.close();
-
-        } catch (SQLException ex) {
-            System.out.println("Update non riuscito del profilo");
-            return false;
-        }
-        manager.update();
-        return true;
+    public boolean updateData(String nome, String address, String linksito, String descr, String cucina, String fascia) {
+        return manager.updateData(this, nome, address, linksito, descr, cucina, fascia);
     }
 
     @Override
@@ -242,45 +204,9 @@ public class Ristorante implements Serializable {
      * @param address l'indirizzo del ristorante
      * @return true se la posizione del ristorante è stata impostata
      * correttamente, false altrimenti
-     * @throws SQLException
-     * @throws FileNotFoundException
-     * @throws IOException
      */
-    public boolean setLuogo(String address) throws SQLException, FileNotFoundException, IOException {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("delete from Luogo where id = (select id_luogo from ristorante where id = ?)");
-            stm.executeUpdate();
-
-            Luogo luogo = manager.getLuogo(address);
-
-            stm = con.prepareStatement("INSERT INTO Luogo (address,lat,lng) VALUES (?,?,?)");
-            stm.setString(1, luogo.getAddress());
-            stm.setDouble(2, luogo.getLat());
-            stm.setDouble(3, luogo.getLng());
-            stm.executeUpdate();
-
-            stm = con.prepareStatement("select id from Luogo where lat = ? AND lng = ?");
-            stm.setDouble(1, luogo.getLat());
-            stm.setDouble(2, luogo.getLng());
-            ResultSet rs = stm.executeQuery();
-            int luogo_id;
-            if (rs.next()) {
-                luogo_id = rs.getInt("id");
-            } else {
-                throw new SQLException();
-            }
-
-            stm = con.prepareStatement("update ristorante set id_luogo = ? where id = ?");
-            stm.setInt(1, luogo_id);
-            stm.setInt(2, id);
-            stm.executeUpdate();
-            stm.close();
-        } catch (SQLException ex) {
-            System.out.println("Impossibile modificare luogo");
-            return false;
-        }
-        return true;
+    public boolean setLuogo(String address) {
+        return manager.setLuogo(this, address);
     }
 
     /**
@@ -288,27 +214,9 @@ public class Ristorante implements Serializable {
      * valutazioni lasciate dagli utenti
      *
      * @return un float tra 0 e 5 che valuta la qualità del ristorante
-     * @throws SQLException
      */
-    public float getVoto() throws SQLException {
-        PreparedStatement stm;
-        ResultSet rs;
-        try {
-            stm = con.prepareStatement("SELECT avg(1.0 * rating) AS mediavoto FROM votorist WHERE id_rist=?");
-            stm.setInt(1, id);
-            rs = stm.executeQuery();
-            float res;
-            if (rs.next()) {
-                res = rs.getFloat("mediavoto");
-            } else {
-                res = 0;
-            }
-            stm.close();
-            return res;
-        } catch (SQLException ex) {
-            System.out.println("Fallita estrazione voto");
-            return 0;
-        }
+    public float getVoto() {
+        return manager.getVoto(this);
     }
 
     /**
@@ -316,27 +224,9 @@ public class Ristorante implements Serializable {
      * ristorante
      *
      * @return la posizione in classifica del ristorante
-     * @throws SQLException
      */
-    public int getPosizioneClassifica() throws SQLException {
-        PreparedStatement stm;
-        ResultSet rs;
-        try {
-            stm = con.prepareStatement("select avg(1.0 * votorist.rating) as media, ristorante.ID as id_rist from (Ristorante) Left Join (votorist) on (ristorante.ID = votorist.ID_RIST) group by (ristorante.ID) order by media asc");
-            rs = stm.executeQuery();
-            int counter = 0;
-            while (rs.next()) {
-                counter++;
-                if (rs.getInt("id_rist") == id) {
-                    return counter;
-                }
-            }
-            stm.close();
-        } catch (SQLException ex) {
-            return -1;
-        }
-
-        return -1;
+    public int getPosizioneClassifica() {
+        return manager.getPosizioneClassifica(this);
     }
 
     /**
@@ -346,68 +236,19 @@ public class Ristorante implements Serializable {
      * @param inizio Time dell'inizio dell'orario di apertura
      * @param fine Time della fine dell'orario di apertura
      * @return
-     * @throws SQLException
      */
-    public boolean addTimes(int giorno, Time inizio, Time fine) throws SQLException {
-        System.out.println("Inizio aggiunta times");
-        PreparedStatement stm;
-        ResultSet rs;
-        try {
-            stm = con.prepareStatement("select * from day where id_rist = ? AND giorno = ?");
-            stm.setInt(1, this.id);
-            stm.setInt(2, giorno);
-            rs = stm.executeQuery();
-            System.out.println("ok");
-            if (rs.next()) {
-                System.out.println("ok");
-                Day d = new Day(rs.getInt("id"), manager.getRistorante(rs.getInt("id_rist")), rs.getInt("giorno"), manager);
-                d.addTimes(inizio, fine);
-            } else if (addDay(giorno)) {
-                stm = con.prepareStatement("select * from day where id_rist = ? AND giorno = ?");
-                stm.setInt(1, this.id);
-                stm.setInt(2, giorno);
-                rs = stm.executeQuery();
-                Day d = new Day(rs.getInt("id"), manager.getRistorante(rs.getInt("id_rist")), rs.getInt("giorno"), manager);
-                d.addTimes(inizio, fine);
-            }
-            rs.close();
-            stm.close();
-        } catch (SQLException ex) {
-            System.out.println("problema aggiunta times");
-            return false;
-        }
-        return true;
+    public boolean addTimes(int giorno, Time inizio, Time fine) {
+        return manager.addTimesToRistorante(this, giorno, inizio, fine);
     }
 
-    public boolean addDay(int giorno) {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("insert into day (giorno, id_rist) values (?,?)");
-            stm.setInt(1, giorno);
-            stm.setInt(2, this.id);
-            stm.executeUpdate();
-            stm.close();
-        } catch (SQLException ex) {
-            System.out.println("problema aggiunta day");
-            return false;
-        }
-
-        return true;
+    public boolean addDays(int giorno) {
+        return manager.addDays(this, giorno);
     }
 
     public boolean removeTimes(int id_times) {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("delete from times where id = ?");
-            stm.setInt(1, id_times);
-            stm.executeUpdate();
-            stm.close();
-        } catch (SQLException ex) {
-            System.out.println("problema rimozione times con id: " + id_times);
-            return false;
-        }
-        return true;
+        return manager.removeTimes(id_times);
     }
+    
 
     /**
      * Per ricevere l'oggetto Luogo riferito a questo ristorante
@@ -415,21 +256,7 @@ public class Ristorante implements Serializable {
      * @return L'oggetto Luogo riferito a questo ristorante
      */
     public Luogo getLuogo() {
-        PreparedStatement stm;
-        ResultSet rs;
-        Luogo res = null;
-        try {
-            stm = con.prepareStatement("select * from Luogo, Ristorante where ristorante.id = ? AND ristorante.id_luogo = luogo.id");
-            stm.setInt(1, id);
-            rs = stm.executeQuery();
-            if (rs.next()) {
-                res = new Luogo(rs.getDouble("lat"), rs.getDouble("lng"), rs.getString("address"));
-            }
-            stm.close();
-        } catch (SQLException ex) {
-            System.out.println("problema estrazione luogo");
-        }
-        return res;
+        return manager.getLuogo(this);
     }
 
     public ArrayList<Ristorante> getVicini() {
@@ -440,35 +267,9 @@ public class Ristorante implements Serializable {
      * Per ottenere tutti gli orari di questo ristorante
      *
      * @return tutti gli orari del ristorante
-     * @throws SQLException
      */
-    public ArrayList<Day> getDay() throws SQLException {
-        PreparedStatement stm;
-        ArrayList<Day> res = new ArrayList<>();
-        ResultSet rs;
-
-        try {
-            stm = con.prepareStatement("SELECT * FROM Day WHERE id_rist = ?");
-            stm.setInt(1, id);
-            rs = stm.executeQuery();
-
-            while (rs.next()) {
-                res.add(new Day(rs.getInt("id"), manager.getRistorante(rs.getInt("id_rist")), rs.getInt("giorno"), manager));
-            }
-            rs.close();
-            stm.close();
-        } catch (SQLException ex) {
-            System.out.println("Fallita estrazione days");
-            return null;
-        }
-        Comparator c = (Comparator<Day>) new Comparator<Day>() {
-            @Override
-            public int compare(Day o1, Day o2) {
-                return o1.getGiorno() > o2.getGiorno() ? 1 : -1;
-            }
-        };
-        res.sort(c);
-        return res;
+    public ArrayList<Days> getDays() {
+        return manager.getDays(this);
     }
 
     /**
@@ -476,38 +277,9 @@ public class Ristorante implements Serializable {
      * ristorante
      *
      * @return Lista di Recensioni
-     * @throws SQLException
      */
-    public ArrayList<Recensione> getRecensioni() throws SQLException {
-        PreparedStatement stm;
-        ArrayList<Recensione> res = new ArrayList<>();
-        ResultSet rs;
-
-        try {
-            stm = con.prepareStatement("SELECT * FROM RECENSIONE WHERE id_rist = ?");
-            stm.setString(1, String.valueOf(id));
-            rs = stm.executeQuery();
-
-            while (rs.next()) {
-                res.add(new Recensione(rs.getInt("id"), this, manager.getUtente(rs.getInt("id_utente")), rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), manager));
-            }
-            Comparator c = (Comparator<Recensione>) (Recensione o1, Recensione o2) -> {
-                if (o1.getData().after(o2.getData())) {
-                    return -1;
-                } else if (o1.getData().equals(o2.getData())) {
-                    return 0;
-                } else {
-                    return 1;
-                }
-            };
-            res.sort(c);
-            rs.close();
-            stm.close();
-        } catch (SQLException ex) {
-            System.out.println("Fallita estrazione recensioni");
-            return null;
-        }
-        return res;
+    public ArrayList<Recensione> getRecensioni() {
+        return manager.getRecensioni(this);
     }
 
     /**
@@ -517,35 +289,9 @@ public class Ristorante implements Serializable {
      * @param testo testo o corpo della recensione
      * @param utente utente che scrive la recensione
      * @return l'oggetto recensione appena creato
-     * @throws SQLException
      */
-    public Recensione addRecensione(String titolo, String testo, Utente utente) throws SQLException {
-        Recensione res;
-        PreparedStatement stm;
-        ResultSet rs;
-        Date current = Date.valueOf(LocalDate.now());
-        try {
-            stm = con.prepareStatement("INSERT INTO RECENSIONE (titolo,testo,data,id_utente,id_rist) VALUES (?,?,?,?,?)");
-            stm.setString(1, titolo);
-            stm.setString(2, testo);
-            stm.setDate(3, current);
-            stm.setInt(4, utente.id);
-            stm.setInt(5, id);
-            stm.executeUpdate();
-
-            stm = con.prepareStatement("SELECT * FROM RECENSIONE where id_utente = ? AND id_rist = ? ");
-            stm.setInt(1, utente.id);
-            stm.setInt(2, id);
-            rs = stm.executeQuery();
-            rs.next();
-            res = new Recensione(rs.getInt("id"), this, utente, rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), manager);
-            rs.close();
-            stm.close();
-        } catch (SQLException ex) {
-            System.out.println("Fallita estrazione recensione su DB" + ex.toString());
-            return null;
-        }
-        return res;
+    public Recensione addRecensione(String titolo, String testo, Utente utente) {
+        return manager.addRecensione(this, titolo, testo, utente);
     }
 
     /**
@@ -555,24 +301,9 @@ public class Ristorante implements Serializable {
      * @param descr piccola descrizione della foto
      * @param utente utente che aggiunge la foto
      * @return true se l'aggiunta ha avuto successo, false altrimenti
-     * @throws SQLException
      */
-    public boolean addFoto(String path, String descr, Utente utente) throws SQLException {
-        PreparedStatement stm = con.prepareStatement("INSERT INTO FOTO (fotopath, descr, data, id_rist, id_utente) VALUES (?,?,?,?,?)");
-        try {
-            stm.setString(1, path);
-            stm.setString(2, descr);
-            Date current = Date.valueOf(LocalDate.now());
-            stm.setDate(3, current);
-            stm.setInt(4, id);
-            stm.setInt(5, utente.id);
-            stm.executeUpdate();
-            stm.close();
-            return true;
-        } catch (SQLException ex) {
-            System.out.println("Fallita aggiunta foto a ristorante su DB");
-            return false;
-        }
+    public boolean addFoto(String path, String descr, Utente utente) {
+        return manager.addFoto(this, path, descr, utente);
     }
 
     /**
@@ -582,17 +313,7 @@ public class Ristorante implements Serializable {
      * @return true se la rimozione ha avuto successo, false altrimenti
      */
     public boolean removeFoto(Foto foto) {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("DELETE FROM FOTO WHERE id = ?");
-            stm.setInt(1, foto.getId());
-            stm.executeUpdate();
-            stm.close();
-            return true;
-        } catch (SQLException ex) {
-            System.out.println("Fallita rimozione foto id: " + id);
-            return false;
-        }
+        return manager.removeFoto(this,foto);
     }
 
     /**
@@ -600,33 +321,9 @@ public class Ristorante implements Serializable {
      * questo ristorante
      *
      * @return ArrayList di foto di questo ristorante
-     * @throws SQLException
      */
-    public ArrayList<Foto> getFoto() throws SQLException {
-        ArrayList<Foto> res = new ArrayList<>();
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("select * from foto where id_rist = ?");
-            stm.setInt(1, id);
-            ResultSet rs = stm.executeQuery();
-            while (rs.next()) { //int id, String fotopath, String descr, Date data
-                res.add(new Foto(rs.getInt("id"), rs.getString("fotopath"), rs.getString("descr"), rs.getDate("data"), manager.getUtente(rs.getInt("id_utente")), manager.getRistorante(rs.getInt("id_rist")), manager));
-            }
-            Comparator c = (Comparator<Foto>) (Foto o1, Foto o2) -> {
-                if (o1.getData().after(o2.getData())) {
-                    return -1;
-                } else if (o1.getData().equals(o2.getData())) {
-                    return 0;
-                } else {
-                    return 1;
-                }
-            };
-            res.sort(c);
-            stm.close();
-        } catch (SQLException ex) {
-            return null;
-        }
-        return res;
+    public ArrayList<Foto> getFoto() {
+        return manager.getFoto(this);
     }
 
     /**
@@ -634,39 +331,9 @@ public class Ristorante implements Serializable {
      * Orari di apertura
      *
      * @return il path per accedere all'immagine creata
-     * @throws SQLException
      */
-    public String creaQR() throws SQLException {
-
-        String pos = "/qr/" + name.replace(' ', '_') + ".jpg";
-        String savePath = manager.completePath + pos;
-
-        ArrayList<Day> days = getDay();
-
-        String forQR = "Nome ristorante: " + name.trim() + "\n" + "Indirizzo: " + getLuogo().getAddress() + "\n";
-
-        for (Day o : days) {
-            for (Times t : o.getTimes()) {
-                forQR = forQR + t.toString();
-            }
-        }
-
-        ByteArrayOutputStream out = QRCode.from(forQR).to(ImageType.JPG).stream();
-        FileOutputStream fout;
-        try {
-            fout = new FileOutputStream(new File(savePath));
-            fout.write(out.toByteArray());
-
-            fout.flush();
-            fout.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("Errore: " + e.toString());
-            System.out.println("Errore nella creazione dell'immagine QR");
-        } catch (IOException e) {
-            System.out.println("Errore nella creazione QR");
-        }
-
-        return pos;
+    public String creaQR() {
+           return manager.creaQR(this);
     }
 
     /**
@@ -677,24 +344,11 @@ public class Ristorante implements Serializable {
      * @return true se il voto è stato aggiunto con successo, false altrimenti
      */
     public boolean addVoto(Utente user, int rating) {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("INSERT INTO votorist (id_utente, id_rist, data, rating) VALUES (?,?,?,?)");
-            stm.setInt(1, user.getId());
-            stm.setInt(2, id);
-            Date current = Date.valueOf(LocalDate.now());
-            if (user.justVotatoOggi(this)) {
-                return false;
-            }
-            stm.setDate(3, current);
-            stm.setInt(4, rating);
-            stm.executeUpdate();
-            stm.close();
-            return true;
-        } catch (SQLException ex) {
-            System.out.println("Fallita aggiunta voto");
-            return false;
-        }
+        return manager.addVoto(this, user, rating);
     }
 
+    //da lavorare
+    public boolean nowOpen() {
+        return true;
+    }
 }

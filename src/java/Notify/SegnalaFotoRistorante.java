@@ -49,16 +49,7 @@ public class SegnalaFotoRistorante extends Notifica {
 
     @Override
     public boolean done() {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("delete from segnalafotoristorante where id = ?");
-            stm.setInt(1, id);
-            stm.executeUpdate();
-            return true;
-        } catch (SQLException ex) {
-            System.out.println("Fallita eliminazione notifica SegnalaFotoRistorante");
-            return false;
-        }
+        return manager.done(this);
     }
 
     @Override

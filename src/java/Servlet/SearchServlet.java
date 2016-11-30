@@ -54,22 +54,18 @@ public class SearchServlet extends HttpServlet {
 
                 case "pos":
                     c = (Comparator<Ristorante>) (Ristorante o1, Ristorante o2) -> {
-                        try {
-                            int res1;
-                            if (o1.getPosizioneClassifica() > o2.getPosizioneClassifica()) {
-                                res1 = -1;
-                            } else if (o1.getPosizioneClassifica() < o2.getPosizioneClassifica()) {
-                                res1 = 1;
-                            } else {
-                                res1 = 0;
-                            }
-                            if ("1".equals(ordine)) {
-                                return res1;
-                            } else {
-                                return -res1;
-                            }
-                        } catch (SQLException ex) {
-                            return 0;
+                        int res1;
+                        if (o1.getPosizioneClassifica() > o2.getPosizioneClassifica()) {
+                            res1 = -1;
+                        } else if (o1.getPosizioneClassifica() < o2.getPosizioneClassifica()) {
+                            res1 = 1;
+                        } else {
+                            res1 = 0;
+                        }
+                        if ("1".equals(ordine)) {
+                            return res1;
+                        } else {
+                            return -res1;
                         }
                     };
                     res.sort(c);

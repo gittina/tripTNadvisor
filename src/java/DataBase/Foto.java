@@ -5,17 +5,15 @@
  */
 package DataBase;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  *
  * @author Luca
  */
-public class Foto {
+public class Foto implements Serializable {
     private final DBManager manager;
     private final Connection con;
     /**
@@ -82,19 +80,7 @@ public class Foto {
     }
     
     public boolean justSegnalato(){
-        PreparedStatement stm;
-        ResultSet rs;
-        try{
-            stm = con.prepareStatement("select * from segnalafotoristorante where id_foto = ?");
-            stm.setInt(1, id);
-            rs = stm.executeQuery();
-            boolean res = rs.next();
-            rs.close();
-            stm.close();
-            return res;
-        } catch (SQLException ex) {
-            return true;
-        }
+        return manager.justSegnalato(this);
     }
     
     /**
