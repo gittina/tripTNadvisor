@@ -10,9 +10,7 @@ import Notify.Notifica;
 import Notify.RichiestaRistorante;
 import Notify.SegnalaFotoRecensione;
 import Notify.SegnalaFotoRistorante;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -47,81 +45,28 @@ public class Amministratore extends Utente {
     * Per ricevere tutte le notifiche di avvenuto commento a recensione
     */
     ArrayList<CommentoRecensione> getCommentoRecensioneNotifiche() {
-        ArrayList<CommentoRecensione> res = new ArrayList<>();
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("select * from rispostarecensione");
-            ResultSet rs = stm.executeQuery();
-            while (rs.next()) {
-                res.add(new CommentoRecensione(manager, rs.getInt("id"), manager.getRecensione(rs.getInt("id_rec")), rs.getString("commento"), rs.getDate("data")));
-                System.out.println("Added notifica");
-            }
-            stm.close();
-        } catch (SQLException ex) {
-            return null;
-        }
-        return res;
+        return manager.getCommentoRecensioneNotifiche();
     }
+    
 
     /*
     * Per ricevere tutte le notifiche di avvenuta richiesta di possesso ristorante da parte di un utente
     */
     ArrayList<RichiestaRistorante> getReclamaRistoranteNotifiche() {
-        ArrayList<RichiestaRistorante> res = new ArrayList<>();
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("select * from richiestaristorante");
-            ResultSet rs = stm.executeQuery();
-            while (rs.next()) {
-                res.add(new RichiestaRistorante(manager, rs.getInt("id"), rs.getDate("data"), manager.getUtente(rs.getInt("id_utente")), manager.getRistorante(rs.getInt("id_rist"))));
-                System.out.println("Added notifica");
-            }
-            stm.close();
-        } catch (SQLException ex) {
-            return null;
-        }
-        return res;
+        return manager.getReclamaRistoranteNotifiche();
     }
     
     /*
     * Per ricevere tutte le notifiche di avvenuta segnalazione foto di un ristorante da parte del proprietario
     */
     ArrayList<SegnalaFotoRistorante> getSegnalaFotoRistoranteNotifiche() {
-        ArrayList<SegnalaFotoRistorante> res = new ArrayList<>();
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("select * from segnalafotoristorante");
-            ResultSet rs = stm.executeQuery();
-            while (rs.next()) { 
-                Foto f = manager.getFoto(rs.getInt("id_foto"));//DBManager manager, int id, Date data, Ristorante ristorante, Foto foto
-                res.add(new SegnalaFotoRistorante(manager, rs.getInt("id"), rs.getDate("data"), manager.getRistorante(f.getRistorante().getId()), f));
-                System.out.println("Added notifica");
-            }
-            stm.close();
-        } catch (SQLException ex) {
-            return null;
-        }
-        return res;
+        return manager.getSegnalaFotoRistoranteNotifiche();
     }
     
     /*
     * Per ricevere tutte le notifiche di avvenuta segnalazione della foto di una recensione da parte del proprietario del ristorante a cui riferisce la recensione
     */
     ArrayList<SegnalaFotoRecensione> getSegnalaFotoRecensioneNotifiche() {
-        ArrayList<SegnalaFotoRecensione> res = new ArrayList<>();
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("select * from segnalafotorecensione");
-            ResultSet rs = stm.executeQuery();
-            while (rs.next()) { 
-                res.add(new SegnalaFotoRecensione(manager, rs.getInt("id"), rs.getDate("data"), manager.getRecensione(rs.getInt("id_rec"))));
-                System.out.println("Added notifica");
-            }
-            stm.close();
-        } catch (SQLException ex) {
-            return null;
-        }
-        return res;
+        return manager.getSegnalaFotoRecensioneNotifiche();
     }
-
 }

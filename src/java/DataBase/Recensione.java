@@ -6,7 +6,6 @@
 package DataBase;
 
 import java.sql.*;
-import java.time.LocalDate;
 
 /**
  *
@@ -23,6 +22,7 @@ public class Recensione {
     private final Connection con;
     private final Ristorante ristorante;
     private final Utente utente;
+    private String fotoPath;
 
     /**
      * Per ottenere l'utente che ha scritto questa recensione
@@ -47,8 +47,12 @@ public class Recensione {
     public void setFotoPath(String fotoPath) {
         this.fotoPath = fotoPath;
     }
+
+    public void setCommento(String commento) {
+        this.commento = commento;
+    }
     
-    protected String fotoPath;
+    
 
     /**
      * Costruttore di una Recensione
@@ -81,18 +85,7 @@ public class Recensione {
      * @return true se il commento è stato inserito/aggiuornato con successo, false altrimenti
      */
     public boolean addComment(String commento) {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("UPDATE RECENSIONE SET commento = ? WHERE id = ?");
-            stm.setString(1, commento);
-            stm.setInt(2, id);
-            stm.executeUpdate();
-            stm.close();
-            this.commento = commento;
-            return true;
-        } catch (SQLException ex) {
-            return false;
-        }
+        return manager.addComment(this, commento);
     }
 
     /**
@@ -104,40 +97,16 @@ public class Recensione {
     }
 
     public boolean justSegnalato(){
-        PreparedStatement stm;
-        ResultSet rs;
-        try{
-            stm = con.prepareStatement("select * from segnalafotorecensione where id_rec = ?");
-            stm.setInt(1, id);
-            rs = stm.executeQuery();
-            boolean res = rs.next();
-            rs.close();
-            stm.close();
-            return res;
-        } catch (SQLException ex) {
-            return true;
-        }
+        return manager.justSegnalato(this);
     }
     
     /**
      * Aggiunge/Aggiorna la foto di questa recensione
      * @param pathFoto il path della foto da aggiungere/aggiornare
      * @return true se la foto è stata aggiunta/aggiornata con successo, false altrimenti
-     * @throws SQLException
      */
-    public boolean addFoto(String pathFoto) throws SQLException {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("UPDATE RECENSIONE SET fotoPath = ? WHERE id = ?");
-            stm.setString(1, pathFoto);
-            stm.setInt(2, id);
-            stm.executeUpdate();
-            stm.close();
-        } catch (SQLException ex) {
-            System.out.println("Fallita aggiunta foto a ristorante su DB");
-            return false;
-        }
-        return true;
+    public boolean addFoto(String pathFoto) {
+        return manager.addFoto(this, pathFoto);
     }
     
     /**
@@ -145,19 +114,7 @@ public class Recensione {
      * @return true se la foto è stata eliminata con successo, false altrimenti
      */
     public boolean removeFoto(){
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("UPDATE RECENSIONE SET fotoPath = ? WHERE id = ?");
-            stm.setString(1, null);
-            stm.setInt(2, id);
-            stm.executeUpdate();
-            stm.close();
-            fotoPath = null;
-        } catch (SQLException ex) {
-            System.out.println("Fallita aggiunta foto a ristorante su DB");
-            return false;
-        }
-        return true;
+        return manager.removeFoto(this);
     }
 
     /**
@@ -165,24 +122,7 @@ public class Recensione {
      * @return float tra 0 e 5 che indica la media delle valutazioni lasciate a questa recensione
      */
     public float getMediaVoti() {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("select rating from votorec where id_rec = ?");
-            stm.setInt(1, id);
-            ResultSet rs = stm.executeQuery();
-            int somma = 0;
-            int count = 0;
-            while (rs.next()) {
-                somma += rs.getInt("rating");
-                count++;
-            }
-            float res = count != 0 ? ((float) somma) / count : -1;
-            stm.close();
-            return res;
-        } catch (SQLException ex) {
-            System.out.println("Fallita estrazione voti recensione");
-            return -1;
-        }
+        return manager.getMediaVoti(this);
     }
 
     /**
@@ -229,19 +169,6 @@ public class Recensione {
      * @return
      */
     public boolean addVoto(Utente utente, int voto) {
-        PreparedStatement stm;
-        try {
-            Date current = Date.valueOf(LocalDate.now());
-            stm = con.prepareStatement("insert into votorec (id_utente,id_rec,rating,data) values (?,?,?,?)");
-            stm.setInt(1, utente.getId());
-            stm.setInt(2, id);
-            stm.setInt(3, voto);
-            stm.setDate(4, current);
-            stm.executeUpdate();
-            stm.close();
-        } catch (SQLException ex) {
-            return false;
-        }
-        return true;
+        return manager.addVoto(this, utente, voto);
     }
 }

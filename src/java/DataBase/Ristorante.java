@@ -8,8 +8,6 @@ package DataBase;
 import java.io.Serializable;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Objects;
 
 /**
@@ -216,7 +214,6 @@ public class Ristorante implements Serializable {
      * valutazioni lasciate dagli utenti
      *
      * @return un float tra 0 e 5 che valuta la qualità del ristorante
-     * @throws SQLException
      */
     public float getVoto() {
         return manager.getVoto(this);
@@ -241,7 +238,7 @@ public class Ristorante implements Serializable {
      * @return
      */
     public boolean addTimes(int giorno, Time inizio, Time fine) {
-        return manager.addTimes(this, giorno, inizio, fine);
+        return manager.addTimesToRistorante(this, giorno, inizio, fine);
     }
 
     public boolean addDays(int giorno) {

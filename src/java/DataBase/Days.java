@@ -5,9 +5,7 @@
  */
 package DataBase;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.io.Serializable;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -17,13 +15,12 @@ import java.util.Comparator;
  * @author Luca
  */
 //giorni della settimana da 1 a 7
-public class Days {
+public class Days implements Serializable{
 
     private final DBManager manager;
     private final int giorno;
     private final int id;
     private final Ristorante ristorante;
-    private final ArrayList<Times> tempi;
 
     public int getId() {
         return id;
@@ -43,8 +40,6 @@ public class Days {
         this.id = id;
         this.ristorante = ristorante;
         this.manager = manager;
-        tempi = new ArrayList<>();
-        update();
     }
 
     /**
@@ -76,46 +71,19 @@ public class Days {
         return giorno;
     }
 
-    private void update() {
-        PreparedStatement stm;
-        ResultSet rs;
-
-        try {
-            stm = manager.con.prepareStatement("SELECT * from Times WHERE id_days = ?");
-            stm.setInt(1, id);
-            rs = stm.executeQuery();
-
-            while (rs.next()) {
-                tempi.add(new Times(rs.getInt("id"), rs.getTime("apertura"), rs.getTime("chiusura")));
-            }
-            rs.close();
-            stm.close();
-        } catch (SQLException ex) {
-            System.out.println("Fallita estrazione tempi");
-        }
-    }
-
     public ArrayList<Times> getTimes() {
+        ArrayList<Times> res = manager.getTimes(this);
         Comparator c = (Comparator<Times>) new Comparator<Times>() {
             @Override
             public int compare(Times o1, Times o2) {
                 return o1.getApertura().after(o2.getApertura()) ? 1 : -1;
             }
         };
-        tempi.sort(c);
-        return tempi;
+        res.sort(c);
+        return res;
     }
 
-    public void addTimes(Time apertura, Time chiusura) {
-        PreparedStatement stm;
-        try {
-            stm = manager.con.prepareStatement("insert into times (id_days,apertura,chiusura) values (?,?,?)");
-            stm.setInt(1, this.id);
-            stm.setTime(2, apertura);
-            stm.setTime(3, chiusura);
-            stm.executeUpdate();
-        } catch (SQLException ex){
-            System.out.println("Failed to add times to days");
-        }
+    public boolean addTimes(Time apertura, Time chiusura) {
+        return manager.addTimes(this, apertura, chiusura);
     }
 }

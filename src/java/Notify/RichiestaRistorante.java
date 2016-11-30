@@ -53,17 +53,7 @@ public class RichiestaRistorante extends Notifica{
 
     @Override
     public boolean done(){
-        PreparedStatement stm;
-        try{
-            stm = con.prepareStatement("delete from richiestaristorante where id = ?");
-            stm.setInt(1, id);
-            stm.executeUpdate();
-            stm.close();
-            return true;
-        } catch(SQLException ex){
-            System.out.println("Fallita eliminazione notifica RichiestaRistorante");
-            return false;
-        }
+        return manager.done(this);
     }
     
     @Override

@@ -43,16 +43,7 @@ public class NuovaRecensione extends Notifica {
 
     @Override
     public boolean done() {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("remove from nuovarecensione where id = ?");
-            stm.setInt(1, id);
-            stm.executeUpdate();
-            stm.close();
-        } catch (SQLException ex) {
-            return false;
-        }
-        return true;
+        return manager.done(this);
     }
 
     @Override

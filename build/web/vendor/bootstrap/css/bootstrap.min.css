@@ -10,8 +10,8 @@
 
 .peopleCarouselImg {
     width: auto;
-    height: 450px;
     max-height: 450px;
+    min-height: 450px;
 }
 
 div#gmaps-canvas {

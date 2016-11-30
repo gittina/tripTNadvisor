@@ -420,15 +420,15 @@
                                 <div class="col-md-3">
                                     <div class="caption">
                                         <div class="caption-content">
-                                            <label class="control-form"><fmt:message key="titolo"/></label>
+                                            <label class="control-form"><b><fmt:message key="titolo"/></b></label>
                                             <br>
                                             <label class="control-form"><c:out value="${rec.getTitolo()}"/></label>
                                             <br>
-                                            <label class="control-form"><fmt:message key="testo"/></label>
+                                            <label class="control-form"><b><fmt:message key="testo"/></b></label>
                                             <br>
                                             <label class="control-form"><i><c:out value="${rec.getTesto()}"/></i></label>
                                             <br><br>
-                                            <label class="control-form"><fmt:message key="king.response"/></label>
+                                            <label class="control-form"><b><fmt:message key="king.response"/></b></label>
                                             <br>
                                             <label class="control-form"><i><c:out value="${rec.getCommento()}"/></i></label>
                                         </div>
