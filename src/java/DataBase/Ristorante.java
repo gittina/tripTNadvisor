@@ -5,19 +5,12 @@
  */
 package DataBase;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.Serializable;
-import java.sql.PreparedStatement;
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Objects;
-import net.glxn.qrgen.QRCode;
-import net.glxn.qrgen.image.ImageType;
 
 /**
  *
@@ -90,7 +83,7 @@ public class Ristorante implements Serializable {
      *
      * @return
      */
-    public Utente getUtente() throws NullPointerException {
+    public Utente getUtente() {
         if (utente != null) {
             return (Ristoratore) utente;
         } else {
@@ -225,7 +218,7 @@ public class Ristorante implements Serializable {
      * @return un float tra 0 e 5 che valuta la qualità del ristorante
      * @throws SQLException
      */
-    public float getVoto() throws SQLException {
+    public float getVoto() {
         return manager.getVoto(this);
     }
 
@@ -246,9 +239,8 @@ public class Ristorante implements Serializable {
      * @param inizio Time dell'inizio dell'orario di apertura
      * @param fine Time della fine dell'orario di apertura
      * @return
-     * @throws SQLException
      */
-    public boolean addTimes(int giorno, Time inizio, Time fine) throws SQLException {
+    public boolean addTimes(int giorno, Time inizio, Time fine) {
         return manager.addTimes(this, giorno, inizio, fine);
     }
 
@@ -278,9 +270,8 @@ public class Ristorante implements Serializable {
      * Per ottenere tutti gli orari di questo ristorante
      *
      * @return tutti gli orari del ristorante
-     * @throws SQLException
      */
-    public ArrayList<Days> getDays() throws SQLException {
+    public ArrayList<Days> getDays() {
         return manager.getDays(this);
     }
 
@@ -289,9 +280,8 @@ public class Ristorante implements Serializable {
      * ristorante
      *
      * @return Lista di Recensioni
-     * @throws SQLException
      */
-    public ArrayList<Recensione> getRecensioni() throws SQLException {
+    public ArrayList<Recensione> getRecensioni() {
         return manager.getRecensioni(this);
     }
 
@@ -302,9 +292,8 @@ public class Ristorante implements Serializable {
      * @param testo testo o corpo della recensione
      * @param utente utente che scrive la recensione
      * @return l'oggetto recensione appena creato
-     * @throws SQLException
      */
-    public Recensione addRecensione(String titolo, String testo, Utente utente) throws SQLException {
+    public Recensione addRecensione(String titolo, String testo, Utente utente) {
         return manager.addRecensione(this, titolo, testo, utente);
     }
 
@@ -315,9 +304,8 @@ public class Ristorante implements Serializable {
      * @param descr piccola descrizione della foto
      * @param utente utente che aggiunge la foto
      * @return true se l'aggiunta ha avuto successo, false altrimenti
-     * @throws SQLException
      */
-    public boolean addFoto(String path, String descr, Utente utente) throws SQLException {
+    public boolean addFoto(String path, String descr, Utente utente) {
         return manager.addFoto(this, path, descr, utente);
     }
 
@@ -336,9 +324,8 @@ public class Ristorante implements Serializable {
      * questo ristorante
      *
      * @return ArrayList di foto di questo ristorante
-     * @throws SQLException
      */
-    public ArrayList<Foto> getFoto() throws SQLException {
+    public ArrayList<Foto> getFoto() {
         return manager.getFoto(this);
     }
 
@@ -347,9 +334,8 @@ public class Ristorante implements Serializable {
      * Orari di apertura
      *
      * @return il path per accedere all'immagine creata
-     * @throws SQLException
      */
-    public String creaQR() throws SQLException {
+    public String creaQR() {
            return manager.creaQR(this);
     }
 
@@ -366,6 +352,6 @@ public class Ristorante implements Serializable {
 
     //da lavorare
     public boolean nowOpen() {
-        return false;
+        return true;
     }
 }
