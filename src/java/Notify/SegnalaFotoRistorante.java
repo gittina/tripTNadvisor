@@ -9,8 +9,6 @@ import DataBase.DBManager;
 import DataBase.Foto;
 import DataBase.Ristorante;
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 /**
  *

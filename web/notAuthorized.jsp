@@ -14,7 +14,7 @@
         <meta name="author" content="">
 
         <title><c:out value="${title}"/></title>
-        <c:set value="/base.jsp" scope="session" var="lastPage"/>
+        <c:set value="/HomeServlet" scope="session" var="lastPage"/>
 
         <!-- Bootstrap Core CSS -->
         <link href="<%= request.getContextPath()%>/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -167,7 +167,8 @@
                             <span class="name">Not Authorized</span>
                             <hr class="star-light">
                             <span class="skills">You have not enough privileges to see this page</span>
-                            <a href="<%= request.getContextPath()%>/HomeServlet">Go to Home Page</a>
+                            <br>
+                            <label class="control-label"><a href="<%= request.getContextPath()%>/HomeServlet">Go to Home Page</a></label>
                         </div>
                     </div>
                 </div>

@@ -27,7 +27,6 @@ public class SearchServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         this.manager = (DBManager) super.getServletContext().getAttribute("dbmanager");
-
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -144,7 +143,7 @@ public class SearchServlet extends HttpServlet {
                 try {
                     res = manager.simpleSearch(research1);
                     resOriginal = manager.simpleSearch(research1);
-                } catch (NullPointerException | SQLException ex) {
+                } catch (NullPointerException ex) {
                     System.out.println("Fallita ricerca di: " + research1 + " nel db");
                     request.getRequestDispatcher("/HomeServlet").forward(request, response);
                 }

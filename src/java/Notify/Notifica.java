@@ -72,6 +72,7 @@ public abstract class Notifica {
     public abstract boolean accetta();
     
     public abstract boolean done();
+    
     @Override
     public abstract String toString();
 
@@ -102,14 +103,6 @@ public abstract class Notifica {
         } else {
             return 0;
         }
-    }
-    
-    /**
-     * Per sapere se una notifica ha una foto
-     * @return true se la notifica ha una foto da mostrare, false altrimenti
-     */
-    public boolean isNotFoto(){
-        return this.getClass() == SegnalaFotoRecensione.class || this.getClass() == SegnalaFotoRistorante.class || this.getClass() == NuovaFoto.class || this.getClass() == NuovaRecensione.class;
     }
     
 }

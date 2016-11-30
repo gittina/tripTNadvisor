@@ -9,29 +9,30 @@ import DataBase.DBManager;
 import DataBase.Ristorante;
 import DataBase.Utente;
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 
 /**
  *
  * @author Luca
  */
-public class RichiestaRistorante extends Notifica{
+public class RichiestaRistorante extends Notifica {
 
     private final Utente utente;
     private final Ristorante ristorante;
-    
+
     /**
-     * Crea un oggetto di tipo RichiestaRistorante, che serve per notificare e far decidere ad un amministratore se il ristorante va assegnato ad un utente
-     * @param manager collegamento al DBManager per poter effetturare operazioni sul DB
+     * Crea un oggetto di tipo RichiestaRistorante, che serve per notificare e
+     * far decidere ad un amministratore se il ristorante va assegnato ad un
+     * utente
+     *
+     * @param manager collegamento al DBManager per poter effetturare operazioni
+     * sul DB
      * @param id id sul DB
      * @param data data di creazione
      * @param utente utente che chiede il possesso di un ristorante
      * @param ristorante ristorante di cui l'utente chiede il possesso
      */
     public RichiestaRistorante(DBManager manager, int id, Date data, Utente utente, Ristorante ristorante) {
-        super(manager,id,data);
+        super(manager, id, data);
         this.ristorante = ristorante;
         this.utente = utente;
     }
@@ -43,28 +44,24 @@ public class RichiestaRistorante extends Notifica{
 
     @Override
     public boolean accetta() {
-        try {
-            manager.linkRistorante(ristorante, utente);
-        } catch (SQLException ex) {
-            return false;
-        }
+        manager.linkRistorante(ristorante, utente);
         return done();
     }
 
     @Override
-    public boolean done(){
+    public boolean done() {
         return manager.done(this);
     }
-    
+
     @Override
-    public String toString(){
+    public String toString() {
         String res = "L'utente " + utente.getNomeCognome() + " ha chiesto il possesso del ristorante " + ristorante.getName();
         return res;
     }
 
     @Override
     public String getFotoPath() {
-        return null;
+        return ristorante.getFoto().get(0).getFotopath();
     }
-    
+
 }

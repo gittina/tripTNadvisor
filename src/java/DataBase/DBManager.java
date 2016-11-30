@@ -28,7 +28,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import net.glxn.qrgen.QRCode;
 import net.glxn.qrgen.image.ImageType;
-import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -43,7 +42,7 @@ public class DBManager implements Serializable {
     public String contextPath;
     public String completePath;
 
-    public DBManager(String dburl, String contextPath, String completePath) throws SQLException {
+    public DBManager(String dburl, String contextPath, String completePath) {
         this.contextPath = contextPath;
         this.completePath = completePath;
         try {
@@ -53,8 +52,15 @@ public class DBManager implements Serializable {
         }
         String user = "progettoTNadvisor";
         String pass = "bRjhdsoR56ve";
-        con = DriverManager.getConnection(dburl, user, pass);
-
+        try {
+            con = DriverManager.getConnection(dburl, user, pass);
+        } catch (SQLException ex) {
+            try {
+                con = DriverManager.getConnection(dburl, user, pass);
+            } catch (SQLException ex1) {
+                Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex1);
+            }
+        }
     }
 
     /**
@@ -63,7 +69,6 @@ public class DBManager implements Serializable {
     public static void shutdown() {
         try {
             DriverManager.getConnection("jdbc:derby:;shutdown=true");
-            System.out.println("DB disconnesso correttamente");
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).info(ex.getMessage());
         }
@@ -80,11 +85,11 @@ public class DBManager implements Serializable {
      * @param password password dell'utente
      * @return un oggetto Utente se la email e la password corrispondono ad un
      * Utente nel DB, null altrimenti
-     * @throws SQLException
      */
-    public Utente authenticate(String email, String password) throws SQLException {
-        PreparedStatement stm;
+    public Utente authenticate(String email, String password) {
+        PreparedStatement stm = null;
         ResultSet rs;
+        Utente res = null;
         try {
             stm = con.prepareStatement("SELECT id FROM UTENTE WHERE email = ? AND password = ?");
             stm.setString(1, email);
@@ -92,14 +97,20 @@ public class DBManager implements Serializable {
 
             rs = stm.executeQuery();
             if (rs.next()) {
-                return getUtente(rs.getInt("id"));
+                res = getUtente(rs.getInt("id"));
             }
-            rs.close();
-            stm.close();
         } catch (SQLException ex) {
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return null;
+        return res;
     }
 
     /**
@@ -109,8 +120,8 @@ public class DBManager implements Serializable {
      */
     public ArrayList<Recensione> getUltimeRecensioni() {
         ArrayList<Recensione> res = new ArrayList<>();
-        PreparedStatement stm;
-        ResultSet rs;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
         try {
             //int id, String titolo, String testo, Date data, String commento, String fotoPath, DBManager manager
             stm = con.prepareStatement("select * from recensione order by data desc { limit 5 }");
@@ -118,11 +129,24 @@ public class DBManager implements Serializable {
             while (rs.next()) {
                 res.add(new Recensione(rs.getInt("id"), getRistorante(rs.getInt("id_rist")), getUtente(rs.getInt("id_utente")), rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), this));
             }
-            rs.close();
-            stm.close();
+
         } catch (SQLException ex) {
-            System.out.println("Fallita estrazione ultime recensioni");
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         return res;
     }
@@ -135,8 +159,8 @@ public class DBManager implements Serializable {
      */
     public ArrayList<Ristorante> getRistorantiPiuVotati() {
         ArrayList<Ristorante> res = new ArrayList<>();
-        PreparedStatement stm;
-        ResultSet rs;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
         try {
             //int id, String titolo, String testo, Date data, String commento, String fotoPath, DBManager manager
             stm = con.prepareStatement("select * from( select ristorante.ID, avg(rating) as media from votorist, ristorante where ristorante.ID = votorist.ID_RIST group by ristorante.ID) as res, ristorante as ristorante where res.id = ristorante.ID order by res.media DESC");
@@ -144,12 +168,25 @@ public class DBManager implements Serializable {
             while (rs.next()) {
                 res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
             }
-            rs.close();
-            stm.close();
-        } catch (SQLException ex) {
-            System.out.println("Fallita estrazione ristoranti migliori");
-        }
 
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
         return res;
     }
 
@@ -160,8 +197,8 @@ public class DBManager implements Serializable {
      */
     public ArrayList<Ristorante> getRistorantiPiuVisitati() {
         ArrayList<Ristorante> res = new ArrayList<>();
-        PreparedStatement stm;
-        ResultSet rs;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
         try {
             //int id, String titolo, String testo, Date data, String commento, String fotoPath, DBManager manager
             stm = con.prepareStatement("SELECT * FROM ristorante order by ristorante.VISITE desc { limit 5 }");
@@ -169,10 +206,23 @@ public class DBManager implements Serializable {
             while (rs.next()) {
                 res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
             }
-            rs.close();
-            stm.close();
         } catch (SQLException ex) {
-            System.out.println("Fallita estrazione ristoranti più visti");
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         return res;
     }
@@ -185,36 +235,56 @@ public class DBManager implements Serializable {
      * altrimenti
      */
     public boolean esisteMail(String email) {
-        PreparedStatement stm;
-        ResultSet rs;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("select * from Utente where email = ?");
             stm.setString(1, email);
             rs = stm.executeQuery();
-            boolean res = rs.next();
-            System.out.println("Esiste mail risponde: " + res);
-
-            rs.close();
-            stm.close();
-            return res;
+            res = rs.next();
         } catch (SQLException ex) {
-            System.out.println(ex);
-            return true;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     public boolean addKey(Utente utente, String key) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        Boolean res = false;
         try {
             stm = con.prepareStatement("insert into Validation (id_utente,chiave) values (?,?)");
             stm.setInt(1, utente.getId());
             stm.setString(2, key);
             stm.executeUpdate();
+            res = true;
         } catch (SQLException ex) {
-            System.out.println("Problema inizializzazione chiave utente");
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
 
     /**
@@ -226,22 +296,33 @@ public class DBManager implements Serializable {
      * altrimenti
      */
     public boolean esisteNomeRistorante(String nome) {
-        PreparedStatement stm;
-        ResultSet rs;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        boolean res = false;
         try {
-            stm = con.prepareStatement("select nome from Ristorante");
+            stm = con.prepareStatement("select * from Ristorante where nome = ?");
+            stm.setString(1, nome);
             rs = stm.executeQuery();
-            while (rs.next()) {
-                if (rs.getString("nome").equals(nome)) {
-                    return true;
+            res = rs.next();
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-            rs.close();
-            stm.close();
-        } catch (SQLException ex) {
-            return true;
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return false;
+        return res;
     }
 
     /**
@@ -253,22 +334,33 @@ public class DBManager implements Serializable {
      * sito web, false altrimenti
      */
     public boolean esisteLinkSitoRistorante(String link) {
-        PreparedStatement stm;
-        ResultSet rs;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        boolean res = false;
         try {
-            stm = con.prepareStatement("select linksito from Ristorante");
+            stm = con.prepareStatement("select * from Ristorante where linksito = ?");
+            stm.setString(1, link);
             rs = stm.executeQuery();
-            while (rs.next()) {
-                if (rs.getString("linksito").equals(link)) {
-                    return true;
+            res = rs.next();
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-            rs.close();
-            stm.close();
-        } catch (SQLException ex) {
-            return true;
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return false;
+        return res;
     }
 
     /**
@@ -281,7 +373,9 @@ public class DBManager implements Serializable {
      * @return l'oggetto Utente per la sessione
      */
     public Utente addRegistrato(String nome, String cognome, String email, String password) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        Utente utente = null;
         try {
             stm = con.prepareStatement("INSERT INTO UTENTE (nome,cognome,email,password,attivato,avpath) VALUES (?,?,?,?,?,?)");
             stm.setString(1, nome);
@@ -294,16 +388,29 @@ public class DBManager implements Serializable {
 
             stm = con.prepareStatement("select * from utente where email = ?");
             stm.setString(1, email);
-            ResultSet rs = stm.executeQuery();
+            rs = stm.executeQuery();
             if (rs.next()) {
-                return (getUtente(rs.getInt("id")));
+                utente = (getUtente(rs.getInt("id")));
             }
-            stm.close();
         } catch (SQLException ex) {
-            System.out.println("Fallita registrazione utente su DB");
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return null;
+        return utente;
     }
 
     /**
@@ -316,15 +423,15 @@ public class DBManager implements Serializable {
      */
     public ArrayList<Utente> getClassificaUtenti() {
         ArrayList<Utente> res = new ArrayList<>();
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
         try {
             stm = con.prepareStatement("select id from utente where amministratore = ?");
             stm.setBoolean(1, false);
-            ResultSet rs = stm.executeQuery();
+            rs = stm.executeQuery();
 
             while (rs.next()) {
                 Utente u = getUtente(rs.getInt("id"));
-                System.out.println(u);
                 res.add(u);
             }
             Comparator c = (Comparator<Utente>) (Utente o1, Utente o2) -> {
@@ -338,13 +445,25 @@ public class DBManager implements Serializable {
                 }
             };
             res.sort(c);
-            stm.close();
         } catch (SQLException ex) {
-            System.out.println("Fallita ricezione classifica utenti su DB");
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         return res;
-
     }
 
     /**
@@ -356,6 +475,7 @@ public class DBManager implements Serializable {
      * coordinate geografiche da google maps, false altrimenti
      */
     public boolean okLuogo(String address) {
+        boolean res = false;
         try {
             String req = "https://maps.googleapis.com/maps/api/geocode/xml?address=" + address.replace(' ', '+') + "&key=" + googleKey;
             URL website = new URL(req);
@@ -365,7 +485,6 @@ public class DBManager implements Serializable {
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 
             File fXmlFile = new File(completePath + "/geo/georef.xml");
-            System.out.println(completePath + "/geo/georef.xml");
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(fXmlFile);
@@ -376,17 +495,18 @@ public class DBManager implements Serializable {
             Node nNode = nList.item(0);
 
             if (nNode == null) {
-                return false;
+                res = false;
             } else if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element eElement = (Element) nNode;
                 lat = Double.parseDouble(eElement.getElementsByTagName("lat").item(0).getTextContent());
                 lng = Double.parseDouble(eElement.getElementsByTagName("lng").item(0).getTextContent());
+                res = true;
             }
-            return true;
 
-        } catch (IOException | ParserConfigurationException | SAXException | DOMException | NumberFormatException e) {
-            return false;
+        } catch (ParserConfigurationException | IOException | SAXException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return res;
     }
 
     /**
@@ -394,22 +514,18 @@ public class DBManager implements Serializable {
      *
      * @param address indirizzo su cui costruire l'oggetto Luogo
      * @return l'oggetto Luogo costruito
-     * @throws MalformedURLException
-     * @throws FileNotFoundException
-     * @throws IOException
      */
-    public Luogo getLuogo(String address) throws MalformedURLException, FileNotFoundException, IOException {
-        String req = "https://maps.googleapis.com/maps/api/geocode/xml?" + "address=" + address.replace(' ', '+') + "&key=" + googleKey;
-        URL website = new URL(req);
-        ReadableByteChannel rbc = Channels.newChannel(website.openStream());
-
-        FileOutputStream fos = new FileOutputStream(completePath + "/geo/georef.xml");
-        fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-
+    public Luogo getLuogo(String address) {
+        Luogo res = null;
         try {
+            String req = "https://maps.googleapis.com/maps/api/geocode/xml?" + "address=" + address.replace(' ', '+') + "&key=" + googleKey;
+            URL website = new URL(req);
+            ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+
+            FileOutputStream fos = new FileOutputStream(completePath + "/geo/georef.xml");
+            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 
             File fXmlFile = new File(completePath + "/geo/georef.xml");
-            System.out.println(completePath + "/geo/georef.xml");
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(fXmlFile);
@@ -433,12 +549,12 @@ public class DBManager implements Serializable {
                 Element eElement = (Element) nNode;
                 formatted_address = eElement.getElementsByTagName("formatted_address").item(0).getTextContent();
             }
-            Luogo res = new Luogo(lat, lng, formatted_address);
-            return res;
+            res = new Luogo(lat, lng, formatted_address);
 
-        } catch (ParserConfigurationException | SAXException | IOException e) {
+        } catch (IOException | SAXException | ParserConfigurationException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return null;
+        return res;
     }
 
     /**
@@ -450,32 +566,50 @@ public class DBManager implements Serializable {
      *
      * @param research campo di ricerca
      * @return un ArrayList dei Ristoranti trovati
-     * @throws SQLException
      */
-    public ArrayList<Ristorante> simpleSearch(String research) throws SQLException {
-        if (research == null) {
-            return null;
-        } else {
-            research = research.toLowerCase();
-        }
-        ArrayList<Ristorante> tmp1 = new ArrayList<>();
-        PreparedStatement stm = con.prepareStatement("SELECT * FROM RISTORANTE");
-        ResultSet rs1 = stm.executeQuery();
-        while (rs1.next()) {
-            tmp1.add(new Ristorante(rs1.getInt("id"), rs1.getString("nome"), rs1.getString("descr"), rs1.getString("linkSito"), rs1.getString("fascia"), rs1.getString("cucina"), this, getUtente(rs1.getInt("id_utente")), rs1.getInt("visite")));
-        }
-
-        Iterator i = tmp1.iterator();
-        while (i.hasNext()) {
-            Ristorante r = (Ristorante) i.next();
-            String name = r.getName().toLowerCase();
-            String addr = r.getLuogo().getAddress().toLowerCase();
-            String cucina = r.getCucina().toLowerCase();
-            if (!name.contains((CharSequence) research) && !addr.contains((CharSequence) research) && !cucina.contains((CharSequence) research)) {
-                i.remove();
+    public ArrayList<Ristorante> simpleSearch(String research) {
+        ArrayList<Ristorante> res = new ArrayList<>();
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        try {
+            if (research != null) {
+                
+                research = research.toLowerCase();
+                stm = con.prepareStatement("SELECT * FROM RISTORANTE");
+                rs = stm.executeQuery();
+                while (rs.next()) {
+                    res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
+                }
+                Iterator i = res.iterator();
+                while (i.hasNext()) {
+                    Ristorante r = (Ristorante) i.next();
+                    String name = r.getName().toLowerCase();
+                    String addr = r.getLuogo().getAddress().toLowerCase();
+                    String cucina = r.getCucina().toLowerCase();
+                    if (!name.contains((CharSequence) research) && !addr.contains((CharSequence) research) && !cucina.contains((CharSequence) research)) {
+                        i.remove();
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
-        return tmp1;
+        return res;
     }
 
     /**
@@ -485,20 +619,35 @@ public class DBManager implements Serializable {
      * @return l'oggetto ristorante
      */
     public Ristorante getRistorante(int id) {
-        PreparedStatement stm;
-        ResultSet rs;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        Ristorante res = null;
         try {
             stm = con.prepareStatement("select * from Ristorante where id = ?");
             stm.setInt(1, id);
             rs = stm.executeQuery();
-            rs.next();
-            Ristorante r = new Ristorante(id, rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"));
-            rs.close();
-            stm.close();
-            return r;
+            if (rs.next()) {
+                res = new Ristorante(id, rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"));
+            }
         } catch (SQLException ex) {
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     /**
@@ -508,20 +657,35 @@ public class DBManager implements Serializable {
      * @return
      */
     public String getPassUtente(Utente utente) {
-        PreparedStatement stm;
-        ResultSet rs;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        String res = null;
         try {
             stm = con.prepareStatement("select * from Utente where id = ?");
             stm.setInt(1, utente.getId());
             rs = stm.executeQuery();
-            rs.next();
-            String res = rs.getString("password");
-            rs.close();
-            stm.close();
-            return res;
+            if (rs.next()) {
+                res = rs.getString("password");
+            }
         } catch (SQLException ex) {
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     /**
@@ -531,16 +695,35 @@ public class DBManager implements Serializable {
      * @return l'oggetto recensione
      */
     public Recensione getRecensione(int id) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        Recensione res = null;
         try {
             stm = con.prepareStatement("select * from Recensione where id = ?");
             stm.setInt(1, id);
-            ResultSet rs = stm.executeQuery();
-            rs.next();
-            return new Recensione(rs.getInt("id"), getRistorante(rs.getInt("id_rist")), getUtente(rs.getInt("id_utente")), rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), this);
+            rs = stm.executeQuery();
+            if (rs.next()) {
+                res = new Recensione(rs.getInt("id"), getRistorante(rs.getInt("id_rist")), getUtente(rs.getInt("id_utente")), rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), this);
+            }
         } catch (SQLException ex) {
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     /**
@@ -552,20 +735,22 @@ public class DBManager implements Serializable {
      * @return l'oggetto utente
      */
     public Utente getUtente(int id) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
         Utente res = null;
+        ResultSet rs = null;
+        ResultSet rs2 = null;
         try {
             stm = con.prepareStatement("select * from Utente where id = ?");
             stm.setInt(1, id);
-            ResultSet rs = stm.executeQuery();
+            rs = stm.executeQuery();
             if (rs.next()) {
                 if (rs.getBoolean("amministratore")) {
                     res = new Amministratore(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), this);
                 } else {
                     stm = con.prepareStatement("SELECT COUNT(*) as res FROM RISTORANTE WHERE id_utente = ?");
                     stm.setInt(1, id);
-                    try (ResultSet rs2 = stm.executeQuery()) {
-                        rs2.next();
+                    rs2 = stm.executeQuery();
+                    if (rs2.next()) {
                         //Ristoratore(int id, String nome, String cognome, String email, String avpath){
                         if (rs2.getInt("res") > 0) {
                             res = new Ristoratore(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), rs.getBoolean("attivato"), this);
@@ -573,14 +758,34 @@ public class DBManager implements Serializable {
                             res = new Registrato(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), rs.getBoolean("attivato"), this);
                         }
                     }
-                    stm.close();
                 }
-                rs.close();
             }
-            return res;
         } catch (SQLException ex) {
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs2 != null) {
+                try {
+                    rs2.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     /**
@@ -589,10 +794,10 @@ public class DBManager implements Serializable {
      *
      * @param hash codice hash dell'utente da attivare
      * @return true se l'attivazione ha avuto successo, false altrimenti
-     * @throws SQLException
      */
-    public boolean activate(String hash) throws SQLException {
-        PreparedStatement stm;
+    public boolean activate(String hash) {
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("update utente set attivato = ? where id = (select id_utente from validation where chiave = ?)");
             stm.setBoolean(1, true);
@@ -601,11 +806,19 @@ public class DBManager implements Serializable {
             stm = con.prepareStatement("delete from validation where chiave = ?");
             stm.setString(1, hash);
             stm.executeUpdate();
-            stm.close();
+            res = true;
         } catch (SQLException ex) {
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
 
     /**
@@ -614,20 +827,28 @@ public class DBManager implements Serializable {
      * @param ristorante che verrà assegnato
      * @param utente che riceverà la proprietà del ristorante
      * @return
-     * @throws SQLException
      */
-    public boolean linkRistorante(Ristorante ristorante, Utente utente) throws SQLException {
-        PreparedStatement stm;
+    public boolean linkRistorante(Ristorante ristorante, Utente utente) {
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("update ristorante set id_utente = ? where id = ?");
             stm.setInt(1, utente.getId());
             stm.setInt(2, ristorante.getId());
             stm.executeUpdate();
-            stm.close();
-        } catch (Exception e) {
-            return false;
+            res = true;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
 
     /**
@@ -637,35 +858,49 @@ public class DBManager implements Serializable {
      * @return l'oggetto foto
      */
     public Foto getFoto(int id) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        Foto res = null;
         try {
             stm = con.prepareStatement("select * from foto where id = ?");
             stm.setInt(1, id);
-            ResultSet rs = stm.executeQuery();
+            rs = stm.executeQuery();
             if (rs.next()) {
-                return new Foto(rs.getInt("id"), rs.getString("fotopath"), rs.getString("descr"), rs.getDate("data"), getUtente(rs.getInt("id_utente")), getRistorante(rs.getInt("id_rist")), this);
-            } else {
-                return null;
+                res = new Foto(rs.getInt("id"), rs.getString("fotopath"), rs.getString("descr"), rs.getDate("data"), getUtente(rs.getInt("id_utente")), getRistorante(rs.getInt("id_rist")), this);
             }
-        } catch (SQLException e) {
-            System.out.println("Impossibile estrarre foto con id " + id);
-            return null;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     public ArrayList<Ristorante> advSearch1(String research, String spec) {
-        ArrayList<Ristorante> tmp1;
-        PreparedStatement stm;
+        ArrayList<Ristorante> res = new ArrayList<>();
+        PreparedStatement stm = null;
+        ResultSet rs = null;
         try {
             research = research.toLowerCase();
-            tmp1 = new ArrayList<>();
             stm = con.prepareStatement("SELECT * FROM RISTORANTE");
-            ResultSet rs1 = stm.executeQuery();
-            while (rs1.next()) {
-                tmp1.add(new Ristorante(rs1.getInt("id"), rs1.getString("nome"), rs1.getString("descr"), rs1.getString("linkSito"), rs1.getString("fascia"), rs1.getString("cucina"), this, getUtente(rs1.getInt("id_utente")), rs1.getInt("visite")));
+            rs = stm.executeQuery();
+            while (rs.next()) {
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
             }
-
-            Iterator i = tmp1.iterator();
+            Iterator i = res.iterator();
             while (i.hasNext()) {
                 Ristorante r = (Ristorante) i.next();
                 switch (spec) {
@@ -692,17 +927,31 @@ public class DBManager implements Serializable {
             }
 
         } catch (SQLException ex) {
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return tmp1;
+        return res;
     }
 
     public ArrayList<Ristorante> advSearch2(double lat, double lng) {
-        ArrayList<Ristorante> tmp1;
-        ResultSet rs;
-        PreparedStatement stm;
+        ArrayList<Ristorante> res = new ArrayList<>();
+        ResultSet rs = null;
+        PreparedStatement stm = null;
         try {
-            tmp1 = new ArrayList<>();
             stm = con.prepareStatement("select * from ristorante, (SELECT ristorante.id , sqrt((?-l.LAT)*(?-l.lat) + (?-l.LNG)*(?-l.LNG)) as distance FROM RISTORANTE as ristorante, Luogo as l where ristorante.id_luogo = l.id) as res where res.id = ristorante.id order by distance asc { limit 20 }");
             stm.setDouble(1, lat);
             stm.setDouble(2, lat);
@@ -710,43 +959,70 @@ public class DBManager implements Serializable {
             stm.setDouble(4, lng);
             rs = stm.executeQuery();
             while (rs.next()) {
-                tmp1.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
             }
-            rs.close();
-            stm.close();
         } catch (SQLException ex) {
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return tmp1;
+        return res;
     }
 
     public ArrayList<Ristorante> advSearch3(String tipo) {
-        ArrayList<Ristorante> tmp1 = new ArrayList<>();
-        PreparedStatement stm;
+        ArrayList<Ristorante> res = new ArrayList<>();
+        PreparedStatement stm = null;
+        ResultSet rs = null;
         try {
             stm = con.prepareStatement("SELECT * FROM RISTORANTE where cucina = ?");
             stm.setString(1, tipo);
-            ResultSet rs1 = stm.executeQuery();
-            while (rs1.next()) {
-                tmp1.add(new Ristorante(rs1.getInt("id"), rs1.getString("nome"), rs1.getString("descr"), rs1.getString("linkSito"), rs1.getString("fascia"), rs1.getString("cucina"), this, getUtente(rs1.getInt("id_utente")), rs1.getInt("visite")));
+            rs = stm.executeQuery();
+            while (rs.next()) {
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
             }
-            System.out.println("Trovati " + tmp1.size() + " ristoranti");
         } catch (SQLException ex) {
-            System.out.println("Errore advSearch3 su ricerca tipo: " + tipo);
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
 
-        return tmp1;
+        return res;
     }
 
-    public boolean update() {
+    public boolean updateAutocomplete() {
         String path = "/autocomplete.txt";
-        PreparedStatement stm;
-        ResultSet rs;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("select ristorante.nome, l.address from ristorante as ristorante, luogo as l where ristorante.id_luogo = l.id");
             rs = stm.executeQuery();
-            System.out.println(this.completePath + path);
             File file = new File(this.completePath + path);
 
             String content = "var ristoranti = {\n";
@@ -777,21 +1053,29 @@ public class DBManager implements Serializable {
 
                 fop.write(contentInBytes);
                 fop.flush();
-            } catch (FileNotFoundException e) {
-                return false;
+                res = true;
+            } catch (IOException e) {
+                res = false;
             }
-
-            rs.close();
-            stm.close();
-            return true;
-        } catch (SQLException e) {
-            System.out.println("Errore SQL updating autocomplete.txt");
-            return false;
-        } catch (IOException e) {
-            System.out.println("Errore IOE updating autocomplete.txt");
-            return false;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-
+        return res;
     }
 
     //////////////////////////////////////////////////////////
@@ -810,15 +1094,26 @@ public class DBManager implements Serializable {
      *
      * @param ristorante
      */
-    public void addVisita(Ristorante ristorante) {
-        PreparedStatement stm;
+    public boolean addVisita(Ristorante ristorante) {
+        boolean res = false;
+        PreparedStatement stm = null;
         try {
             stm = con.prepareStatement("update ristorante set visite = visite+1 where id = ?");
             stm.setInt(1, ristorante.getId());
             stm.executeUpdate();
-            stm.close();
-        } catch (Exception ex) {
+            res = true;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     /**
@@ -834,7 +1129,8 @@ public class DBManager implements Serializable {
      * altrimenti
      */
     public boolean updateData(Ristorante ristorante, String nome, String address, String linksito, String descr, String cucina, String fascia) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("update ristorante set nome = ?, linksito = ?, descr = ?, cucina = ?, fascia = ? where id = ?");
             stm.setString(1, nome);
@@ -844,15 +1140,22 @@ public class DBManager implements Serializable {
             stm.setString(5, fascia);
             stm.setInt(6, ristorante.getId());
             stm.executeUpdate();
-            ristorante.setLuogo(address);
-            stm.close();
-
+            res = ristorante.setLuogo(address);
         } catch (SQLException ex) {
-            System.out.println("Update non riuscito del profilo");
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        this.update();
-        return true;
+        if (res) {
+            res = updateAutocomplete();
+        }
+        return res;
     }
 
     /**
@@ -864,7 +1167,9 @@ public class DBManager implements Serializable {
      * correttamente, false altrimenti
      */
     public boolean setLuogo(Ristorante ristorante, String address) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("delete from Luogo where id = (select id_luogo from ristorante where id = ?)");
             stm.executeUpdate();
@@ -880,7 +1185,7 @@ public class DBManager implements Serializable {
             stm = con.prepareStatement("select id from Luogo where lat = ? AND lng = ?");
             stm.setDouble(1, luogo.getLat());
             stm.setDouble(2, luogo.getLng());
-            ResultSet rs = stm.executeQuery();
+            rs = stm.executeQuery();
             int luogo_id;
             if (rs.next()) {
                 luogo_id = rs.getInt("id");
@@ -892,14 +1197,24 @@ public class DBManager implements Serializable {
             stm.setInt(1, luogo_id);
             stm.setInt(2, ristorante.getId());
             stm.executeUpdate();
-            stm.close();
+            res = true;
         } catch (SQLException ex) {
-            System.out.println("Impossibile modificare luogo");
-            return false;
-        } catch (FileNotFoundException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         return true;
     }
@@ -912,24 +1227,35 @@ public class DBManager implements Serializable {
      * @return un float tra 0 e 5 che valuta la qualità del ristorante
      */
     public float getVoto(Ristorante ristorante) {
-        PreparedStatement stm;
-        ResultSet rs;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        float res = 0;
         try {
             stm = con.prepareStatement("SELECT avg(1.0 * rating) AS mediavoto FROM votorist WHERE id_rist=?");
             stm.setInt(1, ristorante.getId());
             rs = stm.executeQuery();
-            float res;
             if (rs.next()) {
                 res = rs.getFloat("mediavoto");
-            } else {
-                res = 0;
             }
-            stm.close();
-            return res;
         } catch (SQLException ex) {
-            System.out.println("Fallita estrazione voto");
-            return 0;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     /**
@@ -940,24 +1266,37 @@ public class DBManager implements Serializable {
      * @return la posizione in classifica del ristorante
      */
     public int getPosizioneClassifica(Ristorante ristorante) {
-        PreparedStatement stm;
-        ResultSet rs;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        int res = 0;
         try {
             stm = con.prepareStatement("select avg(1.0 * votorist.rating) as media, ristorante.ID as id_rist from (Ristorante) Left Join (votorist) on (ristorante.ID = votorist.ID_RIST) group by (ristorante.ID) order by media asc");
             rs = stm.executeQuery();
-            int counter = 0;
             while (rs.next()) {
-                counter++;
+                res++;
                 if (rs.getInt("id_rist") == ristorante.getId()) {
-                    return counter;
+                    break;
                 }
             }
-            stm.close();
         } catch (SQLException ex) {
-            return -1;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-
-        return -1;
+        return res;
     }
 
     /**
@@ -970,9 +1309,9 @@ public class DBManager implements Serializable {
      * @return
      */
     public boolean addTimesToRistorante(Ristorante ristorante, int giorno, Time inizio, Time fine) {
-        System.out.println("Inizio aggiunta times");
-        PreparedStatement stm;
-        ResultSet rs;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("select * from days where id_rist = ? AND giorno = ?");
             stm.setInt(1, ristorante.getId());
@@ -989,47 +1328,73 @@ public class DBManager implements Serializable {
                 if (rs.next()) {
                     Days d = new Days(rs.getInt("id"), getRistorante(rs.getInt("id_rist")), rs.getInt("giorno"), this);
                     d.addTimes(inizio, fine);
-                } else {
-                    return false;
                 }
             }
-            rs.close();
-            stm.close();
+            res = true;
         } catch (SQLException ex) {
-            System.out.println("problema aggiunta times");
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
 
     public boolean addDays(Ristorante ristorante, int giorno) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("insert into days (giorno, id_rist) values (?,?)");
             stm.setInt(1, giorno);
             stm.setInt(2, ristorante.getId());
             stm.executeUpdate();
-            stm.close();
+            res = true;
         } catch (SQLException ex) {
-            System.out.println("problema aggiunta days");
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-
-        return true;
+        return res;
     }
 
     public boolean removeTimes(int id_times) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("delete from times where id = ?");
             stm.setInt(1, id_times);
             stm.executeUpdate();
-            stm.close();
+            res = true;
         } catch (SQLException ex) {
-            System.out.println("problema rimozione times con id: " + id_times);
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
 
     /**
@@ -1039,8 +1404,8 @@ public class DBManager implements Serializable {
      * @return L'oggetto Luogo riferito a questo ristorante
      */
     public Luogo getLuogo(Ristorante ristorante) {
-        PreparedStatement stm;
-        ResultSet rs;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
         Luogo res = null;
         try {
             stm = con.prepareStatement("select * from Luogo, Ristorante where ristorante.id = ? AND ristorante.id_luogo = luogo.id");
@@ -1049,9 +1414,23 @@ public class DBManager implements Serializable {
             if (rs.next()) {
                 res = new Luogo(rs.getDouble("lat"), rs.getDouble("lng"), rs.getString("address"));
             }
-            stm.close();
         } catch (SQLException ex) {
-            System.out.println("problema estrazione luogo");
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         return res;
     }
@@ -1063,10 +1442,9 @@ public class DBManager implements Serializable {
      * @return tutti gli orari del ristorante
      */
     public ArrayList<Days> getDays(Ristorante ristorante) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
         ArrayList<Days> res = new ArrayList<>();
-        ResultSet rs;
-
+        ResultSet rs = null;
         try {
             stm = con.prepareStatement("SELECT * FROM Days WHERE id_rist = ?");
             stm.setInt(1, ristorante.getId());
@@ -1075,11 +1453,23 @@ public class DBManager implements Serializable {
             while (rs.next()) {
                 res.add(new Days(rs.getInt("id"), getRistorante(rs.getInt("id_rist")), rs.getInt("giorno"), this));
             }
-            rs.close();
-            stm.close();
         } catch (SQLException ex) {
-            System.out.println("Fallita estrazione days");
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         Comparator c = (Comparator<Days>) new Comparator<Days>() {
             @Override
@@ -1099,9 +1489,9 @@ public class DBManager implements Serializable {
      * @return Lista di Recensioni
      */
     public ArrayList<Recensione> getRecensioni(Ristorante ristorante) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
         ArrayList<Recensione> res = new ArrayList<>();
-        ResultSet rs;
+        ResultSet rs = null;
         try {
             stm = con.prepareStatement("SELECT * FROM RECENSIONE WHERE id_rist = ?");
             stm.setInt(1, ristorante.getId());
@@ -1120,11 +1510,23 @@ public class DBManager implements Serializable {
                 }
             };
             res.sort(c);
-            rs.close();
-            stm.close();
         } catch (SQLException ex) {
-            System.out.println("Fallita estrazione recensioni");
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         return res;
     }
@@ -1139,9 +1541,9 @@ public class DBManager implements Serializable {
      * @return l'oggetto recensione appena creato
      */
     public Recensione addRecensione(Ristorante ristorante, String titolo, String testo, Utente utente) {
-        Recensione res;
-        PreparedStatement stm;
-        ResultSet rs;
+        Recensione res = null;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
         Date current = Date.valueOf(LocalDate.now());
         try {
             stm = con.prepareStatement("INSERT INTO RECENSIONE (titolo,testo,data,id_utente,id_rist) VALUES (?,?,?,?,?)");
@@ -1156,13 +1558,26 @@ public class DBManager implements Serializable {
             stm.setInt(1, utente.getId());
             stm.setInt(2, ristorante.getId());
             rs = stm.executeQuery();
-            rs.next();
-            res = new Recensione(rs.getInt("id"), ristorante, utente, rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), this);
-            rs.close();
-            stm.close();
+            if (rs.next()) {
+                res = new Recensione(rs.getInt("id"), ristorante, utente, rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), this);
+            }
         } catch (SQLException ex) {
-            System.out.println("Fallita estrazione recensione su DB" + ex.toString());
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         return res;
     }
@@ -1177,7 +1592,8 @@ public class DBManager implements Serializable {
      * @return true se l'aggiunta ha avuto successo, false altrimenti
      */
     public boolean addFoto(Ristorante ristorante, String path, String descr, Utente utente) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("INSERT INTO FOTO (fotopath, descr, data, id_rist, id_utente) VALUES (?,?,?,?,?)");
             stm.setString(1, path);
@@ -1187,12 +1603,19 @@ public class DBManager implements Serializable {
             stm.setInt(4, ristorante.getId());
             stm.setInt(5, utente.getId());
             stm.executeUpdate();
-            stm.close();
-            return true;
+            res = true;
         } catch (SQLException ex) {
-            System.out.println("Fallita aggiunta foto a ristorante su DB");
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     /**
@@ -1203,17 +1626,25 @@ public class DBManager implements Serializable {
      * @return true se la rimozione ha avuto successo, false altrimenti
      */
     public boolean removeFoto(Ristorante ristorante, Foto foto) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("DELETE FROM FOTO WHERE id = ?");
             stm.setInt(1, foto.getId());
             stm.executeUpdate();
-            stm.close();
-            return true;
+            res = true;
         } catch (SQLException ex) {
-            System.out.println("Fallita rimozione foto id: " + ristorante.getId());
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     /**
@@ -1225,11 +1656,12 @@ public class DBManager implements Serializable {
      */
     public ArrayList<Foto> getFoto(Ristorante ristorante) {
         ArrayList<Foto> res = new ArrayList<>();
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
         try {
             stm = con.prepareStatement("select * from foto where id_rist = ?");
             stm.setInt(1, ristorante.getId());
-            ResultSet rs = stm.executeQuery();
+            rs = stm.executeQuery();
             while (rs.next()) { //int id, String fotopath, String descr, Date data
                 res.add(new Foto(rs.getInt("id"), rs.getString("fotopath"), rs.getString("descr"), rs.getDate("data"), getUtente(rs.getInt("id_utente")), getRistorante(rs.getInt("id_rist")), this));
             }
@@ -1243,9 +1675,23 @@ public class DBManager implements Serializable {
                 }
             };
             res.sort(c);
-            stm.close();
         } catch (SQLException ex) {
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         return res;
     }
@@ -1280,13 +1726,10 @@ public class DBManager implements Serializable {
 
             fout.flush();
             fout.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("Errore: " + e.toString());
-            System.out.println("Errore nella creazione dell'immagine QR");
-        } catch (IOException e) {
-            System.out.println("Errore nella creazione QR");
+        } catch (IOException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+            pos = null;
         }
-
         return pos;
     }
 
@@ -1299,24 +1742,34 @@ public class DBManager implements Serializable {
      * @return true se il voto è stato aggiunto con successo, false altrimenti
      */
     public boolean addVoto(Ristorante ristorante, Utente user, int rating) {
-        PreparedStatement stm;
-        try {
-            stm = con.prepareStatement("INSERT INTO votorist (id_utente, id_rist, data, rating) VALUES (?,?,?,?)");
-            stm.setInt(1, user.getId());
-            stm.setInt(2, ristorante.getId());
-            Date current = Date.valueOf(LocalDate.now());
-            if (user.justVotatoOggi(ristorante)) {
-                return false;
+        PreparedStatement stm = null;
+        Date current = Date.valueOf(LocalDate.now());
+        boolean res = false;
+        if (user.justVotatoOggi(ristorante)) {
+            res = false;
+        } else {
+            try {
+
+                stm = con.prepareStatement("INSERT INTO votorist (id_utente, id_rist, data, rating) VALUES (?,?,?,?)");
+                stm.setInt(1, user.getId());
+                stm.setInt(2, ristorante.getId());
+                stm.setDate(3, current);
+                stm.setInt(4, rating);
+                stm.executeUpdate();
+                res = true;
+            } catch (SQLException ex) {
+                Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                if (stm != null) {
+                    try {
+                        stm.close();
+                    } catch (SQLException ex) {
+                        Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
             }
-            stm.setDate(3, current);
-            stm.setInt(4, rating);
-            stm.executeUpdate();
-            stm.close();
-            return true;
-        } catch (SQLException ex) {
-            System.out.println("Fallita aggiunta voto");
-            return false;
         }
+        return res;
     }
 
     /**
@@ -1330,18 +1783,27 @@ public class DBManager implements Serializable {
      * altriementi
      */
     public boolean newNotReclamaRistorante(Ristorante ristorante, Utente utente) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("insert into richiestaristorante(id_rist, id_utente, data) values (?,?,?)");
             stm.setInt(1, ristorante.getId());
             stm.setInt(2, utente.getId());
             stm.setDate(3, new Date(System.currentTimeMillis()));
             stm.executeUpdate();
-            stm.close();
+            res = true;
         } catch (SQLException ex) {
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
 
     //////////////////////////////////////////////////////////
@@ -1360,17 +1822,31 @@ public class DBManager implements Serializable {
      */
     ArrayList<CommentoRecensione> getCommentoRecensioneNotifiche() {
         ArrayList<CommentoRecensione> res = new ArrayList<>();
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
         try {
             stm = con.prepareStatement("select * from rispostarecensione");
-            ResultSet rs = stm.executeQuery();
+            rs = stm.executeQuery();
             while (rs.next()) {
                 res.add(new CommentoRecensione(this, rs.getInt("id"), getRecensione(rs.getInt("id_rec")), rs.getString("commento"), rs.getDate("data")));
-                System.out.println("Added notifica");
             }
-            stm.close();
         } catch (SQLException ex) {
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         return res;
     }
@@ -1380,17 +1856,31 @@ public class DBManager implements Serializable {
      */
     ArrayList<RichiestaRistorante> getReclamaRistoranteNotifiche() {
         ArrayList<RichiestaRistorante> res = new ArrayList<>();
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
         try {
             stm = con.prepareStatement("select * from richiestaristorante");
-            ResultSet rs = stm.executeQuery();
+            rs = stm.executeQuery();
             while (rs.next()) {
                 res.add(new RichiestaRistorante(this, rs.getInt("id"), rs.getDate("data"), getUtente(rs.getInt("id_utente")), getRistorante(rs.getInt("id_rist"))));
-                System.out.println("Added notifica");
             }
-            stm.close();
         } catch (SQLException ex) {
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         return res;
     }
@@ -1400,18 +1890,32 @@ public class DBManager implements Serializable {
      */
     ArrayList<SegnalaFotoRistorante> getSegnalaFotoRistoranteNotifiche() {
         ArrayList<SegnalaFotoRistorante> res = new ArrayList<>();
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
         try {
             stm = con.prepareStatement("select * from segnalafotoristorante");
-            ResultSet rs = stm.executeQuery();
+            rs = stm.executeQuery();
             while (rs.next()) {
                 Foto f = getFoto(rs.getInt("id_foto"));//DBManager manager, int id, Date data, Ristorante ristorante, Foto foto
                 res.add(new SegnalaFotoRistorante(this, rs.getInt("id"), rs.getDate("data"), getRistorante(f.getRistorante().getId()), f));
-                System.out.println("Added notifica");
             }
-            stm.close();
         } catch (SQLException ex) {
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         return res;
     }
@@ -1421,17 +1925,31 @@ public class DBManager implements Serializable {
      */
     ArrayList<SegnalaFotoRecensione> getSegnalaFotoRecensioneNotifiche() {
         ArrayList<SegnalaFotoRecensione> res = new ArrayList<>();
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
         try {
             stm = con.prepareStatement("select * from segnalafotorecensione");
-            ResultSet rs = stm.executeQuery();
+            rs = stm.executeQuery();
             while (rs.next()) {
                 res.add(new SegnalaFotoRecensione(this, rs.getInt("id"), rs.getDate("data"), getRecensione(rs.getInt("id_rec"))));
-                System.out.println("Added notifica");
             }
-            stm.close();
         } catch (SQLException ex) {
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         return res;
     }
@@ -1448,39 +1966,59 @@ public class DBManager implements Serializable {
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     public ArrayList<Times> getTimes(Days days) {
-        PreparedStatement stm;
-        ResultSet rs;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
         ArrayList<Times> res = new ArrayList<>();
         try {
             stm = con.prepareStatement("SELECT * from Times WHERE id_days = ?");
             stm.setInt(1, days.getId());
             rs = stm.executeQuery();
-
             while (rs.next()) {
                 res.add(new Times(rs.getInt("id"), rs.getTime("apertura"), rs.getTime("chiusura")));
             }
-            rs.close();
-            stm.close();
         } catch (SQLException ex) {
-            System.out.println("Fallita estrazione tempi");
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         return res;
     }
 
     public boolean addTimes(Days days, Time apertura, Time chiusura) {
-        PreparedStatement stm;
+        boolean res = false;
+        PreparedStatement stm = null;
         try {
             stm = con.prepareStatement("insert into times (id_days,apertura,chiusura) values (?,?,?)");
             stm.setInt(1, days.getId());
             stm.setTime(2, apertura);
             stm.setTime(3, chiusura);
             stm.executeUpdate();
+            res = true;
         } catch (SQLException ex) {
-            System.out.println("Failed to add times to days");
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
 
     //////////////////////////////////////////////////////////
@@ -1495,19 +2033,26 @@ public class DBManager implements Serializable {
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     public boolean justSegnalato(Foto foto) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
         ResultSet rs;
+        boolean res = false;
         try {
             stm = con.prepareStatement("select * from segnalafotoristorante where id_foto = ?");
             stm.setInt(1, foto.getId());
             rs = stm.executeQuery();
-            boolean res = rs.next();
-            rs.close();
-            stm.close();
-            return res;
+            res = rs.next();
         } catch (SQLException ex) {
-            return true;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     //////////////////////////////////////////////////////////
@@ -1531,34 +2076,50 @@ public class DBManager implements Serializable {
      * false altrimenti
      */
     public boolean addComment(Recensione recensione, String commento) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("UPDATE RECENSIONE SET commento = ? WHERE id = ?");
             stm.setString(1, commento);
             stm.setInt(2, recensione.getId());
             stm.executeUpdate();
-            stm.close();
             recensione.setCommento(commento);
-            return true;
+            res = true;
         } catch (SQLException ex) {
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     public boolean justSegnalato(Recensione recensione) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
         ResultSet rs;
+        boolean res = false;
         try {
             stm = con.prepareStatement("select * from segnalafotorecensione where id_rec = ?");
             stm.setInt(1, recensione.getId());
             rs = stm.executeQuery();
-            boolean res = rs.next();
-            rs.close();
-            stm.close();
-            return res;
+            res = rs.next();
         } catch (SQLException ex) {
-            return true;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     /**
@@ -1570,18 +2131,26 @@ public class DBManager implements Serializable {
      * altrimenti
      */
     public boolean addFoto(Recensione recensione, String pathFoto) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("UPDATE RECENSIONE SET fotoPath = ? WHERE id = ?");
             stm.setString(1, pathFoto);
             stm.setInt(2, recensione.getId());
             stm.executeUpdate();
-            stm.close();
+            res = true;
         } catch (SQLException ex) {
-            System.out.println("Fallita aggiunta foto a ristorante su DB");
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
 
     /**
@@ -1591,19 +2160,27 @@ public class DBManager implements Serializable {
      * @return true se la foto è stata eliminata con successo, false altrimenti
      */
     public boolean removeFoto(Recensione recensione) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("UPDATE RECENSIONE SET fotoPath = ? WHERE id = ?");
             stm.setString(1, null);
             stm.setInt(2, recensione.getId());
             stm.executeUpdate();
-            stm.close();
             recensione.setFotoPath(null);
+            res = true;
         } catch (SQLException ex) {
-            System.out.println("Fallita aggiunta foto a ristorante su DB");
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
 
     /**
@@ -1615,7 +2192,8 @@ public class DBManager implements Serializable {
      * questa recensione
      */
     public float getMediaVoti(Recensione recensione) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        float res = 0;
         try {
             stm = con.prepareStatement("select rating from votorec where id_rec = ?");
             stm.setInt(1, recensione.getId());
@@ -1626,13 +2204,19 @@ public class DBManager implements Serializable {
                 somma += rs.getInt("rating");
                 count++;
             }
-            float res = count != 0 ? ((float) somma) / count : -1;
-            stm.close();
-            return res;
+            res = count != 0 ? ((float) somma) / count : 0;
         } catch (SQLException ex) {
-            System.out.println("Fallita estrazione voti recensione");
-            return -1;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     /**
@@ -1644,20 +2228,29 @@ public class DBManager implements Serializable {
      * @return
      */
     public boolean addVoto(Recensione recensione, Utente utente, int voto) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
+        Date current = Date.valueOf(LocalDate.now());
         try {
-            Date current = Date.valueOf(LocalDate.now());
             stm = con.prepareStatement("insert into votorec (id_utente,id_rec,rating,data) values (?,?,?,?)");
             stm.setInt(1, utente.getId());
             stm.setInt(2, recensione.getId());
             stm.setInt(3, voto);
             stm.setDate(4, current);
             stm.executeUpdate();
-            stm.close();
+            res = true;
         } catch (SQLException ex) {
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
@@ -1679,17 +2272,26 @@ public class DBManager implements Serializable {
      * @return true se l'attivazione è andata a buon fine, false altrimentie
      */
     public boolean attiva(Utente utente) {
-        PreparedStatement stm;
+        boolean res = false;
+        PreparedStatement stm = null;
         try {
             stm = con.prepareStatement("update utente set attivato = ? where id = ?");
             stm.setBoolean(1, true);
             stm.setInt(2, utente.getId());
             stm.executeUpdate();
-            stm.close();
-            return true;
+            res = true;
         } catch (SQLException ex) {
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     //////////////////////////////////////////////////////////
@@ -1708,18 +2310,32 @@ public class DBManager implements Serializable {
      */
     ArrayList<NuovaFoto> getNuovaFotoNotifiche(Ristoratore ristoratore) {
         ArrayList<NuovaFoto> res = new ArrayList<>();
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
         try {
             stm = con.prepareStatement("select * from nuovafoto where id_dest = ?");
             stm.setInt(1, ristoratore.getId());
-            ResultSet rs = stm.executeQuery();
+            rs = stm.executeQuery();
             while (rs.next()) { //DBManager manager, int id, Date data, Foto foto
                 res.add(new NuovaFoto(this, rs.getInt("id"), rs.getDate("data"), getFoto(rs.getInt("id_foto"))));
-                System.out.println("Added notifica");
             }
-            stm.close();
         } catch (SQLException ex) {
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         return res;
     }
@@ -1729,18 +2345,32 @@ public class DBManager implements Serializable {
      */
     ArrayList<NuovaRecensione> getNuovaRecensioneNotifiche(Ristoratore ristoratore) {
         ArrayList<NuovaRecensione> res = new ArrayList<>();
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
         try {
             stm = con.prepareStatement("select * from nuovafoto where id_dest = ?");
             stm.setInt(1, ristoratore.getId());
-            ResultSet rs = stm.executeQuery();
-            while (rs.next()) { //DBManager manager, int id, Date data, Foto foto
+            rs = stm.executeQuery();
+            while (rs.next()) {
                 res.add(new NuovaRecensione(this, rs.getInt("id"), rs.getDate("data"), getRecensione(rs.getInt("id_rec"))));
-                System.out.println("Added notifica");
             }
-            stm.close();
         } catch (SQLException ex) {
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         return res;
     }
@@ -1753,17 +2383,32 @@ public class DBManager implements Serializable {
      */
     public ArrayList<Ristorante> getRistoranti(Ristoratore ristoratore) {
         ArrayList<Ristorante> res = new ArrayList<>();
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
         try {
             stm = con.prepareStatement("select * from Ristorante where id_utente = ?");
             stm.setInt(1, ristoratore.getId());
-            ResultSet rs = stm.executeQuery();
+            rs = stm.executeQuery();
             while (rs.next()) {
                 res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
             }
-            stm.close();
         } catch (SQLException ex) {
-            return null;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         return res;
     }
@@ -1791,7 +2436,8 @@ public class DBManager implements Serializable {
      * @return true se è andato tutto bene, false, altrimenti
      */
     public boolean modificaProfilo(Utente utente, String nome, String cognome, String email, String avpath) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("update utente set nome = ?, cognome = ?, email = ?, avpath = ? where id = ?");
             stm.setString(1, nome);
@@ -1800,11 +2446,19 @@ public class DBManager implements Serializable {
             stm.setString(4, avpath);
             stm.setInt(5, utente.getId());
             stm.executeUpdate();
-            stm.close();
+            res = true;
         } catch (SQLException ex) {
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
 
     /**
@@ -1815,53 +2469,88 @@ public class DBManager implements Serializable {
      * @return true se è andato tutto bene, false altrimenti
      */
     public boolean cambiaPassword(Utente utente, String nuovaPass) {
-        PreparedStatement stm;
-        ResultSet rs;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("UPDATE utente SET password = ? where id = ?");
             stm.setString(1, nuovaPass);
             stm.setInt(2, utente.getId());
             stm.executeUpdate();
-            stm.close();
+            res = true;
         } catch (SQLException ex) {
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
 
     public int numeroRecensioni(Utente utente) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        int res = 0;
         try {
             stm = con.prepareStatement("select count(*) as tot from recensione where id_utente = ?");
             stm.setInt(1, utente.getId());
-            int res;
-            try (ResultSet rs = stm.executeQuery()) {
-                if (rs.next()) {
-                    res = rs.getInt("tot");
-                } else {
-                    res = -1;
+            rs = stm.executeQuery();
+            if (rs.next()) {
+                res = rs.getInt("tot");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-            stm.close();
-            return res;
-        } catch (SQLException ex) {
-            System.out.println("Fallita estrazione numero recensioni utente");
-            return -1;
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
-    public boolean justSegnalataFoto(Utente utente, Foto foto) {
-        PreparedStatement stm;
+    public boolean justSegnalataFoto(Foto foto) {
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        boolean res = false;
         try {
-            stm = con.prepareStatement("select ");
-            stm.setInt(1, utente.getId());
-            ResultSet rs = stm.executeQuery();
-            return rs.next();
-
+            stm = con.prepareStatement("select * from segnalafotoristorante where id_foto = ?");
+            stm.setInt(1, foto.getId());
+            rs = stm.executeQuery();
+            res = rs.next();
         } catch (SQLException ex) {
-            System.out.println("Fallita estrazione justSegnalato utente " + this);
-            return true;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     /**
@@ -1872,23 +2561,35 @@ public class DBManager implements Serializable {
      * @return un float tra 0 e 5 alle recensioni di questo utente
      */
     public float getReputazione(Utente utente) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        float res = 0;
         try {
             stm = con.prepareStatement("select avg(res.parz) as media from( select avg(voto.rating) as parz from (select * from recensione where id_utente = ?) as rec, votorec as voto where rec.id = voto.ID_REC group by rec.id) as res group by res.parz");
             stm.setInt(1, utente.getId());
-            ResultSet rs = stm.executeQuery();
-            float res;
+            rs = stm.executeQuery();
             if (rs.next()) {
                 res = rs.getFloat("media");
-            } else {
-                res = -1;
             }
-            stm.close();
-            return res;
         } catch (SQLException ex) {
-            System.out.println("Fallita estrazione reputazione utente");
-            return -1;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     /**
@@ -1900,18 +2601,34 @@ public class DBManager implements Serializable {
      * altrimenti
      */
     public boolean justRecensito(Utente utente, Ristorante ristorante) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("select * from recensione where id_rist = ? AND id_utente = ?");
             stm.setInt(1, ristorante.getId());
             stm.setInt(2, utente.getId());
-            ResultSet rs = stm.executeQuery();
-            boolean res = rs.next();
-            stm.close();
-            return res;
-        } catch (Exception ex) {
-            return true;
+            rs = stm.executeQuery();
+            res = rs.next();
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     /**
@@ -1923,9 +2640,10 @@ public class DBManager implements Serializable {
      * altrimenti
      */
     public boolean justVotatoOggi(Utente utente, Ristorante ristorante) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
         ResultSet rs;
-        boolean res;
+        boolean res = true;
+        Date d;
         try {
             Date now = new Date(System.currentTimeMillis());
             stm = con.prepareStatement("select data from votorist where id_utente = ? AND id_rist = ? order by data desc { limit 1 }");
@@ -1933,15 +2651,19 @@ public class DBManager implements Serializable {
             stm.setInt(2, ristorante.getId());
             rs = stm.executeQuery();
             if (rs.next()) {
-                Date d = rs.getDate("data");
+                d = rs.getDate("data");
                 res = d.getDay() == now.getDay() && d.getMonth() == now.getMonth() && d.getYear() == now.getYear();
-            } else {
-                res = false;
             }
-            rs.close();
-            stm.close();
         } catch (SQLException ex) {
-            return true;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         return res;
     }
@@ -1958,24 +2680,35 @@ public class DBManager implements Serializable {
         if (utente.getClass() == Amministratore.class) {
             return true;
         }
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("select attivato from Utente where id = ?");
             stm.setInt(1, utente.getId());
-            ResultSet rs = stm.executeQuery();
-            boolean res;
-
+            rs = stm.executeQuery();
             if (rs.next()) {
                 res = rs.getBoolean("attivato");
-
-            } else {
-                res = false;
             }
-            stm.close();
-            return res;
         } catch (SQLException ex) {
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     /**
@@ -1994,74 +2727,87 @@ public class DBManager implements Serializable {
      * false altrimenti
      */
     public boolean addRistorante(Utente utente, String nome, String desc, String linkSito, String fascia, String spec, String address, String fotoPath, String fotoDescr) {
-        PreparedStatement stm;
-        ResultSet rs;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        boolean res = false;
+        Date sqlDate = new Date(System.currentTimeMillis());
         try {
-
             Luogo luogo = getLuogo(address);
+            if (luogo != null) {
 
-            stm = con.prepareStatement("INSERT INTO Luogo (address,lat,lng) VALUES (?,?,?)");
-            stm.setString(1, luogo.getAddress());
-            stm.setDouble(2, luogo.getLat());
-            stm.setDouble(3, luogo.getLng());
-            stm.executeUpdate();
+                stm = con.prepareStatement("INSERT INTO Luogo (address,lat,lng) VALUES (?,?,?)");
+                stm.setString(1, luogo.getAddress());
+                stm.setDouble(2, luogo.getLat());
+                stm.setDouble(3, luogo.getLng());
+                stm.executeUpdate();
 
-            stm = con.prepareStatement("select id from Luogo where lat = ? AND lng = ?");
-            stm.setDouble(1, luogo.getLat());
-            stm.setDouble(2, luogo.getLng());
-            rs = stm.executeQuery();
-            int luogo_id;
-            if (rs.next()) {
-                luogo_id = rs.getInt("id");
+                stm = con.prepareStatement("select id from Luogo where lat = ? AND lng = ?");
+                stm.setDouble(1, luogo.getLat());
+                stm.setDouble(2, luogo.getLng());
+                rs = stm.executeQuery();
+
+                int luogo_id;
+                if (rs.next()) {
+                    luogo_id = rs.getInt("id");
+
+                    stm = con.prepareStatement("INSERT INTO Ristorante (nome,descr,linksito,cucina,fascia,id_luogo) VALUES (?,?,?,?,?,?)");
+                    stm.setString(1, nome);
+                    stm.setString(2, desc);
+                    stm.setString(3, linkSito);
+                    stm.setString(4, spec);
+                    stm.setString(5, fascia);
+                    stm.setInt(6, luogo_id);
+                    stm.executeUpdate();
+
+                    stm = con.prepareStatement("select id from Ristorante where nome = ? AND linkSito = ?");
+                    stm.setString(1, nome);
+                    stm.setString(2, linkSito);
+                    rs = stm.executeQuery();
+
+                    Ristorante rist;
+                    if (rs.next()) {
+                        rist = getRistorante(rs.getInt("id"));
+                        if (rist != null) {
+                            stm = con.prepareStatement("INSERT INTO Foto (fotoPath,data,descr,id_rist,id_utente) VALUES (?,?,?,?,?)");
+                            stm.setString(1, fotoPath);
+                            stm.setDate(2, sqlDate);
+                            stm.setString(3, fotoDescr);
+                            stm.setInt(4, rist.getId());
+                            stm.setInt(5, utente.getId());
+                            stm.executeUpdate();
+                            res = true;
+                        }
+                    } else {
+                        res = false;
+                    }
+                } else {
+                    res = false;
+                }
+
             } else {
-                throw new SQLException();
+                res = false;
             }
-
-            stm = con.prepareStatement("INSERT INTO Ristorante (nome,descr,linksito,cucina,fascia,id_luogo) VALUES (?,?,?,?,?,?)");
-            stm.setString(1, nome);
-            stm.setString(2, desc);
-            stm.setString(3, linkSito);
-            stm.setString(4, spec);
-            stm.setString(5, fascia);
-            stm.setInt(6, luogo_id);
-            stm.executeUpdate();
-
-            stm = con.prepareStatement("select id from Ristorante where nome = ? AND linkSito = ?");
-            stm.setString(1, nome);
-            stm.setString(2, linkSito);
-            rs = stm.executeQuery();
-            Ristorante res;
-            if (rs.next()) {
-                res = getRistorante(rs.getInt("id"));
-            } else {
-                throw new SQLException();
-            }
-
-            stm = con.prepareStatement("INSERT INTO Foto (fotoPath,data,descr,id_rist,id_utente) VALUES (?,?,?,?,?)");
-            Date sqlDate = new Date(System.currentTimeMillis());
-            stm.setString(1, fotoPath);
-            stm.setDate(2, sqlDate);
-            stm.setString(3, fotoDescr);
-            stm.setInt(4, res.getId());
-            stm.setInt(5, utente.getId());
-            stm.executeUpdate();
-            rs.close();
-            stm.close();
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("Fallita registrazione ristorante su DB");
-            return false;
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        } catch (IOException ex) {
-            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        update();
-        return true;
+        updateAutocomplete();
+        return res;
     }
-
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
@@ -2073,17 +2819,27 @@ public class DBManager implements Serializable {
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
+
     public boolean done(NuovaFoto nuovafoto) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("remove from nuovafoto where id = ?");
             stm.setInt(1, nuovafoto.getId());
             stm.executeUpdate();
-            stm.close();
+            res = true;
         } catch (SQLException ex) {
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
 
     /**
@@ -2095,18 +2851,27 @@ public class DBManager implements Serializable {
      * altriementi
      */
     public boolean newNotNuovaFoto(Foto foto) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("insert into nuovafoto(id_foto, id_dest, data) values (?,?,?)");
             stm.setInt(1, foto.getId());
             stm.setInt(2, foto.getRistorante().getUtente().getId());
             stm.setDate(3, new Date(System.currentTimeMillis()));
             stm.executeUpdate();
-            stm.close();
+            res = true;
         } catch (SQLException ex) {
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
 
     //////////////////////////////////////////////////////////
@@ -2121,16 +2886,25 @@ public class DBManager implements Serializable {
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     public boolean done(NuovaRecensione nuovarecensione) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("remove from nuovarecensione where id = ?");
             stm.setInt(1, nuovarecensione.getId());
             stm.executeUpdate();
-            stm.close();
+            res = true;
         } catch (SQLException ex) {
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
 
     /**
@@ -2142,18 +2916,27 @@ public class DBManager implements Serializable {
      * altriementi
      */
     public boolean newNotNuovaRecensione(Recensione recensione) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("insert into nuovarecensione(id_rec, id_dest, data) values (?,?,?)");
             stm.setInt(1, recensione.getId());
             stm.setInt(2, recensione.getRistorante().getUtente().getId());
             stm.setDate(3, new Date(System.currentTimeMillis()));
             stm.executeUpdate();
-            stm.close();
+            res = true;
         } catch (SQLException ex) {
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
 
     //////////////////////////////////////////////////////////
@@ -2168,17 +2951,25 @@ public class DBManager implements Serializable {
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     public boolean done(RichiestaRistorante richiestaristorante) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("delete from richiestaristorante where id = ?");
             stm.setInt(1, richiestaristorante.getId());
             stm.executeUpdate();
-            stm.close();
-            return true;
+            res = true;
         } catch (SQLException ex) {
-            System.out.println("Fallita eliminazione notifica RichiestaRistorante");
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     //////////////////////////////////////////////////////////
@@ -2193,16 +2984,25 @@ public class DBManager implements Serializable {
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     public boolean done(SegnalaFotoRecensione segnalafotorecensione) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("delete from segnalafotorecensione where id = ?");
             stm.setInt(1, segnalafotorecensione.getId());
             stm.executeUpdate();
-            return true;
+            res = true;
         } catch (SQLException ex) {
-            System.out.println("Fallita eliminazione notifica SegnalaFotoRecensione");
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     /**
@@ -2218,17 +3018,26 @@ public class DBManager implements Serializable {
      * altriementi
      */
     public boolean newNotSegnalaFotoRecensione(Recensione recensione) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("insert into segnalafotorecensione(id_rec, data) values (?,?)");
             stm.setInt(1, recensione.getId());
             stm.setDate(2, new Date(System.currentTimeMillis()));
             stm.executeUpdate();
-            stm.close();
+            res = true;
         } catch (SQLException ex) {
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
 
     //////////////////////////////////////////////////////////
@@ -2243,16 +3052,25 @@ public class DBManager implements Serializable {
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     public boolean done(SegnalaFotoRistorante segnalafotoristorante) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("delete from segnalafotoristorante where id = ?");
             stm.setInt(1, segnalafotoristorante.getId());
             stm.executeUpdate();
-            return true;
+            res = true;
         } catch (SQLException ex) {
-            System.out.println("Fallita eliminazione notifica SegnalaFotoRistorante");
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     /**
@@ -2266,17 +3084,26 @@ public class DBManager implements Serializable {
      * altriementi
      */
     public boolean newNotSegnalaFotoRistorante(Foto foto) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("insert into segnalafotoristorante(id_foto, data) values (?,?)");
             stm.setInt(1, foto.getId());
             stm.setDate(2, new Date(System.currentTimeMillis()));
             stm.executeUpdate();
-            stm.close();
+            res = false;
         } catch (SQLException ex) {
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
 
     //////////////////////////////////////////////////////////
@@ -2291,16 +3118,25 @@ public class DBManager implements Serializable {
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     public boolean done(CommentoRecensione commentorecensione) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("delete from rispostarecensione where id = ?");
             stm.setInt(1, commentorecensione.getId());
             stm.executeUpdate();
-            return true;
+            res = true;
         } catch (SQLException ex) {
-            System.out.println("Fallita eliminazione notifica CommentoRecensione");
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        return res;
     }
 
     /**
@@ -2314,18 +3150,27 @@ public class DBManager implements Serializable {
      * altriementi
      */
     public boolean newNotCommentoRecensione(Recensione recensione, String commento) {
-        PreparedStatement stm;
+        PreparedStatement stm = null;
+        boolean res = false;
         try {
             stm = con.prepareStatement("insert into RispostaRecensione(id_rec, commento, data) values (?,?,?)");
             stm.setInt(1, recensione.getId());
             stm.setString(2, commento);
             stm.setDate(3, new Date(System.currentTimeMillis()));
             stm.executeUpdate();
-            stm.close();
+            res = true;
         } catch (SQLException ex) {
-            return false;
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        return true;
+        return res;
     }
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////

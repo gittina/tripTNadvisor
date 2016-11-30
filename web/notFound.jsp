@@ -167,8 +167,10 @@
                             <span class="name">Not Found</span>
                             <hr class="star-light">
                             <span class="skills">The resource you were looking for was not found</span>
-                            <a href="<%= request.getContextPath()%>/HomeServlet">Go to Home Page</a>
-                            <a href="<%= request.getContextPath()%>/login.jsp">Go to Login Page</a>
+                            <br>
+                            <label class="control-label"><a href="<%= request.getContextPath()%>/HomeServlet">Go to Home Page</a></label>
+                            <br>
+                            <label class="control-label"><a href="<%= request.getContextPath()%>/login.jsp">Go to Login Page</a></label>
                         </div>
                     </div>
                 </div>

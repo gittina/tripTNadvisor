@@ -1,9 +1,6 @@
-
 package Listener;
 
 import DataBase.DBManager;
-import java.sql.SQLException;
-import java.util.logging.Logger;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -11,23 +8,16 @@ import javax.servlet.ServletContextListener;
  *
  * @author Luca
  */
-public class WebAppContextListener implements ServletContextListener{
+public class WebAppContextListener implements ServletContextListener {
 
-    
-    
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        
+
         String dburl = sce.getServletContext().getInitParameter("dburl");
         String contextPath = sce.getServletContext().getInitParameter("contextPath");
         String completePath = sce.getServletContext().getInitParameter("completePath");
-        try {
-            DBManager manager = new DBManager(dburl,contextPath,completePath);
-            sce.getServletContext().setAttribute("dbmanager", manager);
-        } catch (SQLException ex) {
-            Logger.getLogger(getClass().getName()).severe(ex.toString());
-            throw new RuntimeException(ex);
-        }
+        DBManager manager = new DBManager(dburl, contextPath, completePath);
+        sce.getServletContext().setAttribute("dbmanager", manager);
     }
 
     @Override
@@ -39,5 +29,5 @@ public class WebAppContextListener implements ServletContextListener{
             System.out.println("Failed to stop DataBase: " + ex.toString());
         }
     }
-    
+
 }

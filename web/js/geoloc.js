@@ -2,7 +2,6 @@ function getLocationConstant() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError);
         document.getElementById("temp").style.display = 'block';
-        console.log("Ciaoooo");
     } else {
         alert("Your browser or device doesn't support Geolocation");
     }

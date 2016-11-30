@@ -8,8 +8,6 @@ package Notify;
 import DataBase.DBManager;
 import DataBase.Recensione;
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 /**
  *
@@ -66,7 +64,7 @@ public class CommentoRecensione extends Notifica {
 
     @Override
     public String getFotoPath() {
-        return null;
+        return rec.getFotoPath();
     }
 
 }

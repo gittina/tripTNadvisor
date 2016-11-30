@@ -167,8 +167,10 @@
                             <span class="name">Not Logged in</span>
                             <hr class="star-light">
                             <span class="skills">You have to log in to enter this area</span>
-                            <a href="<%= request.getContextPath()%>/HomeServlet">Go to Home Page</a>
-                            <a href="<%= request.getContextPath()%>/login.jsp">Go to Login Page</a>
+                            <br>
+                            <label class="control-label"><a href="<%= request.getContextPath()%>/HomeServlet">Go to Home Page</a></label>
+                            <br>
+                            <label class="control-label"><a href="<%= request.getContextPath()%>/login.jsp">Go to Login Page</a></label>
                         </div>
                     </div>
                 </div>

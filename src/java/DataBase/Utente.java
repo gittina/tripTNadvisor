@@ -73,7 +73,7 @@ public abstract class Utente implements Serializable{
     
     
     public boolean justSegnalataFoto(Foto foto){
-        return manager.justSegnalataFoto(this, foto);
+        return manager.justSegnalataFoto(foto);
     }
     
     /**
