@@ -17,8 +17,7 @@ import java.util.Objects;
  */
 public class Ristorante implements Serializable {
 
-    private final DBManager manager;
-    private final Connection con;
+    transient private final DBManager manager;
 
     public int getId() {
         return id;
@@ -113,7 +112,6 @@ public class Ristorante implements Serializable {
      * @param visite numero di visite del ristorante
      */
     public Ristorante(int id, String name, String descr, String linksito, String fascia, String cucina, DBManager manager, Utente utente, int visite) {
-        con = manager.con;
         this.id = id;
         this.name = name;
         this.descr = descr;

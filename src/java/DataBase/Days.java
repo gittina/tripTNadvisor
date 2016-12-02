@@ -17,7 +17,7 @@ import java.util.Comparator;
 //giorni della settimana da 1 a 7
 public class Days implements Serializable{
 
-    private final DBManager manager;
+    transient private final DBManager manager;
     private final int giorno;
     private final int id;
     private final Ristorante ristorante;

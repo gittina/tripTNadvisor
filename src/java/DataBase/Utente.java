@@ -22,7 +22,7 @@ public abstract class Utente implements Serializable{
     private String cognome;
     private String email;
     private String avpath;
-    protected final DBManager manager;
+    transient protected final DBManager manager;
 
     public Utente(int id, String nome, String cognome, String email, String avpath, DBManager manager) {
         this.id = id;

@@ -5,6 +5,7 @@
  */
 package DataBase;
 
+import java.io.Serializable;
 import java.sql.Time;
 import java.util.Objects;
 
@@ -12,7 +13,7 @@ import java.util.Objects;
  *
  * @author lucadiliello
  */
-public class Times {
+public class Times implements Serializable {
     private final int id;
     private final Time apertura;
     private final Time chiusura;

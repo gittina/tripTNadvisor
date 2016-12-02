@@ -10,7 +10,6 @@ import Notify.Notifica;
 import Notify.RichiestaRistorante;
 import Notify.SegnalaFotoRecensione;
 import Notify.SegnalaFotoRistorante;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 

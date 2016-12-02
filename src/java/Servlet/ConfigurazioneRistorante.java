@@ -36,9 +36,9 @@ public class ConfigurazioneRistorante extends HttpServlet {
 
             ristorante.addVisita();
             HttpSession session = request.getSession();
+            session.removeAttribute("ristorante");
             session.setAttribute("ristorante", ristorante);
             request.getRequestDispatcher("/info.jsp").forward(request, response);
-
         } catch (NumberFormatException | NullPointerException e) {
             request.getRequestDispatcher("/HomeServlet").forward(request, response);
         }

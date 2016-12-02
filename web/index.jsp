@@ -174,7 +174,10 @@
                             <div class="row">
                                 <div class="form-group">
                                     <div class="form-group">
-                                        <input type="text" placeholder="<fmt:message key="cerca"/>" class="form-control" name="research"/>
+                                        <div style="position: relative; height: 80px;">
+                                            <input type="text" placeholder=" <fmt:message key="cerca"/>" class="form-control" name="research" id="autocomplete-ajax" style="position: absolute; z-index: 2;"/>
+                                            <input type="text" name="research" id="autocomplete-ajax-x" disabled="disabled" style="color: #CCC; background: transparent; z-index: 1;"/>
+                                        </div>
                                     </div>
                                     <div class="radio">
                                         <h5>

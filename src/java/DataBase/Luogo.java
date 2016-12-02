@@ -5,11 +5,13 @@
  */
 package DataBase;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Luca
  */
-public class Luogo {
+public class Luogo implements Serializable{
     private double lat;
     private double lng;
     private String address;

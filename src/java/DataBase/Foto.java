@@ -6,7 +6,6 @@
 package DataBase;
 
 import java.io.Serializable;
-import java.sql.Connection;
 import java.sql.Date;
 
 /**
@@ -14,8 +13,7 @@ import java.sql.Date;
  * @author Luca
  */
 public class Foto implements Serializable {
-    private final DBManager manager;
-    private final Connection con;
+    transient private final DBManager manager;
     /**
      * Creazione dell'oggetto foto
      * @param id id della foto su DB
@@ -28,7 +26,6 @@ public class Foto implements Serializable {
      */
     public Foto(int id, String fotopath, String descr, Date data, Utente utente, Ristorante ristorante, DBManager manager) {
         this.manager = manager;
-        con = manager.con;
         this.id = id;
         this.fotopath = fotopath;
         this.descr = descr;

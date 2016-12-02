@@ -14,13 +14,12 @@ import java.sql.*;
  */
 public class Recensione implements Serializable{
 
+    transient private final DBManager manager;
     private int id;
     private String titolo;
     private String testo;
     private Date data;
     private String commento;
-    private final DBManager manager;
-    private final Connection con;
     private final Ristorante ristorante;
     private final Utente utente;
     private String fotoPath;
@@ -77,7 +76,6 @@ public class Recensione implements Serializable{
         this.manager = manager;
         this.utente = utente;
         this.ristorante = ristorante;
-        con = manager.con;
     }
 
     /**
