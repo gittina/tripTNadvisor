@@ -39,7 +39,7 @@ public class ReclamaRistoranteServlet extends HttpServlet {
             Utente utente = (Utente) session.getAttribute("utente");
             Ristorante ristorante = (Ristorante) session.getAttribute("ristorante");
            
-            manager.newNotReclamaRistorante(ristorante, utente);
+            ristorante.newNotReclamaRistorante(utente);
             session.setAttribute("notMessage", "La tua richiesta sarà valutata da un amministratore");
             request.getRequestDispatcher("/info.jsp").forward(request, response);
     }

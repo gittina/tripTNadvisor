@@ -210,16 +210,15 @@ public class Recensione implements Serializable{
      * Per ottenere la valutazione di questa recensione come media delle
      * valutazioni lasciate dagli altri utenti
      *
-     * @param recensione
      * @return float tra 0 e 5 che indica la media delle valutazioni lasciate a
      * questa recensione
      */
-    public float getMediaVoti(Recensione recensione) {
+    public float getMediaVoti() {
         PreparedStatement stm = null;
         float res = 0;
         try {
             stm = con.prepareStatement("select rating from votorec where id_rec = ?");
-            stm.setInt(1, recensione.getId());
+            stm.setInt(1, getId());
             ResultSet rs = stm.executeQuery();
             int somma = 0;
             int count = 0;

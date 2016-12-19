@@ -295,9 +295,8 @@ public abstract class Utente implements Serializable{
      *
      * @param ristorante ristorante
      * @return true se l'utente è proprietario del ristorante, false altrimentiw
-     * @throws SQLException
      */
-    public boolean proprietario(Ristorante ristorante) throws SQLException {
+    public boolean proprietario(Ristorante ristorante) {
         System.out.println(this);
         System.out.println(ristorante);
         if (ristorante.getUtente() == null) {
@@ -313,9 +312,8 @@ public abstract class Utente implements Serializable{
      *
      * @param rec
      * @return
-     * @throws SQLException
      */
-    public boolean proprietario(Recensione rec) throws SQLException {
+    public boolean proprietario(Recensione rec) {
         return rec.getUtente().equals(this);
     }
 
@@ -455,6 +453,43 @@ public abstract class Utente implements Serializable{
             }
         }
         manager.updateAutocomplete();
+        return res;
+    }
+    
+    /**
+     * Per ottenere la lista dei ristoranti posseduti da un utente
+     *
+     * @return Un ArrayList dei ristoranti dell'utente
+     */
+    public ArrayList<Ristorante> getRistoranti() {
+        ArrayList<Ristorante> res = new ArrayList<>();
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        try {
+            stm = con.prepareStatement("select * from Ristorante where id_utente = ?");
+            stm.setInt(1, getId());
+            rs = stm.executeQuery();
+            while (rs.next()) {
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), manager, manager.getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
         return res;
     }
 

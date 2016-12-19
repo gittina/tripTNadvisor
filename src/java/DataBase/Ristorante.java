@@ -672,7 +672,6 @@ public class Ristorante implements Serializable {
     /**
      * Funzione per l'aggiunta di una foto a questo ristorante
      *
-     * @param ristorante
      * @param path path della foto da aggiungere
      * @param descr piccola descrizione della foto
      * @param utente utente che aggiunge la foto
