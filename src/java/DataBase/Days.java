@@ -122,4 +122,28 @@ public class Days implements Serializable{
         }
         return res;
     }
+    
+    public boolean addTimes(Time apertura, Time chiusura) {
+        boolean res = false;
+        PreparedStatement stm = null;
+        try {
+            stm = con.prepareStatement("insert into times (id_days,apertura,chiusura) values (?,?,?)");
+            stm.setInt(1, getId());
+            stm.setTime(2, apertura);
+            stm.setTime(3, chiusura);
+            stm.executeUpdate();
+            res = true;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
+    }
 }
