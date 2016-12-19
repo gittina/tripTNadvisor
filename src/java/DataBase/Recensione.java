@@ -7,6 +7,9 @@ package DataBase;
 
 import java.io.Serializable;
 import java.sql.*;
+import java.time.LocalDate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -15,6 +18,7 @@ import java.sql.*;
 public class Recensione implements Serializable{
 
     transient private final DBManager manager;
+    transient private final Connection con;
     private int id;
     private String titolo;
     private String testo;
@@ -76,16 +80,9 @@ public class Recensione implements Serializable{
         this.manager = manager;
         this.utente = utente;
         this.ristorante = ristorante;
+        this.con = manager.con;
     }
 
-    /**
-     * Aggiunge un commento alla recensione, scritto dal proprietario del ristorante a cui è riferica
-     * @param commento il commento da aggiungere
-     * @return true se il commento è stato inserito/aggiuornato con successo, false altrimenti
-     */
-    public boolean addComment(String commento) {
-        return manager.addComment(this, commento);
-    }
 
     /**
      * Per ottenere il ristorante su cui è stata scritta questa recensione
@@ -95,35 +92,188 @@ public class Recensione implements Serializable{
         return ristorante;
     }
 
-    public boolean justSegnalato(){
-        return manager.justSegnalato(this);
+    /**
+     * Aggiunge un commento alla recensione, scritto dal proprietario del
+     * ristorante a cui è riferica
+     *
+     * @param commento il commento da aggiungere
+     * @return true se il commento è stato inserito/aggiuornato con successo,
+     * false altrimenti
+     */
+    public boolean addComment(String commento) {
+        PreparedStatement stm = null;
+        boolean res = false;
+        try {
+            stm = con.prepareStatement("UPDATE RECENSIONE SET commento = ? WHERE id = ?");
+            stm.setString(1, commento);
+            stm.setInt(2, getId());
+            stm.executeUpdate();
+            setCommento(commento);
+            res = true;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
     }
-    
+
+    public boolean justSegnalato() {
+        PreparedStatement stm = null;
+        ResultSet rs;
+        boolean res = false;
+        try {
+            stm = con.prepareStatement("select * from segnalafotorecensione where id_rec = ?");
+            stm.setInt(1, getId());
+            rs = stm.executeQuery();
+            res = rs.next();
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
+    }
+
     /**
      * Aggiunge/Aggiorna la foto di questa recensione
+     *
      * @param pathFoto il path della foto da aggiungere/aggiornare
-     * @return true se la foto è stata aggiunta/aggiornata con successo, false altrimenti
+     * @return true se la foto è stata aggiunta/aggiornata con successo, false
+     * altrimenti
      */
     public boolean addFoto(String pathFoto) {
-        return manager.addFoto(this, pathFoto);
+        PreparedStatement stm = null;
+        boolean res = false;
+        try {
+            stm = con.prepareStatement("UPDATE RECENSIONE SET fotoPath = ? WHERE id = ?");
+            stm.setString(1, pathFoto);
+            stm.setInt(2, getId());
+            stm.executeUpdate();
+            res = true;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
     }
-    
+
     /**
      * Elimina la foto di questa recensione
+     *
      * @return true se la foto è stata eliminata con successo, false altrimenti
      */
-    public boolean removeFoto(){
-        return manager.removeFoto(this);
+    public boolean removeFoto() {
+        PreparedStatement stm = null;
+        boolean res = false;
+        try {
+            stm = con.prepareStatement("UPDATE RECENSIONE SET fotoPath = ? WHERE id = ?");
+            stm.setString(1, null);
+            stm.setInt(2, getId());
+            stm.executeUpdate();
+            setFotoPath(null);
+            res = true;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
     }
 
     /**
-     * Per ottenere la valutazione di questa recensione come media delle valutazioni lasciate dagli altri utenti
-     * @return float tra 0 e 5 che indica la media delle valutazioni lasciate a questa recensione
+     * Per ottenere la valutazione di questa recensione come media delle
+     * valutazioni lasciate dagli altri utenti
+     *
+     * @param recensione
+     * @return float tra 0 e 5 che indica la media delle valutazioni lasciate a
+     * questa recensione
      */
-    public float getMediaVoti() {
-        return manager.getMediaVoti(this);
+    public float getMediaVoti(Recensione recensione) {
+        PreparedStatement stm = null;
+        float res = 0;
+        try {
+            stm = con.prepareStatement("select rating from votorec where id_rec = ?");
+            stm.setInt(1, recensione.getId());
+            ResultSet rs = stm.executeQuery();
+            int somma = 0;
+            int count = 0;
+            while (rs.next()) {
+                somma += rs.getInt("rating");
+                count++;
+            }
+            res = count != 0 ? ((float) somma) / count : 0;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
     }
 
+    /**
+     * Per aggiungere un voto alla recensione
+     *
+     * @param utente utente che vota la recensione
+     * @param voto intero da 0 a 5
+     * @return
+     */
+    public boolean addVoto(Utente utente, int voto) {
+        PreparedStatement stm = null;
+        boolean res = false;
+        Date current = Date.valueOf(LocalDate.now());
+        try {
+            stm = con.prepareStatement("insert into votorec (id_utente,id_rec,rating,data) values (?,?,?,?)");
+            stm.setInt(1, utente.getId());
+            stm.setInt(2, getId());
+            stm.setInt(3, voto);
+            stm.setDate(4, current);
+            stm.executeUpdate();
+            res = true;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
+    }
     /**
      * Per controllare se la foto è già stata commentata
      * @return true se è già stata commentata, false altrimenti
@@ -159,15 +309,5 @@ public class Recensione implements Serializable{
 
     public String getCommento() {
         return commento;
-    }
-
-    /**
-     * Per aggiungere un voto alla recensione
-     * @param utente utente che vota la recensione
-     * @param voto intero da 0 a 5 
-     * @return
-     */
-    public boolean addVoto(Utente utente, int voto) {
-        return manager.addVoto(this, utente, voto);
     }
 }

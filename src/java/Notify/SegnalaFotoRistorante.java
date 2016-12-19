@@ -9,6 +9,10 @@ import DataBase.DBManager;
 import DataBase.Foto;
 import DataBase.Ristorante;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -47,9 +51,26 @@ public class SegnalaFotoRistorante extends Notifica {
 
     @Override
     public boolean done() {
-        return manager.done(this);
+        PreparedStatement stm = null;
+        boolean res = false;
+        try {
+            stm = con.prepareStatement("delete from segnalafotoristorante where id = ?");
+            stm.setInt(1, getId());
+            stm.executeUpdate();
+            res = true;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
     }
-
     @Override
     public String toString() {
         System.out.println(ristorante);

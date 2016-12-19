@@ -10,8 +10,13 @@ import Notify.Notifica;
 import Notify.RichiestaRistorante;
 import Notify.SegnalaFotoRecensione;
 import Notify.SegnalaFotoRistorante;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -42,30 +47,139 @@ public class Amministratore extends Utente {
 
     /*
     * Per ricevere tutte le notifiche di avvenuto commento a recensione
-    */
+     */
     ArrayList<CommentoRecensione> getCommentoRecensioneNotifiche() {
-        return manager.getCommentoRecensioneNotifiche();
+        ArrayList<CommentoRecensione> res = new ArrayList<>();
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        try {
+            stm = con.prepareStatement("select * from rispostarecensione");
+            rs = stm.executeQuery();
+            while (rs.next()) {
+                res.add(new CommentoRecensione(manager, rs.getInt("id"), manager.getRecensione(rs.getInt("id_rec")), rs.getString("commento"), rs.getDate("data")));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
     }
-    
 
     /*
     * Per ricevere tutte le notifiche di avvenuta richiesta di possesso ristorante da parte di un utente
-    */
+     */
     ArrayList<RichiestaRistorante> getReclamaRistoranteNotifiche() {
-        return manager.getReclamaRistoranteNotifiche();
+        ArrayList<RichiestaRistorante> res = new ArrayList<>();
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        try {
+            stm = con.prepareStatement("select * from richiestaristorante");
+            rs = stm.executeQuery();
+            while (rs.next()) {
+                res.add(new RichiestaRistorante(manager, rs.getInt("id"), rs.getDate("data"), manager.getUtente(rs.getInt("id_utente")), manager.getRistorante(rs.getInt("id_rist"))));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
     }
-    
+
     /*
     * Per ricevere tutte le notifiche di avvenuta segnalazione foto di un ristorante da parte del proprietario
-    */
+     */
     ArrayList<SegnalaFotoRistorante> getSegnalaFotoRistoranteNotifiche() {
-        return manager.getSegnalaFotoRistoranteNotifiche();
+        ArrayList<SegnalaFotoRistorante> res = new ArrayList<>();
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        try {
+            stm = con.prepareStatement("select * from segnalafotoristorante");
+            rs = stm.executeQuery();
+            while (rs.next()) {
+                Foto foto = manager.getFoto(rs.getInt("id_foto"));//DBManager manager, int id, Date data, Ristorante ristorante, Foto foto
+                res.add(new SegnalaFotoRistorante(manager, rs.getInt("id"), rs.getDate("data"), manager.getRistorante(foto.getRistorante().getId()), foto));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
     }
-    
+
     /*
     * Per ricevere tutte le notifiche di avvenuta segnalazione della foto di una recensione da parte del proprietario del ristorante a cui riferisce la recensione
-    */
+     */
     ArrayList<SegnalaFotoRecensione> getSegnalaFotoRecensioneNotifiche() {
-        return manager.getSegnalaFotoRecensioneNotifiche();
+        ArrayList<SegnalaFotoRecensione> res = new ArrayList<>();
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        try {
+            stm = con.prepareStatement("select * from segnalafotorecensione");
+            rs = stm.executeQuery();
+            while (rs.next()) {
+                res.add(new SegnalaFotoRecensione(manager, rs.getInt("id"), rs.getDate("data"), manager.getRecensione(rs.getInt("id_rec"))));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
     }
+
 }

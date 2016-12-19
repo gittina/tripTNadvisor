@@ -8,9 +8,13 @@ package DataBase;
 import Notify.Notifica;
 import Notify.NuovaFoto;
 import Notify.NuovaRecensione;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -38,24 +42,109 @@ public class Ristoratore extends Utente {
     
     /*
     * Riceve tutte le notifiche di avvenuta aggiunta foto ad uno dei ristorante dell'utente
-    */
+     */
     ArrayList<NuovaFoto> getNuovaFotoNotifiche() {
-        return manager.getNuovaFotoNotifiche(this);
+        ArrayList<NuovaFoto> res = new ArrayList<>();
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        try {
+            stm = con.prepareStatement("select * from nuovafoto where id_dest = ?");
+            stm.setInt(1, getId());
+            rs = stm.executeQuery();
+            while (rs.next()) { //DBManager manager, int id, Date data, Foto foto
+                res.add(new NuovaFoto(manager, rs.getInt("id"), rs.getDate("data"), manager.getFoto(rs.getInt("id_foto"))));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
     }
 
     /*
     * Riceve tutte le notifiche di avvenuta aggiunta recensione ad uno dei ristorante dell'utente
-    */
+     */
     ArrayList<NuovaRecensione> getNuovaRecensioneNotifiche() {
-        return manager.getNuovaRecensioneNotifiche(this);
+        ArrayList<NuovaRecensione> res = new ArrayList<>();
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        try {
+            stm = con.prepareStatement("select * from nuovafoto where id_dest = ?");
+            stm.setInt(1, getId());
+            rs = stm.executeQuery();
+            while (rs.next()) {
+                res.add(new NuovaRecensione(manager, rs.getInt("id"), rs.getDate("data"), manager.getRecensione(rs.getInt("id_rec"))));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
     }
 
     /**
      * Per ottenere la lista dei ristoranti posseduti da un utente
+     *
+     * @param ristoratore
      * @return Un ArrayList dei ristoranti dell'utente
-     * @throws SQLException
      */
-    public ArrayList<Ristorante> getRistoranti() throws SQLException {
-        return manager.getRistoranti(this);
+    public ArrayList<Ristorante> getRistoranti(Ristoratore ristoratore) {
+        ArrayList<Ristorante> res = new ArrayList<>();
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        try {
+            stm = con.prepareStatement("select * from Ristorante where id_utente = ?");
+            stm.setInt(1, ristoratore.getId());
+            rs = stm.executeQuery();
+            while (rs.next()) {
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), manager, manager.getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
     }
 }

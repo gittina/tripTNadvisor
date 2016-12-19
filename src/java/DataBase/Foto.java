@@ -6,7 +6,13 @@
 package DataBase;
 
 import java.io.Serializable;
+import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -14,6 +20,7 @@ import java.sql.Date;
  */
 public class Foto implements Serializable {
     transient private final DBManager manager;
+    transient private final Connection con;
     /**
      * Creazione dell'oggetto foto
      * @param id id della foto su DB
@@ -32,6 +39,7 @@ public class Foto implements Serializable {
         this.data = data;
         this.ristorante = ristorante;
         this.utente = utente;
+        this.con = manager.con;
     }
 
     public int getId() {
@@ -76,8 +84,27 @@ public class Foto implements Serializable {
         return ristorante;
     }
     
-    public boolean justSegnalato(){
-        return manager.justSegnalato(this);
+    public boolean justSegnalato() {
+        PreparedStatement stm = null;
+        ResultSet rs;
+        boolean res = false;
+        try {
+            stm = con.prepareStatement("select * from segnalafotoristorante where id_foto = ?");
+            stm.setInt(1, getId());
+            rs = stm.executeQuery();
+            res = rs.next();
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
     }
     
     /**

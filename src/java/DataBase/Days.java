@@ -6,9 +6,15 @@
 package DataBase;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -18,6 +24,7 @@ import java.util.Comparator;
 public class Days implements Serializable{
 
     transient private final DBManager manager;
+    transient private final Connection con;
     private final int giorno;
     private final int id;
     private final Ristorante ristorante;
@@ -40,6 +47,7 @@ public class Days implements Serializable{
         this.id = id;
         this.ristorante = ristorante;
         this.manager = manager;
+        this.con = manager.con;
     }
 
     /**
@@ -72,7 +80,7 @@ public class Days implements Serializable{
     }
 
     public ArrayList<Times> getTimes() {
-        ArrayList<Times> res = manager.getTimes(this);
+        ArrayList<Times> res = getAllTimes();
         Comparator c = (Comparator<Times>) new Comparator<Times>() {
             @Override
             public int compare(Times o1, Times o2) {
@@ -83,7 +91,35 @@ public class Days implements Serializable{
         return res;
     }
 
-    public boolean addTimes(Time apertura, Time chiusura) {
-        return manager.addTimes(this, apertura, chiusura);
+    public ArrayList<Times> getAllTimes() {
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        ArrayList<Times> res = new ArrayList<>();
+        try {
+            stm = con.prepareStatement("SELECT * from Times WHERE id_days = ?");
+            stm.setInt(1, getId());
+            rs = stm.executeQuery();
+            while (rs.next()) {
+                res.add(new Times(rs.getInt("id"), rs.getTime("apertura"), rs.getTime("chiusura")));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
     }
 }

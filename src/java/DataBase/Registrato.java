@@ -6,7 +6,11 @@
 package DataBase;
 
 import Notify.Notifica;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -32,12 +36,34 @@ public class Registrato extends Utente {
     }
 
     /**
-     * Funzione per attivare un utente registrato non ancora verificato tramite mail
+     * Funzione per attivare un utente registrato non ancora verificato tramite
+     * mail
+     *
      * @return true se l'attivazione è andata a buon fine, false altrimentie
      */
     public boolean attiva() {
-        return manager.attiva(this);
+        boolean res = false;
+        PreparedStatement stm = null;
+        try {
+            stm = con.prepareStatement("update utente set attivato = ? where id = ?");
+            stm.setBoolean(1, true);
+            stm.setInt(2, getId());
+            stm.executeUpdate();
+            res = true;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
     }
+
     
     /*
     * L'utente registrato non ha notifiche, probabile implementazione futura

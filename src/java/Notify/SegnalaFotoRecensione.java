@@ -10,6 +10,8 @@ import DataBase.Recensione;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -44,8 +46,27 @@ public class SegnalaFotoRecensione extends Notifica{
 
     @Override
     public boolean done() {
-        return manager.done(this);
+        PreparedStatement stm = null;
+        boolean res = false;
+        try {
+            stm = con.prepareStatement("delete from segnalafotorecensione where id = ?");
+            stm.setInt(1, getId());
+            stm.executeUpdate();
+            res = true;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
     }
+
 
     @Override
     public String toString() {
