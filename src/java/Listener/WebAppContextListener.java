@@ -17,6 +17,7 @@ public class WebAppContextListener implements ServletContextListener {
         String contextPath = sce.getServletContext().getInitParameter("contextPath");
         String completePath = sce.getServletContext().getInitParameter("completePath");
         DBManager manager = new DBManager(dburl, contextPath, completePath);
+        manager.updateAutocomplete();
         sce.getServletContext().setAttribute("dbmanager", manager);
     }
 

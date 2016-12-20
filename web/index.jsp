@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -39,6 +40,20 @@
         <script type="text/javascript" src="<%= request.getContextPath()%>/src/jquery.autocomplete.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/autocomplete.txt"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/demo.js"></script>
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <link rel="stylesheet" href="/resources/demos/style.css">
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <script>
+            $(function () {
+                $.get('<%= request.getContextPath()%>/autocomplete.txt',function(data){
+                    $("#autocomplete_jquery1").autocomplete({
+                        source: data.split(",")
+                    });
+                });
+                
+            });
+        </script>
     </head>
 
     <body id="page-top" class="index">
@@ -158,7 +173,6 @@
 
 
 
-
         <!-- Header -->
         <header>
             <div class="container">
@@ -175,8 +189,7 @@
                                 <div class="form-group">
                                     <div class="form-group">
                                         <div style="position: relative; height: 80px;">
-                                            <input type="text" placeholder=" <fmt:message key="cerca"/>" class="form-control" name="research" id="autocomplete-ajax" style="position: absolute; z-index: 2;"/>
-                                            <input type="text" name="research" id="autocomplete-ajax-x" disabled="disabled" style="color: #CCC; background: transparent; z-index: 1;"/>
+                                            <input type="text" placeholder=" <fmt:message key="cerca"/>" class="form-control" name="research" id="autocomplete_jquery1"/>
                                         </div>
                                     </div>
                                     <div class="radio">
@@ -224,6 +237,7 @@
                 </div>
             </div>
         </header>
+
 
         <!-- Ristoranti più votati -->
         <section>
@@ -360,9 +374,6 @@
 
         <!-- Geolocation -->
         <script src="<%= request.getContextPath()%>/js/geoloc.js" type="text/javascript"></script>
-
-        <!-- jQuery -->
-        <script src="<%= request.getContextPath()%>/vendor/jquery/jquery.min.js"></script>
 
         <!-- Bootstrap Core JavaScript -->
         <script src="<%= request.getContextPath()%>/vendor/bootstrap/js/bootstrap.min.js"></script>

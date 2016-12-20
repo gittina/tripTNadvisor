@@ -1013,22 +1013,20 @@ public class DBManager implements Serializable {
             rs = stm.executeQuery();
             File file = new File(this.completePath + path);
 
-            String content = "var ristoranti = {\n";
             int counter = 0;
-
+            String content = "";
             while (rs.next()) {
-                content = content + "\t \"" + counter++ + "\": " + "\"" + rs.getString("nome") + "\", \n";
-                content = content + "\t \"" + counter++ + "\": " + "\"" + rs.getString("address") + "\", \n";
+                content += rs.getString("nome") + "," + rs.getString("address") + ",";
             }
 
             stm = con.prepareStatement("select cucina from ristorante group by cucina");
             rs = stm.executeQuery();
 
             while (rs.next()) {
-                content = content + "\t \"" + counter++ + "\": " + "\"" + rs.getString("cucina") + "\", \n";
+                content += rs.getString("cucina") + ",";
             }
+            content += "ristorante,cucina";
 
-            content = content + "}";
 
             // if file doesn't exists, then create it
             try (FileOutputStream fop = new FileOutputStream(file)) {

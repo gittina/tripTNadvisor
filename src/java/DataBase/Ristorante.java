@@ -887,6 +887,10 @@ public class Ristorante implements Serializable {
         return res;
     }
 
+    public ArrayList<Ristorante> getVicini() {
+        return manager.advSearch2(this.getLuogo().getLat(), this.getLuogo().getLng());
+    }
+
     //da lavorare
     public boolean nowOpen() {
         return true;
