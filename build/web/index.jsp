@@ -286,7 +286,7 @@
                     <c:forEach var="ristorante" items="${mostSeen}">
                         <div class="col-md-4">
                             <h5>
-                                <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${ristorante.getId()}"/>o" class="portfolio-link" data-toggle="modal">
+                                <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${ristorante.getId()}"/>" class="portfolio-link" data-toggle="modal">
                                     <c:out value="${ristorante.getName()}"/><br>
                                     <fmt:message key="users.posClass"/>
                                     <c:out value="${ristorante.getPosizioneClassifica()}"/><br><br>

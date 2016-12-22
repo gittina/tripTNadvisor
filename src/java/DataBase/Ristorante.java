@@ -797,7 +797,7 @@ public class Ristorante implements Serializable {
 
         for (Days o : days) {
             for (Times t : o.getTimes()) {
-                forQR = forQR + t.toString();
+                forQR = forQR + t.toString() + '\n';
             }
         }
 

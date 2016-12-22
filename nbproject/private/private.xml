@@ -3,22 +3,17 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/src/java/DataBase/Recensione.java</file>
-            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/autocomplete.txt</file>
-            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/vendor/jquery/jquery.js</file>
-            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/vendor/jquery/jquery.min.js</file>
-            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/src/java/DataBase/Ristoratore.java</file>
+            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/src/java/DataBase/Utente.java</file>
+            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/result.jsp</file>
             <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/src/java/DataBase/DBManager.java</file>
             <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/src/java/Listener/WebAppContextListener.java</file>
-            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/index.jsp</file>
-            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/src/java/DataBase/Times.java</file>
-            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/src/java/DataBase/Registrato.java</file>
-            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/src/java/DataBase/Days.java</file>
-            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/src/java/DataBase/Amministratore.java</file>
-            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/src/java/DataBase/Luogo.java</file>
-            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/src/java/DataBase/Foto.java</file>
-            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/notFound.jsp</file>
-            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/src/java/DataBase/Language.java</file>
+            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/personalScript/show_hidden.js</file>
+            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/info.jsp</file>
+            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/vendor/bootstrap/css/bootstrap.min.css</file>
+            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/css/freelancer.css</file>
+            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/personalScript/maps.js</file>
+            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/login.jsp</file>
+            <file>file:/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/css/freelancer.min.css</file>
         </group>
     </open-files>
 </project-private>
