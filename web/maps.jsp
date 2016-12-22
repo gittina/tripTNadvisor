@@ -6,9 +6,7 @@
 <fmt:setBundle basename="Resources.string" />
 
 <html lang="en">
-
     <head>
-
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,7 +14,7 @@
         <meta name="author" content="">
 
         <title><c:out value="${title}"/></title>
-        <c:set value="/registration.jsp" scope="session" var="lastPage"/>
+        <c:set value="/base.jsp" scope="session" var="lastPage"/>
 
         <!-- Bootstrap Core CSS -->
         <link href="<%= request.getContextPath()%>/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -40,9 +38,8 @@
         <script type="text/javascript" src="<%= request.getContextPath()%>/src/jquery.autocomplete.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/autocomplete.txt"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/demo.js"></script>
-
     </head>
-
+    
     <body id="page-top" class="index">
 
         <!-- Navigation -->
@@ -166,51 +163,16 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-12">
+                        <img class="img-responsive" src="img/profile.png" alt="">
                         <div class="intro-text">
-                            <span class="name"><fmt:message key="register"/></span>
+                            <span class="name">Pagina della mappa</span>
+                            <hr class="star-light">
+                            <span class="skills">Web Developer - Graphic Artist - User Experience Designer</span>
                         </div>
-                        <hr class="star-light">
-                        <div class="col-md-4"></div>
-                        <div class="col-md-4">
-                            <form method="POST" action="<%= request.getContextPath()%>/RegistrationServlet">
-                                <span class="label label-danger"><c:out value="${problemMessage}"/></span>
-                                <br>
-
-                                <label class="control-label">Email</label>
-                                <input type="email" name="mail1" class="form-control">
-                                <span class="label label-danger"><c:out value="${doppioneMessage}"/></span>
-                                <span class="label label-danger"><c:out value="${mailMessage}"/></span>
-                                <br>
-
-                                <label class="control-label">Confirm Email</label>
-                                <input type="email" name="mail2" class="form-control">
-                                <br>
-
-                                <label class="control-label">Password</label>
-                                <input type="password" name="pass1" class="form-control">
-                                <span class="label label-danger"><c:out value="${passMessage}"/></span>
-                                <br>
-
-                                <label class="control-label">Repeat Password</label>
-                                <input type="password" name="pass2" class="form-control">
-                                <br>
-
-                                <input type="checkbox" name="check"/>
-                                <fmt:message key="terms.accept"/>
-                                <span class="label label-danger"><c:out value="${checkMessage}"/></span>
-                                <br><br>
-
-                                <button type="submit" class="btn btn-primary"><fmt:message key="register"/></button>
-                                <button type="reset" id="user" class="btn btn-primary" onclick="history.go(-1);"><fmt:message key="cancel"/></button>
-                            </form>
-                        </div>
-                        <div class="col-md-4"></div>
                     </div>
                 </div>
             </div>
         </header>
-
-
 
         <!-- Footer -->
         <footer class="text-center">
@@ -232,7 +194,7 @@
             <div class="footer-below">
                 <div class="container">
                     <div class="row">
-                        <div class="col-md-12">
+                        <div class="col-lg-12">
                             Copyright &copy; TRIPTNADVISOR 2016
                         </div>
                     </div>

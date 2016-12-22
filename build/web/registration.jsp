@@ -176,16 +176,6 @@
                                 <span class="label label-danger"><c:out value="${problemMessage}"/></span>
                                 <br>
 
-                                <label class="control-label">Name</label>
-                                <input type="text" name="name" class="form-control">                                              
-                                <span class="label label-danger"><c:out value="${nomeMessage}"/></span>
-                                <br>
-
-                                <label class="control-label">Surname</label>
-                                <input type="text" name="surname" class="form-control">                                             
-                                <span class="label label-danger"><c:out value="${cognomeMessage}"/></span>
-                                <br>
-
                                 <label class="control-label">Email</label>
                                 <input type="email" name="mail1" class="form-control">
                                 <span class="label label-danger"><c:out value="${doppioneMessage}"/></span>

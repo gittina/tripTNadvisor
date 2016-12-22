@@ -47,8 +47,8 @@ public class RegistrationServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException, MessagingException {
 
-        String surname = request.getParameter("surname");
-        String name = request.getParameter("name");
+        String surname = "Utente";
+        String name = "Anonimo";
         String mail1 = request.getParameter("mail1");
         String mail2 = request.getParameter("mail2");
         String pass1 = request.getParameter("pass1");
@@ -61,16 +61,6 @@ public class RegistrationServlet extends HttpServlet {
         Language lan = (Language) session.getAttribute("lan");
 
         ResourceBundle labels = ResourceBundle.getBundle("Resources.string_" + lan.getLanSelected());
-
-        if (name.length() < 2) {
-            request.setAttribute("nomeMessage", labels.getString("insert.valid.name"));
-            tornaIndietro = true;
-        }
-
-        if (surname.length() < 3) {
-            request.setAttribute("cognomeMessage", labels.getString("insert.valid.surname"));
-            tornaIndietro = true;
-        }
 
         if (!(pass1.equals(pass2))) {
             request.setAttribute("passMessage", labels.getString("different.password"));
