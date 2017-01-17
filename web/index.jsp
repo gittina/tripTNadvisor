@@ -38,8 +38,8 @@
         <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/jquery-1.8.2.min.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/jquery.mockjax.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/src/jquery.autocomplete.js"></script>
-        <script type="text/javascript" src="<%= request.getContextPath()%>/autocomplete.txt"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/demo.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/personalScript/utility.js"></script>
         <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
         <link rel="stylesheet" href="/resources/demos/style.css">
         <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
@@ -48,10 +48,9 @@
             $(function () {
                 $.get('<%= request.getContextPath()%>/autocomplete.txt',function(data){
                     $("#autocomplete_jquery1").autocomplete({
-                        source: data.split(",")
+                        source: unique(data.split(","))
                     });
                 });
-                
             });
         </script>
     </head>
