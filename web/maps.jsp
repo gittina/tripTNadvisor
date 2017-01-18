@@ -38,9 +38,7 @@
         <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/demo.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/personalScript/maps.js"></script>
 
-        <script async defer
-                src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA61l8xRmFya8etADzBQAHA7oZVu9vUQEY">
-        </script>
+        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA61l8xRmFya8etADzBQAHA7oZVu9vUQEY"></script>
     </head>
 
     <body id="page-top" class="index" onload="initMap('<%= request.getContextPath()%>/GetMapsData')">

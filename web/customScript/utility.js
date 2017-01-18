@@ -18,4 +18,12 @@ var unique = function (origArr) {
     return newArr;
 };
 
-exports.unique = unique;
+function setupAutocomplete(source) {
+    $.get(source, function (data) {
+        $("#autocomplete_jquery1").autocomplete({
+            source: unique(data.split(","))
+        });
+    });
+}
+
+exports.setupAutocomplete = setupAutocomplete;

@@ -39,23 +39,15 @@
         <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/jquery.mockjax.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/src/jquery.autocomplete.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/demo.js"></script>
-        <script type="text/javascript" src="<%= request.getContextPath()%>/personalScript/utility.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/customScript/utility.js"></script>
         <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
         <link rel="stylesheet" href="/resources/demos/style.css">
         <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-        <script>
-            $(function () {
-                $.get('<%= request.getContextPath()%>/autocomplete.txt',function(data){
-                    $("#autocomplete_jquery1").autocomplete({
-                        source: unique(data.split(","))
-                    });
-                });
-            });
-        </script>
+
     </head>
 
-    <body id="page-top" class="index">
+    <body id="page-top" class="index" onload="setupAutocomplete('<%= request.getContextPath()%>/autocomplete.txt')">
 
         <!-- Navigation -->
         <nav id="mainNav" class="navbar navbar-default navbar-fixed-top navbar-custom">
