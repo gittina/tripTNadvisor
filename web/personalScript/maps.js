@@ -24,18 +24,22 @@ function initMap(source) {
             center: myLatLng,
             mapTypeId: google.maps.MapTypeId.ROADMAP
         });
-        
+
         for (i in coord.vicini) {
-            var infowindow = new google.maps.InfoWindow({
-                content: coord.vicini[i].name
-            });
+            var infowindow = new google.maps.InfoWindow();
+
             var marker = new google.maps.Marker({
                 position: new google.maps.LatLng(coord.vicini[i].lat, coord.vicini[i].lng),
                 map: map
             });
-            marker.addListener(marker,'click', (function (marker,infowindow) {
-                infowindow.open(map, marker);
-            })(marker,infowindow));
+            var content = coord.vicini[i].name;
+            
+            google.maps.event.addListener(marker, 'click', (function (marker, content, infowindow) {
+                return function () {
+                    infowindow.setContent(content);
+                    infowindow.open(map, marker);
+                };
+            })(marker, content, infowindow));
         }
     });
 
