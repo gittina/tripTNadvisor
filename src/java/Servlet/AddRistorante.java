@@ -50,7 +50,7 @@ public class AddRistorante extends HttpServlet {
         response.setContentType("text/plain"); //tipo di file di upload
         Utente utente = (Utente) session.getAttribute("utente");
 
-        MultipartRequest multi = new MultipartRequest(request, dirName, 10 * 1024 * 1024, "ISO-8859-1", new DefaultFileRenamePolicy());
+        MultipartRequest multi = new MultipartRequest(request, manager.completePath + "/web" + dirName, 10 * 1024 * 1024, "ISO-8859-1", new DefaultFileRenamePolicy());
         Enumeration files = multi.getFileNames();
         String name = null;
         while (files.hasMoreElements()) {
@@ -63,7 +63,7 @@ public class AddRistorante extends HttpServlet {
         String spec = multi.getParameter("spec");
         String addr = multi.getParameter("addr");
         String fascia = multi.getParameter("fascia");
-        String fotoPath = "/fotoRistoranti/" + multi.getFilesystemName(name);
+        String fotoPath = dirName + "/" + multi.getFilesystemName(name);
         String fotoDescr = multi.getParameter("fotoDescr");
 
         boolean tornaIndietro = false;

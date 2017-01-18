@@ -52,7 +52,7 @@ public class AddFotoServlet extends HttpServlet {
         Utente utente = (Utente) session.getAttribute("utente");
         Ristorante ristorante = (Ristorante) session.getAttribute("ristorante");
 
-        MultipartRequest multi = new MultipartRequest(request, dirName, 10 * 1024 * 1024, "ISO-8859-1", new DefaultFileRenamePolicy());
+        MultipartRequest multi = new MultipartRequest(request, manager.completePath + "/web" + dirName, 10 * 1024 * 1024, "ISO-8859-1", new DefaultFileRenamePolicy());
 
         Enumeration files = multi.getFileNames();
         String name = null;
@@ -64,7 +64,7 @@ public class AddFotoServlet extends HttpServlet {
             request.setAttribute("errMessage", "Selezione non valida, riprova");
             rd = request.getRequestDispatcher("/private/choose.jsp");
         } else {
-            String newAvPath = "/fotoRistoranti/" + multi.getFilesystemName(name);
+            String newAvPath = dirName + "/" + multi.getFilesystemName(name);
             ristorante.addFoto(newAvPath, multi.getParameter("descr"), utente);
             rd = request.getRequestDispatcher("/ConfigurazioneRistorante?id_rist=" + ristorante.getId());
         }

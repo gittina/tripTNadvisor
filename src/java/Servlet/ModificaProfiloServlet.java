@@ -54,7 +54,7 @@ public class ModificaProfiloServlet extends HttpServlet {
         Utente utente = (Utente) session.getAttribute("utente");
         RequestDispatcher rd = request.getRequestDispatcher("/private/ConfigurazioneProfilo");
         if (utente != null) {
-            MultipartRequest multi = new MultipartRequest(request, dirName, 10 * 1024 * 1024, "ISO-8859-1", new DefaultFileRenamePolicy());
+            MultipartRequest multi = new MultipartRequest(request, manager.completePath + "/web" + dirName, 10 * 1024 * 1024, "ISO-8859-1", new DefaultFileRenamePolicy());
             Enumeration files = multi.getFileNames();
             String name = null;
             while (files.hasMoreElements()) {
@@ -113,7 +113,7 @@ public class ModificaProfiloServlet extends HttpServlet {
             if (multi.getFilesystemName(name) == null) {
                 newAvPath = utente.getAvpath();
             } else {
-                newAvPath = "/fotoUtenti/" + multi.getFilesystemName(name);
+                newAvPath = dirName + "/" + multi.getFilesystemName(name);
             }
 
             if (tornaIndietro) {

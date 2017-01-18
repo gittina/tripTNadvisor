@@ -48,7 +48,7 @@ public class InserisciRecensioniServlet extends HttpServlet {
         Utente utente = (Utente) session.getAttribute("utente");
         Ristorante ristorante = (Ristorante) session.getAttribute("ristorante");
 
-        MultipartRequest multi = new MultipartRequest(request, dirName, 10 * 1024 * 1024, "ISO-8859-1", new DefaultFileRenamePolicy());
+        MultipartRequest multi = new MultipartRequest(request, manager.completePath + "/web" + dirName, 10 * 1024 * 1024, "ISO-8859-1", new DefaultFileRenamePolicy());
         Enumeration files = multi.getFileNames();
         String name = null;
         while (files.hasMoreElements()) {
@@ -75,7 +75,7 @@ public class InserisciRecensioniServlet extends HttpServlet {
             request.getRequestDispatcher("/private/scriviRecensione.jsp").forward(request, response);
         }
 
-        String fotoPath = "/fotoRecensioni/" + multi.getFilesystemName(name);
+        String fotoPath = dirName + "/" + multi.getFilesystemName(name);
 
         Recensione rec = ristorante.addRecensione(titolo, recensione, utente);
         rec.addFoto(fotoPath);

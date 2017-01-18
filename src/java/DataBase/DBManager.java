@@ -27,11 +27,9 @@ public class DBManager implements Serializable {
     //transient == non viene serializzato
     public transient Connection con;
     private String googleKey = "AIzaSyA7spDhgAtLeyh6b0F6MQI2I5fldqrR6oM";
-    public String contextPath;
     public String completePath;
 
     public DBManager(String dburl, String contextPath, String completePath) {
-        this.contextPath = contextPath;
         this.completePath = completePath;
         try {
             Class.forName("org.apache.derby.jdbc.ClientDriver", true, getClass().getClassLoader());

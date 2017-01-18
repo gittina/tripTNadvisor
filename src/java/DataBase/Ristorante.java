@@ -789,7 +789,8 @@ public class Ristorante implements Serializable {
     public String creaQR() {
 
         String pos = "/qr/" + this.getName().replace(' ', '_') + ".jpg";
-        String savePath = manager.completePath + pos;
+        String savePath = manager.completePath + "/web" + pos;
+        System.out.println(savePath);
 
         ArrayList<Days> days = getDays();
 

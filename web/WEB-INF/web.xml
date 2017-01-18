@@ -78,13 +78,10 @@
         <param-name>javax.servlet.jsp.jstl.fmt.localizationContext</param-name>
         <param-value>Resources.string</param-value>
     </context-param>
-    <context-param>
-        <param-name>contextPath</param-name>
-        <param-value>/tripTNadvisor</param-value>
-    </context-param>
+    <!-- Configure with the path of the project in your computer -->
     <context-param>
         <param-name>completePath</param-name>
-        <param-value>/Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web</param-value>
+        <param-value>/Users/lucadiliello/Desktop/Progetti/Programmazione_web/tripTNadvisor</param-value>
     </context-param>
     <welcome-file-list>
         <welcome-file>HomeServlet</welcome-file>
@@ -118,7 +115,7 @@
                 uploadDir
             </param-name>
             <param-value>
-                /Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/fotoUtenti
+                /fotoUtenti
             </param-value>
         </init-param>
     </servlet>
@@ -139,7 +136,7 @@
                 uploadDir
             </param-name>
             <param-value>
-                /Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/fotoRistoranti
+                /fotoRistoranti
             </param-value>
         </init-param>
     </servlet>
@@ -167,7 +164,7 @@
                 uploadDir
             </param-name>
             <param-value>
-                /Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/fotoRistoranti
+                /fotoRistoranti
             </param-value>
         </init-param>
     </servlet>
@@ -187,7 +184,7 @@
                 uploadDir
             </param-name>
             <param-value>
-                /Users/lucadiliello/Desktop/Programmazione_web/tripTNadvisor/web/fotoRecensioni
+                /fotoRecensioni
             </param-value>
         </init-param>
     </servlet>
