@@ -239,6 +239,10 @@
         <servlet-name>LoadRistoranteFotoServlet</servlet-name>
         <servlet-class>Servlet.LoadRistoranteFotoServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>GetMapsData</servlet-name>
+        <servlet-class>Servlet.GetMapsData</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ConfigurazioneProfilo</servlet-name>
         <url-pattern>/private/ConfigurazioneProfilo</url-pattern>
@@ -354,6 +358,10 @@
     <servlet-mapping>
         <servlet-name>ApplicaNotificaServlet</servlet-name>
         <url-pattern>/privateAdministrator/ApplicaNotificaServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>GetMapsData</servlet-name>
+        <url-pattern>/GetMapsData</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

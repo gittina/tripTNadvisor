@@ -41,46 +41,9 @@
 
         <!-- javascript file specific for this page-->
         <script type="text/javascript" src="<%= request.getContextPath()%>/personalScript/show_hidden.js"></script>
-
-        <!-- maps scripts-->
-        <script type="text/javascript">
-            function initialize() {
-
-                var myLatLng = new google.maps.LatLng(<c:out value="${ristorante.getLuogo().getLat()}"/>, <c:out value="${ristorante.getLuogo().getLng()}"/>);
-                var myOptions = {
-                    zoom: 14,
-                    center: myLatLng,
-                    mapTypeId: google.maps.MapTypeId.ROADMAP
-                };
-
-                var map = new google.maps.Map(document.getElementById("gmaps-canvas"), myOptions);
-
-            <c:forEach items="${ristorante.getVicini()}" var="rist">
-
-                var marker<c:out value="${rist.getId()}"/> = new google.maps.Marker({
-                    position: new google.maps.LatLng(<c:out value="${rist.getLuogo().getLat()}"/>, <c:out value="${rist.getLuogo().getLng()}"/>),
-                    map: map,
-                    title: "<c:out value="${rist.getName()}"/>"
-                });
-
-                var contentString<c:out value="${rist.getId()}"/> = '<c:out value="${rist.getName()}"/>';
-                var infoWindow<c:out value="${rist.getId()}"/> = new google.maps.InfoWindow({
-                    content: contentString<c:out value="${rist.getId()}"/>
-                });
-
-                google.maps.event.addListener(marker<c:out value="${rist.getId()}"/>, 'click', function () {
-                    infoWindow<c:out value="${rist.getId()}"/>.open(map, marker<c:out value="${rist.getId()}"/>);
-                });
-
-            </c:forEach>
-
-            }
-        </script>
-        <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
-        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7spDhgAtLeyh6b0F6MQI2I5fldqrR6oM&callback=initMap"></script>
     </head>
 
-    <body id="page-top" class="index" onload="initialize()">
+    <body id="page-top" class="index">
 
         <!-- Navigation -->
         <nav id="mainNav" class="navbar navbar-default navbar-fixed-top navbar-custom">
@@ -257,6 +220,7 @@
                                 <br>
                                 <label class="control-label"><fmt:message key="economy.zone"/>: <c:out value="${ristorante.getFascia()}"/></label>
                                 <br>
+                                <label class="control-label"><a href="<%= request.getContextPath()%>/maps.jsp"><fmt:message key="maps"/></a></label>
                             </div>
                         </div>
                     </div>
@@ -353,18 +317,7 @@
             </div>
         </section>
 
-        <!-- Mappa ristorante -->
-        <section>
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <h2>Map</h2>
-                        <hr class="star-primary">
-                        <div id="gmaps-canvas"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
+        
 
         <!-- Recensioni ristorante Section -->
         <section>

@@ -35,12 +35,15 @@
         <![endif]-->
         <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/jquery-1.8.2.min.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/jquery.mockjax.js"></script>
-        <script type="text/javascript" src="<%= request.getContextPath()%>/src/jquery.autocomplete.js"></script>
-        <script type="text/javascript" src="<%= request.getContextPath()%>/autocomplete.txt"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/demo.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/personalScript/maps.js"></script>
+
+        <script async defer
+                src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA61l8xRmFya8etADzBQAHA7oZVu9vUQEY">
+        </script>
     </head>
-    
-    <body id="page-top" class="index">
+
+    <body id="page-top" class="index" onload="initMap('<%= request.getContextPath()%>/GetMapsData')">
 
         <!-- Navigation -->
         <nav id="mainNav" class="navbar navbar-default navbar-fixed-top navbar-custom">
@@ -156,19 +159,14 @@
         </nav>
 
 
-
-
         <!-- Header -->
         <header>
             <div class="container">
                 <div class="row">
-                    <div class="col-md-12">
-                        <img class="img-responsive" src="img/profile.png" alt="">
-                        <div class="intro-text">
-                            <span class="name">Pagina della mappa</span>
-                            <hr class="star-light">
-                            <span class="skills">Web Developer - Graphic Artist - User Experience Designer</span>
-                        </div>
+                    <div class="col-md-12 text-center">
+                        <h2>Map</h2>
+                        <hr class="star-light">
+                        <div id="gmaps-canvas" style="color: black"></div>
                     </div>
                 </div>
             </div>
