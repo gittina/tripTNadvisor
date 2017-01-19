@@ -3,8 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/lucadiliello/Desktop/Progetti/Programmazione_web/tripTNadvisor/src/java/DataBase/Ristorante.java</file>
-            <file>file:/Users/lucadiliello/Desktop/Progetti/Programmazione_web/tripTNadvisor/web/result.jsp</file>
+            <file>file:/Users/lucadiliello/Desktop/Progetti/Programmazione_web/tripTNadvisor/src/java/Servlet/PrivacyServlet.java</file>
+            <file>file:/Users/lucadiliello/Desktop/Progetti/Programmazione_web/tripTNadvisor/src/java/Servlet/ReclamaRistoranteServlet.java</file>
+            <file>file:/Users/lucadiliello/Desktop/Progetti/Programmazione_web/tripTNadvisor/web/privacy.jsp</file>
         </group>
     </open-files>
 </project-private>

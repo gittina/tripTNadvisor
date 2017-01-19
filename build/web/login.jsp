@@ -39,6 +39,7 @@
         <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/jquery.mockjax.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/src/jquery.autocomplete.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/customScript/newPass.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/customScript/privacy.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/demo.js"></script>
 
     </head>

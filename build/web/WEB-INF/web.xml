@@ -3,7 +3,7 @@
     <!-- PARAMETRI DA CONFIGURARE -->
     <context-param>
         <param-name>dburl</param-name>
-        <param-value>jdbc:derby://localhost:1527/db1 </param-value>
+        <param-value>jdbc:derby://localhost:1527/db1</param-value>
     </context-param>
     <context-param>
         <param-name>user</param-name>
@@ -79,7 +79,6 @@
         <filter-name>FilterUser</filter-name>
         <url-pattern>/WEB-INF/*</url-pattern>
         <url-pattern>/META-INF/*</url-pattern>
-        <url-pattern>/geo/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>
@@ -257,6 +256,10 @@
         <servlet-name>NuovaPassword</servlet-name>
         <servlet-class>Servlet.NuovaPassword</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>PrivacyServlet</servlet-name>
+        <servlet-class>Servlet.PrivacyServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ConfigurazioneProfilo</servlet-name>
         <url-pattern>/private/ConfigurazioneProfilo</url-pattern>
@@ -380,6 +383,10 @@
     <servlet-mapping>
         <servlet-name>NuovaPassword</servlet-name>
         <url-pattern>/NuovaPassword</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PrivacyServlet</servlet-name>
+        <url-pattern>/PrivacyServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

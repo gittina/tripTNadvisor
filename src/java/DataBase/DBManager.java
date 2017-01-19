@@ -355,17 +355,17 @@ public class DBManager implements Serializable {
      * @param password password del nuovo utente
      * @return l'oggetto Utente per la sessione
      */
-    public Utente addRegistrato(String nome, String cognome, String email, String password) {
+    public Utente addRegistrato(String nome, String cognome, String email, String password, boolean privacy) {
         PreparedStatement stm = null;
         ResultSet rs = null;
         Utente utente = null;
         try {
-            stm = con.prepareStatement("INSERT INTO UTENTE (nome,cognome,email,password,attivato,avpath) VALUES (?,?,?,?,?,?)");
+            stm = con.prepareStatement("INSERT INTO UTENTE (nome,cognome,email,password,accettato,avpath) VALUES (?,?,?,?,?,?)");
             stm.setString(1, nome);
             stm.setString(2, cognome);
             stm.setString(3, email);
             stm.setString(4, password);
-            stm.setBoolean(5, false);
+            stm.setBoolean(5, privacy);
             stm.setString(6, defaultFolder + "/default.jpg");
             stm.executeUpdate();
 

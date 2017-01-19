@@ -399,6 +399,79 @@ public abstract class Utente implements Serializable {
         return res;
     }
 
+    
+    /**
+     * Per controllare se un utente è attivato, ovvero ha confermato la sua
+     * registrazione via mail Un amministratore è sempre verificato, quindi per
+     * utenti amministratori verrà ritornato sempre true
+     *
+     * @return true se l'utente è attivato, false altrimenti
+     */
+    public boolean isAccepted() {
+        if (this.getClass() == Amministratore.class) {
+            return true;
+        }
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        boolean res = false;
+        try {
+            stm = con.prepareStatement("select accettato from Utente where id = ?");
+            stm.setInt(1, getId());
+            rs = stm.executeQuery();
+            if (rs.next()) {
+                res = rs.getBoolean("accettato");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
+    }
+    
+    public boolean accettaPrivacy(){
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        boolean res = false;
+        try {
+            stm = con.prepareStatement("update utente set accettato = true where id = ?");
+            stm.setInt(1, getId());
+            stm.executeUpdate();
+            res = true;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
+    }
+    
     /**
      *
      * @param nome nome completo del ristorante

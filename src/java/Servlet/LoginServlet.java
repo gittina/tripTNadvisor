@@ -41,12 +41,15 @@ public class LoginServlet extends HttpServlet {
             if (utente == null) {
                 req.setAttribute("message", labels.getString("err.mail.password"));
                 req.getRequestDispatcher("/login.jsp").forward(req, resp);
-            } else if (utente.isActivate()) {
-                session.setAttribute("utente", utente);
-                req.getRequestDispatcher("/HomeServlet").forward(req, resp);
-            } else {
+            } else if (!utente.isActivate()) {
                 req.setAttribute("message", labels.getString("err.activate.account"));
                 req.getRequestDispatcher("/login.jsp").forward(req, resp);
+            } else if(!utente.isAccepted()) {
+                session.setAttribute("utenteTmp", utente);
+                req.getRequestDispatcher("/privacy.jsp").forward(req, resp);
+            } else {
+                session.setAttribute("utente", utente);
+                req.getRequestDispatcher("/HomeServlet").forward(req, resp);
             }
         }
     }

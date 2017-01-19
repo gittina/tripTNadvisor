@@ -55,7 +55,7 @@ public class RegistrationServlet extends HttpServlet {
         String pass1 = request.getParameter("pass1");
         String pass2 = request.getParameter("pass2");
         String check = request.getParameter("check");
-
+        System.out.println(check);
         boolean tornaIndietro = false;
         Utente user;
         HttpSession session = request.getSession();
@@ -79,9 +79,9 @@ public class RegistrationServlet extends HttpServlet {
             tornaIndietro = true;
         }
 
-        if (check == null) {
-            request.setAttribute("checkMessage", labels.getString("privacy.permission"));
-            tornaIndietro = true;
+        boolean privacy = false;
+        if(check != null) {
+            privacy = true;
         }
 
         if (manager.esisteMail(mail1)) {
@@ -91,10 +91,10 @@ public class RegistrationServlet extends HttpServlet {
 
         if (tornaIndietro) {
             request.getRequestDispatcher("/registration.jsp").forward(request, response);
-        } else if ((user = manager.addRegistrato(name, surname, mail1, pass1)) != null) {
+        } else if ((user = manager.addRegistrato(name, surname, mail1, pass1, privacy)) != null) {
             String cfr = encrypt(mail1);
             manager.addKey(user, cfr);
-            sendMail(labels.getString("click.link.mail") + " http://lucaled.ml:2000" + request.getContextPath() + "/ConfirmServlet?hash=" + cfr, mail1, session);
+            sendMail(labels.getString("click.link.mail") + " http://localhost:2000" + request.getContextPath() + "/ConfirmServlet?hash=" + cfr, mail1, session);
             request.getRequestDispatcher("/HomeServlet").forward(request, response);
         } else {
             request.setAttribute("problemMessage", labels.getString("error.message"));
