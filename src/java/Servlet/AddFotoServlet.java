@@ -23,10 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-/**
- *
- * @author lucadiliello
- */
+
 public class AddFotoServlet extends HttpServlet {
 
     private DBManager manager;
@@ -48,12 +45,12 @@ public class AddFotoServlet extends HttpServlet {
             throws ServletException, IOException, SQLException {
 
         HttpSession session = request.getSession();
-        response.setContentType("text/plain"); //tipo di file di upload
+        response.setContentType("text/plain");
         Utente utente = (Utente) session.getAttribute("utente");
         Ristorante ristorante = (Ristorante) session.getAttribute("ristorante");
 
         MultipartRequest multi = new MultipartRequest(request, manager.completePath + "/web" + dirName, 10 * 1024 * 1024, "ISO-8859-1", new DefaultFileRenamePolicy());
-
+        
         Enumeration files = multi.getFileNames();
         String name = null;
         while (files.hasMoreElements()) {

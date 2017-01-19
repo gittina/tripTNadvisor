@@ -42,7 +42,7 @@ public class HomeServlet extends HttpServlet {
         } else {
             session.setAttribute("title", "HomePage - " + utente.getNome() + " " + utente.getCognome());
         }
-       
+
         session.setAttribute("mostVoted", manager.getRistorantiPiuVotati());
         session.setAttribute("mostSeen", manager.getRistorantiPiuVisitati());
         session.setAttribute("lastRec", manager.getUltimeRecensioni());

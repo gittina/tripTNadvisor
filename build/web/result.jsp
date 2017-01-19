@@ -215,12 +215,12 @@
             <div class="container">
                 <c:forEach var="ristorante" items="${result}">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <a href="">
                                 <img src="<%= request.getContextPath()%><c:out value="${ristorante.getFoto().get(0).getFotopath()}"/>" class="img-responsive infoCarouselImg" alt="">
                             </a>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${ristorante.getId()}"/>">
                                 <c:out value="${ristorante.getName()}"/>
                             </a>
@@ -228,14 +228,13 @@
                             <fmt:message key="fascia"/>: <c:out value="${ristorante.getFascia()}"/><br>
                             <fmt:message key="cucina"/>: <c:out value="${ristorante.getCucina()}"/><br>
                             <fmt:message key="voto"/>: <c:out value="${ristorante.getVoto()}"/><br>
-                            <fmt:message key="posClass"/>: <c:out value="${ristorante.getPosizioneClassifica()}"/><br>
+                            <fmt:message key="posClass"/>: <c:out value="${ristorante.getPosizioneClassificaPerCitta()}"/> in <c:out value="${ristorante.getLuogo().getCity()}"/><br>
+                            <fmt:message key="numero.recensioni"/>: <c:out value="${ristorante.getRecensioni().size()}"/><br>
                         </div>
-                        <div class="col-md-4">
-                            <img src="<%= request.getContextPath()%><c:out value="${ristorante.creaQR()}"/>" class="img-responsive qrCarouselImg" alt="Error creating QR Code">
-                        </div>
+
                     </div>
                     <div class="row"><hr></div>
-                    </c:forEach>
+                </c:forEach>
             </div>
         </section>
 

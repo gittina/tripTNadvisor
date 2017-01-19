@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  *
  * @author Luca
  */
-public abstract class Utente implements Serializable{
+public abstract class Utente implements Serializable {
 
     private int id;
     private String nome;
@@ -146,8 +146,6 @@ public abstract class Utente implements Serializable{
         return res;
     }
 
-    
-    
     public boolean justSegnalataFoto(Foto foto) {
         PreparedStatement stm = null;
         ResultSet rs = null;
@@ -178,6 +176,48 @@ public abstract class Utente implements Serializable{
         return res;
     }
 
+    public int getPosizioneClassifica() {
+        if (this.isAmministratore()) {
+            return -1;
+        }
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        int res = 1;
+        try {
+            stm = con.prepareStatement("select utente.id as idU, mid from (select avg(voti.rate) as mid, recensione.ID_UTENTE as "
+                    + "id from (select recensione.id as id, avg(rating) as rate from recensione left join votorec on "
+                    + "recensione.id = votorec.ID_REC group by recensione.id) as voti, recensione where voti.id = recensione.ID "
+                    + "group by recensione.ID_UTENTE) as res right join (select * from utente where amministratore = false) as utente"
+                    + " on res.id = utente.ID order by mid, utente.id");
+            
+            rs = stm.executeQuery();
+            boolean found = false;
+            while(rs.next() && !found){
+                if(rs.getInt("idU") == getId()){
+                    found = true;
+                } else res++;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
+    }
+
     /**
      * Calcola la reputazione di un utente sulla media dei voti delle recensioni
      * che ha lasciato
@@ -187,9 +227,12 @@ public abstract class Utente implements Serializable{
     public float getReputazione() {
         PreparedStatement stm = null;
         ResultSet rs = null;
-        float res = 0;
+        float res = -1;
         try {
-            stm = con.prepareStatement("select avg(res.parz) as media from( select avg(voto.rating) as parz from (select * from recensione where id_utente = ?) as rec, votorec as voto where rec.id = voto.ID_REC group by rec.id) as res group by res.parz");
+            stm = con.prepareStatement("select mid*1.0 as media from (select avg(voti.rate) as mid, recensione.ID_UTENTE as id "
+                    + "from (select recensione.id as id, avg(rating) as rate from recensione left join votorec on recensione.id = votorec.ID_REC "
+                    + "group by recensione.id) as voti, recensione where voti.id = recensione.ID group by recensione.ID_UTENTE) as res right join "
+                    + "(select * from utente where amministratore = false) as utente on res.id = utente.ID where utente.ID = ?");
             stm.setInt(1, getId());
             rs = stm.executeQuery();
             if (rs.next()) {
@@ -297,15 +340,12 @@ public abstract class Utente implements Serializable{
      * @return true se l'utente è proprietario del ristorante, false altrimentiw
      */
     public boolean proprietario(Ristorante ristorante) {
-        System.out.println(this);
-        System.out.println(ristorante);
         if (ristorante.getUtente() == null) {
             return false;
         } else {
             return ristorante.getUtente().equals(this);
         }
     }
-
 
     /**
      * Serve a verificare se un utente è proprietario di una recensione
@@ -377,63 +417,25 @@ public abstract class Utente implements Serializable{
         PreparedStatement stm = null;
         ResultSet rs = null;
         boolean res = false;
-        Date sqlDate = new Date(System.currentTimeMillis());
         try {
-            Luogo luogo = manager.getLuogo(address);
-            if (luogo != null) {
+            stm = con.prepareStatement("INSERT INTO Ristorante (nome,descr,linksito,cucina,fascia) VALUES (?,?,?,?,?)");
+            stm.setString(1, nome);
+            stm.setString(2, desc);
+            stm.setString(3, linkSito);
+            stm.setString(4, spec);
+            stm.setString(5, fascia);
+            stm.executeUpdate();
 
-                stm = con.prepareStatement("INSERT INTO Luogo (address,lat,lng) VALUES (?,?,?)");
-                stm.setString(1, luogo.getAddress());
-                stm.setDouble(2, luogo.getLat());
-                stm.setDouble(3, luogo.getLng());
-                stm.executeUpdate();
+            stm = con.prepareStatement("select id from Ristorante where nome = ? AND linkSito = ?");
+            stm.setString(1, nome);
+            stm.setString(2, linkSito);
+            rs = stm.executeQuery();
 
-                stm = con.prepareStatement("select id from Luogo where lat = ? AND lng = ?");
-                stm.setDouble(1, luogo.getLat());
-                stm.setDouble(2, luogo.getLng());
-                rs = stm.executeQuery();
+            Ristorante rist = manager.getRistorante(rs.getInt("id"));
+            rist.addFoto(fotoPath, fotoDescr, this);
+            rist.setLuogo(address);
+            res = true;
 
-                int luogo_id;
-                if (rs.next()) {
-                    luogo_id = rs.getInt("id");
-
-                    stm = con.prepareStatement("INSERT INTO Ristorante (nome,descr,linksito,cucina,fascia,id_luogo) VALUES (?,?,?,?,?,?)");
-                    stm.setString(1, nome);
-                    stm.setString(2, desc);
-                    stm.setString(3, linkSito);
-                    stm.setString(4, spec);
-                    stm.setString(5, fascia);
-                    stm.setInt(6, luogo_id);
-                    stm.executeUpdate();
-
-                    stm = con.prepareStatement("select id from Ristorante where nome = ? AND linkSito = ?");
-                    stm.setString(1, nome);
-                    stm.setString(2, linkSito);
-                    rs = stm.executeQuery();
-
-                    Ristorante rist;
-                    if (rs.next()) {
-                        rist = manager.getRistorante(rs.getInt("id"));
-                        if (rist != null) {
-                            stm = con.prepareStatement("INSERT INTO Foto (fotoPath,data,descr,id_rist,id_utente) VALUES (?,?,?,?,?)");
-                            stm.setString(1, fotoPath);
-                            stm.setDate(2, sqlDate);
-                            stm.setString(3, fotoDescr);
-                            stm.setInt(4, rist.getId());
-                            stm.setInt(5, getId());
-                            stm.executeUpdate();
-                            res = true;
-                        }
-                    } else {
-                        res = false;
-                    }
-                } else {
-                    res = false;
-                }
-
-            } else {
-                res = false;
-            }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
@@ -453,43 +455,6 @@ public abstract class Utente implements Serializable{
             }
         }
         manager.updateAutocomplete();
-        return res;
-    }
-    
-    /**
-     * Per ottenere la lista dei ristoranti posseduti da un utente
-     *
-     * @return Un ArrayList dei ristoranti dell'utente
-     */
-    public ArrayList<Ristorante> getRistoranti() {
-        ArrayList<Ristorante> res = new ArrayList<>();
-        PreparedStatement stm = null;
-        ResultSet rs = null;
-        try {
-            stm = con.prepareStatement("select * from Ristorante where id_utente = ?");
-            stm.setInt(1, getId());
-            rs = stm.executeQuery();
-            while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), manager, manager.getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if (stm != null) {
-                try {
-                    stm.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
         return res;
     }
 
@@ -531,7 +496,6 @@ public abstract class Utente implements Serializable{
         hash = 17 * hash + Objects.hashCode(this.email);
         return hash;
     }
-    
 
     public int getId() {
         return id;
@@ -603,7 +567,7 @@ public abstract class Utente implements Serializable{
     public boolean isRistoratore() {
         return this instanceof Ristoratore;
     }
-    
+
     /**
      * Per sapere se un utente è uno registrato, amministratore o ristoratore
      *
@@ -612,6 +576,4 @@ public abstract class Utente implements Serializable{
     public boolean isLogged() {
         return isRegistrato() || isAmministratore() || isRistoratore();
     }
-    
-
 }

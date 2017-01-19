@@ -162,8 +162,8 @@
         <header>
             <div class="container">
                 <div class="row">
-                    <div class="col-md-12">
-                        <img class="img-responsive" src="img/profile.png" alt="">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
                         <div class="intro-text">
                             <span class="name">Recensione per <c:out value="${ristorante.getName()}"/></span>
                             <hr class="star-light">
@@ -173,32 +173,33 @@
                                 <label class="control-label"><fmt:message key="titolo"/></label>
                                 <input type="text" name="titolo" placeholder="Titolo" class="form-control">
                                 <br>
-                                
+
                                 <label class="control-label"><fmt:message key="contenuto"/></label>
                                 <textarea cols="50" rows="5" name="rec" placeholder="<fmt:message key="insert.review"/>" class="form-control"></textarea>
                                 <br>
-                                
+
                                 <label class="control-label"><fmt:message key="add.foto"/></label>
                                 <fmt:message key="insert.photo"/><input type='file' name='img'>
                                 <br>
 
                                 <label class="control-label"><fmt:message key="vote.restaurant"/></label>
                                 <br>
-                                <input type="radio" name="voto" value="1" class="form-control">1
-                                <input type="radio" name="voto" value="2" class="form-control">2
-                                <input type="radio" name="voto" value="3" checked class="form-control">3
-                                <input type="radio" name="voto" value="4" class="form-control">4
-                                <input type="radio" name="voto" value="5" class="form-control">5
-
-                                <button type="submit" name="invia"><fmt:message key="invia"/></button><br>
+                                <label><input type="radio" name="voto" value="1"> 1 |</label>
+                                <label><input type="radio" name="voto" value="2"> 2 |</label>
+                                <label><input type="radio" name="voto" value="3" checked> 3 |</label> 
+                                <label><input type="radio" name="voto" value="4"> 4 | </label>
+                                <label><input type="radio" name="voto" value="5"> 5</label>
+                                <br><br>
+                                <button type="submit" class="btn btn-primary"><fmt:message key="invia"/></button><br>
                             </form>
                         </div>
                     </div>
+                    <div class="col-md-4"></div>
                 </div>
             </div>
         </header>
 
-        
+
 
 
         <!-- Footer -->
@@ -238,7 +239,7 @@
             </a>
         </div>
 
-        
+
 
         <!-- jQuery -->
         <script src="<%= request.getContextPath()%>/vendor/jquery/jquery.min.js"></script>

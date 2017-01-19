@@ -18,6 +18,7 @@ import java.util.Formatter;
 import java.util.Date;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -177,7 +178,7 @@ public class RegistrationServlet extends HttpServlet {
         try {
             processRequest(request, response);
         } catch (SQLException | MessagingException ex) {
-            System.out.println("Errore servlet di registrazione, details: " + ex.toString());
+            Logger.getLogger(ex.toString());
         }
     }
 
@@ -187,7 +188,7 @@ public class RegistrationServlet extends HttpServlet {
         try {
             processRequest(request, response);
         } catch (SQLException | MessagingException ex) {
-            System.out.println("Errore servlet di registrazione, details: " + ex.toString());
+            Logger.getLogger(ex.toString());
         }
     }
 

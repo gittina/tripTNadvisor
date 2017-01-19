@@ -48,7 +48,6 @@ public class GetMapsData extends HttpServlet {
         }
         json += "]}";
         try (PrintWriter out = response.getWriter()) {
-            System.out.println(json);
             out.println(json);
         }
     }

@@ -54,9 +54,9 @@ public class SearchServlet extends HttpServlet {
                 case "pos":
                     c = (Comparator<Ristorante>) (Ristorante o1, Ristorante o2) -> {
                         int res1;
-                        if (o1.getPosizioneClassifica() > o2.getPosizioneClassifica()) {
+                        if (o1.getVoto() > o2.getVoto()) {
                             res1 = -1;
-                        } else if (o1.getPosizioneClassifica() < o2.getPosizioneClassifica()) {
+                        } else if (o1.getVoto() < o2.getVoto()) {
                             res1 = 1;
                         } else {
                             res1 = 0;
@@ -144,7 +144,6 @@ public class SearchServlet extends HttpServlet {
                     res = manager.simpleSearch(research1);
                     resOriginal = manager.simpleSearch(research1);
                 } catch (NullPointerException ex) {
-                    System.out.println("Fallita ricerca di: " + research1 + " nel db");
                     request.getRequestDispatcher("/HomeServlet").forward(request, response);
                 }
                 break;

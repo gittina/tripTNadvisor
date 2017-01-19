@@ -60,7 +60,6 @@ public class CambiaOrariServlet extends HttpServlet {
         chiusura = new Time(Integer.parseInt(request.getParameter("chH")), Integer.parseInt(request.getParameter("chM")), 0);
         int day = Integer.parseInt(request.getParameter("day"));
         if (ristorante != null) {
-            System.out.println("Ristorante valido times");
             ristorante.addTimesToRistorante(day,apertura, chiusura);
         }
         request.getRequestDispatcher("/privateRistoratore/orari.jsp").forward(request, response);

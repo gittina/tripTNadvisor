@@ -2,47 +2,47 @@ package DataBase;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.Serializable;
-import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
+import java.nio.charset.Charset;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class DBManager implements Serializable {
 
     //transient == non viene serializzato
     public transient Connection con;
-    private String googleKey = "AIzaSyA7spDhgAtLeyh6b0F6MQI2I5fldqrR6oM";
+    protected String googleKey = "AIzaSyA7spDhgAtLeyh6b0F6MQI2I5fldqrR6oM";
     public String completePath;
+    public String defaultFolder;
 
-    public DBManager(String dburl, String contextPath, String completePath) {
+    public DBManager(String dburl, String user, String password, String completePath, String defaultFolder) {
         this.completePath = completePath;
+        this.defaultFolder = defaultFolder;
         try {
             Class.forName("org.apache.derby.jdbc.ClientDriver", true, getClass().getClassLoader());
         } catch (Exception e) {
             throw new RuntimeException(e.toString(), e);
         }
-        String user = "progettoTNadvisor";
-        String pass = "bRjhdsoR56ve";
+        System.out.println(user + " " +password);
+        System.out.println(dburl);
         try {
-            con = DriverManager.getConnection(dburl, user, pass);
+            con = DriverManager.getConnection(dburl, user, password);
         } catch (SQLException ex) {
             try {
-                con = DriverManager.getConnection(dburl, user, pass);
+                con = DriverManager.getConnection(dburl, user, password);
             } catch (SQLException ex1) {
                 Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex1);
             }
@@ -152,7 +152,7 @@ public class DBManager implements Serializable {
             stm = con.prepareStatement("select * from( select ristorante.ID, avg(rating) as media from votorist, ristorante where ristorante.ID = votorist.ID_RIST group by ristorante.ID) as res, ristorante as ristorante where res.id = ristorante.ID order by res.media DESC");
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), rs.getInt("id_luogo")));
             }
 
         } catch (SQLException ex) {
@@ -190,7 +190,7 @@ public class DBManager implements Serializable {
             stm = con.prepareStatement("SELECT * FROM ristorante order by ristorante.VISITE desc { limit 5 }");
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), rs.getInt("id_luogo")));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -369,7 +369,7 @@ public class DBManager implements Serializable {
             stm.setString(3, email);
             stm.setString(4, password);
             stm.setBoolean(5, false);
-            stm.setString(6, "/img/utente-generico.jpg");
+            stm.setString(6, defaultFolder + "/default.jpg");
             stm.executeUpdate();
 
             stm = con.prepareStatement("select * from utente where email = ?");
@@ -412,25 +412,17 @@ public class DBManager implements Serializable {
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
-            stm = con.prepareStatement("select id from utente where amministratore = ?");
-            stm.setBoolean(1, false);
+            stm = con.prepareStatement("select utente.id as idU, mid from (select avg(voti.rate) as mid, recensione.ID_UTENTE as "
+                    + "id from (select recensione.id as id, avg(rating) as rate from recensione left join votorec on "
+                    + "recensione.id = votorec.ID_REC group by recensione.id) as voti, recensione where voti.id = recensione.ID "
+                    + "group by recensione.ID_UTENTE) as res right join (select * from utente where amministratore = false) as utente"
+                    + " on res.id = utente.ID order by mid, utente.id");
             rs = stm.executeQuery();
-
+            
             while (rs.next()) {
-                Utente u = getUtente(rs.getInt("id"));
+                Utente u = getUtente(rs.getInt("idU"));
                 res.add(u);
             }
-            Comparator c = (Comparator<Utente>) (Utente o1, Utente o2) -> {
-                float rep1 = o1.getReputazione(), rep2 = o2.getReputazione();
-                if (rep1 > rep2) {
-                    return -1;
-                } else if (rep1 < rep2) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            };
-            res.sort(c);
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
@@ -460,39 +452,33 @@ public class DBManager implements Serializable {
      * @return true se l'indirizzo può essere elaborato e trasformato in
      * coordinate geografiche da google maps, false altrimenti
      */
-    public boolean okLuogo(String address) {
-        boolean res = false;
-        try {
-            String req = "https://maps.googleapis.com/maps/api/geocode/xml?address=" + address.replace(' ', '+') + "&key=" + googleKey;
-            URL website = new URL(req);
-            ReadableByteChannel rbc = Channels.newChannel(website.openStream());
-
-            FileOutputStream fos = new FileOutputStream(completePath + "/geo/georef.xml");
-            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-
-            File fXmlFile = new File(completePath + "/geo/georef.xml");
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(fXmlFile);
-            double lat = 0, lng = 0;
-            doc.getDocumentElement().normalize();
-
-            NodeList nList = doc.getElementsByTagName("location");
-            Node nNode = nList.item(0);
-
-            if (nNode == null) {
-                res = false;
-            } else if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                Element eElement = (Element) nNode;
-                lat = Double.parseDouble(eElement.getElementsByTagName("lat").item(0).getTextContent());
-                lng = Double.parseDouble(eElement.getElementsByTagName("lng").item(0).getTextContent());
-                res = true;
-            }
-
-        } catch (ParserConfigurationException | IOException | SAXException ex) {
-            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+    private static String readAll(Reader rd) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        int cp;
+        while ((cp = rd.read()) != -1) {
+            sb.append((char) cp);
         }
-        return res;
+        return sb.toString();
+    }
+
+    public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
+        try (InputStream is = new URL(url).openStream()) {
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+            String jsonText = readAll(rd);
+            JSONObject json = new JSONObject(jsonText);
+            return json;
+        }
+    }
+
+    public boolean okLuogo(String address) {
+        String req = "https://maps.googleapis.com/maps/api/geocode/json?address=" + address.replace(' ', '+') + "&key=" + googleKey;
+        try {
+            JSONObject json = readJsonFromUrl(req);
+            return json.get("status").equals("OK");
+        } catch (IOException | JSONException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
     }
 
     /**
@@ -501,46 +487,8 @@ public class DBManager implements Serializable {
      * @param address indirizzo su cui costruire l'oggetto Luogo
      * @return l'oggetto Luogo costruito
      */
-    public Luogo getLuogo(String address) {
-        Luogo res = null;
-        try {
-            String req = "https://maps.googleapis.com/maps/api/geocode/xml?" + "address=" + address.replace(' ', '+') + "&key=" + googleKey;
-            URL website = new URL(req);
-            ReadableByteChannel rbc = Channels.newChannel(website.openStream());
-
-            FileOutputStream fos = new FileOutputStream(completePath + "/geo/georef.xml");
-            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-
-            File fXmlFile = new File(completePath + "/geo/georef.xml");
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(fXmlFile);
-            double lat = 0, lng = 0;
-            String formatted_address = "";
-            doc.getDocumentElement().normalize();
-
-            NodeList nList = doc.getElementsByTagName("location");
-            Node nNode = nList.item(0);
-
-            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                Element eElement = (Element) nNode;
-                lat = Double.parseDouble(eElement.getElementsByTagName("lat").item(0).getTextContent());
-                lng = Double.parseDouble(eElement.getElementsByTagName("lng").item(0).getTextContent());
-            }
-
-            nList = doc.getElementsByTagName("result");
-            nNode = nList.item(0);
-
-            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                Element eElement = (Element) nNode;
-                formatted_address = eElement.getElementsByTagName("formatted_address").item(0).getTextContent();
-            }
-            res = new Luogo(lat, lng, formatted_address);
-
-        } catch (IOException | SAXException | ParserConfigurationException ex) {
-            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return res;
+    public Luogo getLuogo(String address) {        
+        return new Luogo(address,this);
     }
 
     /**
@@ -564,7 +512,7 @@ public class DBManager implements Serializable {
                 stm = con.prepareStatement("SELECT * FROM RISTORANTE");
                 rs = stm.executeQuery();
                 while (rs.next()) {
-                    res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
+                    res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), rs.getInt("id_luogo")));
                 }
                 Iterator i = res.iterator();
                 while (i.hasNext()) {
@@ -613,7 +561,7 @@ public class DBManager implements Serializable {
             stm.setInt(1, id);
             rs = stm.executeQuery();
             if (rs.next()) {
-                res = new Ristorante(id, rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"));
+                res = new Ristorante(id, rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), rs.getInt("id_luogo"));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -884,7 +832,7 @@ public class DBManager implements Serializable {
             stm = con.prepareStatement("SELECT * FROM RISTORANTE");
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), rs.getInt("id_luogo")));
             }
             Iterator i = res.iterator();
             while (i.hasNext()) {
@@ -945,7 +893,7 @@ public class DBManager implements Serializable {
             stm.setDouble(4, lng);
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), rs.getInt("id_luogo")));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -977,7 +925,7 @@ public class DBManager implements Serializable {
             stm.setString(1, tipo);
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), rs.getInt("id_luogo")));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -1025,7 +973,6 @@ public class DBManager implements Serializable {
             }
             content += "ristorante,cucina";
 
-
             // if file doesn't exists, then create it
             try (FileOutputStream fop = new FileOutputStream(file)) {
                 // if file doesn't exists, then create it
@@ -1061,7 +1008,6 @@ public class DBManager implements Serializable {
         }
         return res;
     }
-
 
     ///////////////// METODI PER NOTIFICHE ///////////////////
     //////////////////////////////////////////////////////////
@@ -1130,7 +1076,7 @@ public class DBManager implements Serializable {
         }
         return res;
     }
-    
+
     /**
      * Crea una nuova notifica di tipo SegnalaFotoRecensione sul DB, verrà
      * estratta poi da un utente amministratore per essere verificata. Questa

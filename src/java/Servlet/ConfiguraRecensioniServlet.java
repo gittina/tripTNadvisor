@@ -31,15 +31,14 @@ public class ConfiguraRecensioniServlet extends HttpServlet {
         Ristorante ristorante = (Ristorante) session.getAttribute("ristorante");
         Utente utente = (Utente) session.getAttribute("utente");
         RequestDispatcher rd;
-        System.out.println(ristorante + " " + utente);
         if (ristorante != null && utente != null) {
             if (ristorante.getUtente() != null) {
                 if (utente.getId() == ristorante.getUtente().getId()) {
                     //controllo di 1 recensione per utente
                     request.setAttribute("messConfiguraRecensioni", "Non puoi recensire un tuo ristorante");
                     rd = request.getRequestDispatcher("/info.jsp");
-                } else rd = request.getRequestDispatcher("/private/scriviRecensioni.jsp");
-            } else rd = request.getRequestDispatcher("/private/scriviRecensioni.jsp");
+                } else rd = request.getRequestDispatcher("/private/scriviRecensione.jsp");
+            } else rd = request.getRequestDispatcher("/private/scriviRecensione.jsp");
         } else{
             request.setAttribute("messConfiguraRecensioni", "Errore interno, riprova");
             rd = request.getRequestDispatcher("/info.jsp");

@@ -1,5 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+    
+    <!-- PARAMETRI DA CONFIGURARE -->
+    <context-param>
+        <param-name>dburl</param-name>
+        <param-value>jdbc:derby://localhost:1527/db1 </param-value>
+    </context-param>
+    <context-param>
+        <param-name>user</param-name>
+        <param-value>progettoTNadvisor</param-value>
+    </context-param>
+    <context-param>
+        <param-name>password</param-name>
+        <param-value>bRjhdsoR56ve</param-value>
+    </context-param>
+    <context-param>
+        <param-name>completePath</param-name>
+        <param-value>/Users/lucadiliello/Desktop/Progetti/Programmazione_web/tripTNadvisor</param-value>
+    </context-param>
+    <!-- FINE PARAMETRI DA CONFIGURARE -->
+    
+    
     <!-- inizializzatori -->
     <filter>
         <filter-name>FilterUser</filter-name>
@@ -70,19 +91,17 @@
     <listener>
         <listener-class>Listener.WebAppContextListener</listener-class>
     </listener>
+    
+    
     <context-param>
-        <param-name>dburl</param-name>
-        <param-value>jdbc:derby://localhost:1527/db1 </param-value>
+        <param-name>defaultFolder</param-name>
+        <param-value>/defaultItem</param-value>
     </context-param>
     <context-param>
         <param-name>javax.servlet.jsp.jstl.fmt.localizationContext</param-name>
         <param-value>Resources.string</param-value>
     </context-param>
-    <!-- Configure with the path of the project in your computer -->
-    <context-param>
-        <param-name>completePath</param-name>
-        <param-value>/Users/lucadiliello/Desktop/Progetti/Programmazione_web/tripTNadvisor</param-value>
-    </context-param>
+    
     <welcome-file-list>
         <welcome-file>HomeServlet</welcome-file>
     </welcome-file-list>

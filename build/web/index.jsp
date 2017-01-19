@@ -279,8 +279,8 @@
                             <h5>
                                 <a href="<%= request.getContextPath()%>/ConfigurazioneRistorante?id_rist=<c:out value="${ristorante.getId()}"/>" class="portfolio-link" data-toggle="modal">
                                     <c:out value="${ristorante.getName()}"/><br>
-                                    <fmt:message key="users.posClass"/>
-                                    <c:out value="${ristorante.getPosizioneClassifica()}"/><br><br>
+                                    <fmt:message key="ristorante.getvoto"/>
+                                    <c:out value="${ristorante.getVoto()}"/><br><br>
                                     <img src="<%= request.getContextPath()%><c:out value="${ristorante.getFoto().get(0).getFotopath()}"/>" class="img-responsive" alt="" height="200" width="300">
                                 </a>
                             </h5>

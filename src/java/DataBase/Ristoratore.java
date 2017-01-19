@@ -113,19 +113,18 @@ public class Ristoratore extends Utente {
     /**
      * Per ottenere la lista dei ristoranti posseduti da un utente
      *
-     * @param ristoratore
      * @return Un ArrayList dei ristoranti dell'utente
      */
-    public ArrayList<Ristorante> getRistoranti(Ristoratore ristoratore) {
+    public ArrayList<Ristorante> getRistoranti() {
         ArrayList<Ristorante> res = new ArrayList<>();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
             stm = con.prepareStatement("select * from Ristorante where id_utente = ?");
-            stm.setInt(1, ristoratore.getId());
+            stm.setInt(1, getId());
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), manager, manager.getUtente(rs.getInt("id_utente")), rs.getInt("visite")));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), manager, manager.getUtente(rs.getInt("id_utente")), rs.getInt("visite"), rs.getInt("id_luogo")));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);

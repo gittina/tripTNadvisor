@@ -74,8 +74,9 @@ public class InserisciRecensioniServlet extends HttpServlet {
         if (tornaIndietro) {
             request.getRequestDispatcher("/private/scriviRecensione.jsp").forward(request, response);
         }
-
-        String fotoPath = dirName + "/" + multi.getFilesystemName(name);
+        String fotoPath;
+        if(multi.getFilesystemName(name) == null || multi.getFilesystemName(name).equals("")) fotoPath = manager.defaultFolder + "/rec_default.jpg";
+        else fotoPath = dirName + "/" + multi.getFilesystemName(name);
 
         Recensione rec = ristorante.addRecensione(titolo, recensione, utente);
         rec.addFoto(fotoPath);

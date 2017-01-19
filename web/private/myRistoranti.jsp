@@ -187,7 +187,7 @@
                                     </c:otherwise>
                                 </c:choose>
                             </label>
-                            <label class="control-label"><fmt:message key="posClass"/>: <c:out value="${ristorante.getPosizioneClassifica()}"/></label>
+                            <label class="control-label"><fmt:message key="posClass"/>: <c:out value="${ristorante.getPosizioneClassificaPerCitta()}"/> in <c:out value="${ristorante.getLuogo().getCity()}"/></label>
                             <br>
                             <label class="control-label"><fmt:message key="reviews"/> <c:out value="${ristorante.getRecensioni().size()}"/></label>
                             <br>

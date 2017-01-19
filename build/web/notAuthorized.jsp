@@ -56,48 +56,7 @@
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 
-                    <ul class="nav navbar-nav navbar-left">
-                        <c:choose>
-                            <c:when test="${utente == null}">
-                                <li>
-                                    <a href="<%= request.getContextPath()%>/registration.jsp"><fmt:message key="welcome.visitors"/></a>
-                                </li>
-                            </c:when>
-                            <c:when test="${utente.isAmministratore()}">
-                                <li>
-                                    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><img src="<%= request.getContextPath()%><c:out value="${utente.getAvpath()}"/>" HEIGHT="25" WIDTH="25" BORDER="0" align="center">  <c:out value="${utente.getNomeCognome()}"/>
-                                        <span class="caret"></span></button>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneProfilo"><fmt:message key="profile"/></a></li>
-                                        <li><a href="<%= request.getContextPath()%>/private/LogoutServlet"><fmt:message key="exit"/></a></li>
-                                    </ul>
-                                </li>
-                            </c:when>
-                            <c:when test="${utente.isRegistrato()}">
-                                <li>
-                                    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><img src="<%= request.getContextPath()%><c:out value="${utente.getAvpath()}"/>" HEIGHT="25" WIDTH="25" BORDER="0" align="center">  <c:out value="${utente.getNomeCognome()}"/>
-                                        <span class="caret"></span></button>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneProfilo"><fmt:message key="profile"/></a></li>
-                                        <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneAddRistorante"><fmt:message key="add.restaurant"/></a></li>
-                                        <li><a href="<%= request.getContextPath()%>/private/LogoutServlet"><fmt:message key="exit"/></a></li>
-                                    </ul>
-                                </li>
-                            </c:when>
-                            <c:when test="${utente.isRistoratore()}">
-                                <li>
-                                    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><img src="<%= request.getContextPath()%><c:out value="${utente.getAvpath()}"/>" HEIGHT="25" WIDTH="25" BORDER="0" align="center">  <c:out value="${utente.getNomeCognome()}"/>
-                                        <span class="caret"></span></button>            
-                                    <ul class="dropdown-menu">
-                                        <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneProfilo"><font class="dropdown-line"><fmt:message key="profile"/></font></a></li>
-                                        <li><a href="<%= request.getContextPath()%>/privateRistoratore/ConfigurazioneRistoranti"><fmt:message key="my.restaurant"/></a></li>
-                                        <li><a href="<%= request.getContextPath()%>/private/ConfigurazioneAddRistorante"><fmt:message key="add.restaurant"/></a></li>
-                                        <li><a href="<%= request.getContextPath()%>/private/LogoutServlet"><fmt:message key="exit"/></a></li>
-                                    </ul>
-                                </li>
-                            </c:when>
-                        </c:choose>
-                    </ul>
+                   
                     <ul class="nav navbar-nav navbar-right">
                         <c:choose>
                             <c:when test="${utente == null}">
@@ -110,32 +69,7 @@
                                     </a>
                                 </li>
                             </c:when>
-                            <c:when test="${utente.isRistoratore() || utente.isAmministratore()}">
-                                <li>
-                                    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><fmt:message key="notify"/>
-                                        <span class="caret"></span></button>
-                                    <ul class="dropdown-menu">
-                                        <c:choose>
-                                            <c:when test="${utente.getNotifiche().size()>0}">
-                                                <c:forEach var="notifica" items="${utente.getNotifiche()}">
-                                                    <li>
-                                                        <a href="<%=request.getContextPath()%>/private/PrepareNotificheServlet?id_not=<c:out value="${notifica.getId()}"/>">
-                                                            <c:out value="${notifica.toString()}"/>
-                                                        </a>
-                                                    </li>
-                                                </c:forEach>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <li>
-                                                    <a href="<%=request.getContextPath()%>/private/PrepareNotificheServlet?">
-                                                        Nessuna notifica
-                                                    </a>
-                                                </li>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </ul>
-                                </li>
-                            </c:when>  
+                             
                         </c:choose>
                         <li>
                             <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
@@ -154,8 +88,6 @@
             </div>
             <!-- /.container-fluid -->
         </nav>
-
-
 
 
         <!-- Header -->

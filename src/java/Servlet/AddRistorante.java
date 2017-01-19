@@ -73,11 +73,16 @@ public class AddRistorante extends HttpServlet {
             request.getRequestDispatcher("/private/ConfigurazioneAddRistorante").forward(request, response);
         } else {
 
-            if (nome.equals("") || descr.equals("") || linkSito.equals("") || addr.equals("") || fotoPath.equals("") || fotoDescr.equals("")) {
+            if (nome.equals("") || descr.equals("") || linkSito.equals("") || addr.equals("")) {
                 tornaIndietro = true;
                 request.setAttribute("error", "devi riempire tutti i campi");
             }
-
+            
+            if (fotoPath.equals("") || fotoDescr.equals("")) {
+                tornaIndietro = true;
+                request.setAttribute("error", "devi riempire anche i campi della prima fotografia");
+            }
+            
             if (!manager.okLuogo(addr)) {
                 tornaIndietro = true;
                 request.setAttribute("addrError", "Indirizzo invalido, inseriscine uno del tipo  - via e numero civico, città, CAP");

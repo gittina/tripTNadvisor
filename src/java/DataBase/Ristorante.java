@@ -109,6 +109,15 @@ public class Ristorante implements Serializable {
     private final Utente utente;
     private int visite;
 
+    public int getId_luogo() {
+        return id_luogo;
+    }
+
+    public void setId_luogo(int id_luogo) {
+        this.id_luogo = id_luogo;
+    }
+    private int id_luogo;
+
     /**
      * Crea un nuovo oggetto di tipo Ristorante
      *
@@ -121,8 +130,9 @@ public class Ristorante implements Serializable {
      * @param manager oggetto DBManager per la connessione e l'uso del DB
      * @param utente utente che possiede il ristorante, null altrimenti
      * @param visite numero di visite del ristorante
+     * @param id_luogo id del luogo riferito
      */
-    public Ristorante(int id, String name, String descr, String linksito, String fascia, String cucina, DBManager manager, Utente utente, int visite) {
+    public Ristorante(int id, String name, String descr, String linksito, String fascia, String cucina, DBManager manager, Utente utente, int visite, int id_luogo) {
         this.id = id;
         this.name = name;
         this.descr = descr;
@@ -270,10 +280,16 @@ public class Ristorante implements Serializable {
 
             Luogo luogo = manager.getLuogo(address);
 
-            stm = con.prepareStatement("INSERT INTO Luogo (address,lat,lng) VALUES (?,?,?)");
-            stm.setString(1, luogo.getAddress());
-            stm.setDouble(2, luogo.getLat());
-            stm.setDouble(3, luogo.getLng());
+            stm = con.prepareStatement("INSERT INTO Luogo (lat,lng,state,area1,area2,city,street,street_number) VALUES (?,?,?,?,?,?,?,?)");
+            stm.setDouble(1, luogo.getLat());
+            stm.setDouble(2, luogo.getLng());
+            stm.setString(3, luogo.getState());
+            stm.setString(4, luogo.getArea1());
+            stm.setString(5, luogo.getArea2());
+            stm.setString(6, luogo.getCity());
+            stm.setString(7, luogo.getStreet());
+            stm.setInt(8, luogo.getStreet_number());
+
             stm.executeUpdate();
 
             stm = con.prepareStatement("select id from Luogo where lat = ? AND lng = ?");
@@ -357,17 +373,19 @@ public class Ristorante implements Serializable {
      *
      * @return la posizione in classifica del ristorante
      */
-    public int getPosizioneClassifica() {
+    public int getPosizioneClassificaPerCitta() {
         PreparedStatement stm = null;
         ResultSet rs = null;
-        int res = 0;
+        int res = 1;
         try {
-            stm = con.prepareStatement("select avg(1.0 * votorist.rating) as media, ristorante.ID as id_rist from (Ristorante) Left Join (votorist) on (ristorante.ID = votorist.ID_RIST) group by (ristorante.ID) order by media asc");
+            stm = con.prepareStatement("select avg(1.0 * votorist.rating) as media, ristorante.ID as id_rist from (select ristorante.* from ristorante, luogo where ristorante.id_luogo = luogo.id and luogo.city = ?) as ristorante Left Join votorist on (ristorante.ID = votorist.ID_RIST) group by (ristorante.ID) order by media asc");
+            stm.setString(1, getLuogo().getCity());
             rs = stm.executeQuery();
             while (rs.next()) {
-                res++;
                 if (rs.getInt("id_rist") == getId()) {
                     break;
+                } else {
+                    res++;
                 }
             }
         } catch (SQLException ex) {
@@ -498,11 +516,11 @@ public class Ristorante implements Serializable {
         ResultSet rs = null;
         Luogo res = null;
         try {
-            stm = con.prepareStatement("select * from Luogo, Ristorante where ristorante.id = ? AND ristorante.id_luogo = luogo.id");
-            stm.setInt(1, getId());
+            stm = con.prepareStatement("select * from Luogo where luogo.id = ?");
+            stm.setInt(1, getId_luogo());
             rs = stm.executeQuery();
-            if (rs.next()) {
-                res = new Luogo(rs.getDouble("lat"), rs.getDouble("lng"), rs.getString("address"));
+            if (rs.next()) {    //double lat, double lng, int street_number, String street, String city, String area1, String area2, String state, DBManager manager
+                res = new Luogo(rs.getDouble("lat"), rs.getDouble("lng"), rs.getInt("street_number"), rs.getString("street"), rs.getString("city"), rs.getString("area1"), rs.getString("area2"), rs.getString("state"), manager);
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -790,7 +808,6 @@ public class Ristorante implements Serializable {
 
         String pos = "/qr/" + this.getName().replace(' ', '_') + ".jpg";
         String savePath = manager.completePath + "/web" + pos;
-        System.out.println(savePath);
 
         ArrayList<Days> days = getDays();
 

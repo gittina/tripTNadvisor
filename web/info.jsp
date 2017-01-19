@@ -234,7 +234,7 @@
                     <div class="col-sm-4">
                         <div class="caption">
                             <div class="caption-content">
-                                <label class="control-label"><fmt:message key="ranking"/>: <c:out value="${ristorante.getPosizioneClassifica()}"/></label>
+                                <label class="control-label"><fmt:message key="ranking"/>: <c:out value="${ristorante.getPosizioneClassificaPerCitta()}"/> in <c:out value="${ristorante.getLuogo().getCity()}"/></label>
                                 <br>
                                 <label class="control-label">
                                     <fmt:message key="users.vote"/>:
@@ -243,7 +243,20 @@
                                     </c:if>
                                     <c:if test="${ristorante.getVoto() > 0}">
                                         <c:out value="${ristorante.getVoto()}"/>
-                                    </c:if></label>
+                                    </c:if>
+                                </label>
+                                    <br><br>
+                                <label class="control-label"><fmt:message key="orari.apertura"/></label>
+                                <br>
+                                <c:forEach var="days" items="${ristorante.getDays()}">
+                                    <label class="control-label">
+                                        <c:out value="${days.getGiornoString()}"/>:
+                                        <c:forEach var="times" items="${days.getTimes()}">
+                                            <c:out value="${times.toString()}"/>,
+                                        </c:forEach>
+                                    </label>
+                                    <br>
+                                </c:forEach>
                                 <br>
                             </div>
                         </div>
@@ -301,23 +314,14 @@
                         <label class="control-label"><c:out value="${messageVoto}"/></label>
                     </div>
                     <div class="col-md-4">
-                        <label class="control-label"><fmt:message key="orari.apertura"/></label>
-                        <br>
-                        <c:forEach var="days" items="${ristorante.getDays()}">
-                            <label class="control-label">
-                                <c:out value="${days.getGiornoString()}"/>:
-                                <c:forEach var="times" items="${days.getTimes()}">
-                                    <c:out value="${times.toString()}"/>,
-                                </c:forEach>
-                            </label>
-                            <br>
-                        </c:forEach>
+                        <img src="<%= request.getContextPath()%><c:out value="${ristorante.creaQR()}"/>" class="img-responsive qrCarouselImg" alt="Error creating QR Code">
                     </div>
+
                 </div>
             </div>
         </section>
 
-        
+
 
         <!-- Recensioni ristorante Section -->
         <section>
