@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.Serializable;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,8 +35,6 @@ public class DBManager implements Serializable {
         } catch (Exception e) {
             throw new RuntimeException(e.toString(), e);
         }
-        System.out.println(user + " " +password);
-        System.out.println(dburl);
         try {
             con = DriverManager.getConnection(dburl, user, password);
         } catch (SQLException ex) {
@@ -721,6 +718,68 @@ public class DBManager implements Serializable {
         }
         return res;
     }
+    
+    /**
+     * Per recupare l'oggetto utente con quell'id. Ad esso verrà effettuato un
+     * downcast ad utente Registrato, Ristoratore, Amministratore secondo le
+     * informazioni contenute nel DB
+     *
+     * @param mail
+     * @return l'oggetto utente
+     */
+    public Utente getUtente(String mail) {
+        PreparedStatement stm = null;
+        Utente res = null;
+        ResultSet rs = null;
+        ResultSet rs2 = null;
+        try {
+            stm = con.prepareStatement("select * from Utente where email = ?");
+            stm.setString(1, mail);
+            rs = stm.executeQuery();
+            if (rs.next()) {
+                if (rs.getBoolean("amministratore")) {
+                    res = new Amministratore(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), this);
+                } else {
+                    stm = con.prepareStatement("SELECT COUNT(*) as res FROM RISTORANTE WHERE id_utente = ?");
+                    stm.setInt(1, rs.getInt("id"));
+                    rs2 = stm.executeQuery();
+                    if (rs2.next()) {
+                        //Ristoratore(int id, String nome, String cognome, String email, String avpath){
+                        if (rs2.getInt("res") > 0) {
+                            res = new Ristoratore(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), rs.getBoolean("attivato"), this);
+                        } else {
+                            res = new Registrato(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), rs.getBoolean("attivato"), this);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs2 != null) {
+                try {
+                    rs2.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
+    }
 
     /**
      * Attiva l'utente con il codice hash corrispondente nella tabella
@@ -955,23 +1014,28 @@ public class DBManager implements Serializable {
         ResultSet rs = null;
         boolean res = false;
         try {
-            stm = con.prepareStatement("select ristorante.nome, l.address from ristorante as ristorante, luogo as l where ristorante.id_luogo = l.id");
-            rs = stm.executeQuery();
+            
             File file = new File(this.completePath + path);
-
-            int counter = 0;
             String content = "";
+            
+            stm = con.prepareStatement("select ristorante.nome as nome from ristorante");
+            rs = stm.executeQuery();
             while (rs.next()) {
-                content += rs.getString("nome") + "," + rs.getString("address") + ",";
+                content += rs.getString("nome") + ",";
+            }
+            
+            stm = con.prepareStatement("select * from luogo");
+            rs = stm.executeQuery();
+            while (rs.next()) {
+                content += rs.getString("street") + "," + rs.getString("city") + "," + rs.getString("area1") + "," + rs.getString("area2") + ","  + rs.getString("state") + ",";
             }
 
             stm = con.prepareStatement("select cucina from ristorante group by cucina");
             rs = stm.executeQuery();
-
             while (rs.next()) {
                 content += rs.getString("cucina") + ",";
             }
-            content += "ristorante,cucina";
+            content += "ristorante, cucina";
 
             // if file doesn't exists, then create it
             try (FileOutputStream fop = new FileOutputStream(file)) {

@@ -172,6 +172,8 @@
                                 <br>
                                 <label class="control-label"><fmt:message key="email"/>: <c:out value="${utente.getEmail()}"/></label>
                                 <br>
+                                <label class="control-label"><fmt:message key="classify.position"/>: <c:out value="${utente.getPosizioneClassifica()}"/></label>
+                                <br>
                             </div>
                             <div class="col-md-4">
                                 <label class="control-label"><fmt:message key="you.do"/> <c:out value="${utente.numeroRecensioni()}"/> <fmt:message key="minus.review"/></label>

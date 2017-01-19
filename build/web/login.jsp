@@ -38,7 +38,7 @@
         <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/jquery-1.8.2.min.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/jquery.mockjax.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/src/jquery.autocomplete.js"></script>
-        <script type="text/javascript" src="<%= request.getContextPath()%>/autocomplete.txt"></script>
+        <script type="text/javascript" src="<%= request.getContextPath()%>/customScript/newPass.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath()%>/scripts/demo.js"></script>
 
     </head>
@@ -179,6 +179,13 @@
                                     <button type="submit" class="btn btn-primary"><fmt:message key="vai"/></button>
                                     <button type="reset" id="user" class="btn btn-primary" onclick="history.go(-1);">Annulla</button>
                                 </form>
+                                <br><br><br>
+                                <button class="btn btn-primary" id="setButton">Hai dimenticato la password?</button>
+                                <div id="newpassform" hidden>
+                                    <label class="control-label">Inserisci la tua mail: </label><input type="text" id="email" class="form-control" size="50"/>
+                                    <button id="sendButton" onclick="send('<%= request.getContextPath()%>')" class="btn btn-primary">Ricevi nuova password</button> 
+                                </div>
+
                             </div>
                             <div class="col-md-4"></div>
                         </div>
@@ -239,7 +246,7 @@
 
         <!-- Theme JavaScript -->
         <script src="<%= request.getContextPath()%>/js/freelancer.min.js"></script>
-
+        
     </body>
 
 </html>

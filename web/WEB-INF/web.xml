@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
-    
     <!-- PARAMETRI DA CONFIGURARE -->
     <context-param>
         <param-name>dburl</param-name>
@@ -19,8 +18,6 @@
         <param-value>/Users/lucadiliello/Desktop/Progetti/Programmazione_web/tripTNadvisor</param-value>
     </context-param>
     <!-- FINE PARAMETRI DA CONFIGURARE -->
-    
-    
     <!-- inizializzatori -->
     <filter>
         <filter-name>FilterUser</filter-name>
@@ -91,8 +88,6 @@
     <listener>
         <listener-class>Listener.WebAppContextListener</listener-class>
     </listener>
-    
-    
     <context-param>
         <param-name>defaultFolder</param-name>
         <param-value>/defaultItem</param-value>
@@ -101,7 +96,6 @@
         <param-name>javax.servlet.jsp.jstl.fmt.localizationContext</param-name>
         <param-value>Resources.string</param-value>
     </context-param>
-    
     <welcome-file-list>
         <welcome-file>HomeServlet</welcome-file>
     </welcome-file-list>
@@ -259,6 +253,10 @@
         <servlet-name>GetMapsData</servlet-name>
         <servlet-class>Servlet.GetMapsData</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>NuovaPassword</servlet-name>
+        <servlet-class>Servlet.NuovaPassword</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ConfigurazioneProfilo</servlet-name>
         <url-pattern>/private/ConfigurazioneProfilo</url-pattern>
@@ -378,6 +376,10 @@
     <servlet-mapping>
         <servlet-name>GetMapsData</servlet-name>
         <url-pattern>/GetMapsData</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>NuovaPassword</servlet-name>
+        <url-pattern>/NuovaPassword</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
