@@ -187,10 +187,10 @@ public class Recensione implements Serializable{
         boolean res = false;
         try {
             stm = con.prepareStatement("UPDATE RECENSIONE SET fotoPath = ? WHERE id = ?");
-            stm.setString(1, null);
+            stm.setString(1, manager.defaultFolder + "/rec_default.png");
             stm.setInt(2, getId());
             stm.executeUpdate();
-            setFotoPath(null);
+            setFotoPath(manager.defaultFolder + "/rec_default.png");
             res = true;
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);

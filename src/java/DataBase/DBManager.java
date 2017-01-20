@@ -149,7 +149,7 @@ public class DBManager implements Serializable {
             stm = con.prepareStatement("select * from( select ristorante.ID, avg(rating) as media from votorist, ristorante where ristorante.ID = votorist.ID_RIST group by ristorante.ID) as res, ristorante as ristorante where res.id = ristorante.ID order by res.media DESC");
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), rs.getInt("id_luogo")));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo"))));
             }
 
         } catch (SQLException ex) {
@@ -187,7 +187,7 @@ public class DBManager implements Serializable {
             stm = con.prepareStatement("SELECT * FROM ristorante order by ristorante.VISITE desc { limit 5 }");
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), rs.getInt("id_luogo")));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo"))));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -415,7 +415,7 @@ public class DBManager implements Serializable {
                     + "group by recensione.ID_UTENTE) as res right join (select * from utente where amministratore = false) as utente"
                     + " on res.id = utente.ID order by mid, utente.id");
             rs = stm.executeQuery();
-            
+
             while (rs.next()) {
                 Utente u = getUtente(rs.getInt("idU"));
                 res.add(u);
@@ -481,11 +481,41 @@ public class DBManager implements Serializable {
     /**
      * Costruisce un oggetto di tipo Luogo sulla base dell'indirizzo fornito
      *
-     * @param address indirizzo su cui costruire l'oggetto Luogo
      * @return l'oggetto Luogo costruito
      */
-    public Luogo getLuogo(String address) {        
-        return new Luogo(address,this);
+    public Luogo getLuogo(int id) {
+        if (id == 0) {
+            return null;
+        }
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        Luogo res = null;
+        try {
+            stm = con.prepareStatement("select * from Luogo where id = ?");
+            stm.setInt(1, id);
+            rs = stm.executeQuery();
+            if (rs.next()) {
+                res = new Luogo(rs.getInt("id"), rs.getDouble("lat"), rs.getDouble("lng"), rs.getInt("street_number"), rs.getString("street"), rs.getString("city"), rs.getString("area1"), rs.getString("area2"), rs.getString("state"));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
     }
 
     /**
@@ -509,7 +539,7 @@ public class DBManager implements Serializable {
                 stm = con.prepareStatement("SELECT * FROM RISTORANTE");
                 rs = stm.executeQuery();
                 while (rs.next()) {
-                    res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), rs.getInt("id_luogo")));
+                    res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo"))));
                 }
                 Iterator i = res.iterator();
                 while (i.hasNext()) {
@@ -558,7 +588,7 @@ public class DBManager implements Serializable {
             stm.setInt(1, id);
             rs = stm.executeQuery();
             if (rs.next()) {
-                res = new Ristorante(id, rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), rs.getInt("id_luogo"));
+                res = new Ristorante(id, rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo")));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -718,7 +748,7 @@ public class DBManager implements Serializable {
         }
         return res;
     }
-    
+
     /**
      * Per recupare l'oggetto utente con quell'id. Ad esso verrà effettuato un
      * downcast ad utente Registrato, Ristoratore, Amministratore secondo le
@@ -891,7 +921,7 @@ public class DBManager implements Serializable {
             stm = con.prepareStatement("SELECT * FROM RISTORANTE");
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), rs.getInt("id_luogo")));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo"))));
             }
             Iterator i = res.iterator();
             while (i.hasNext()) {
@@ -952,7 +982,7 @@ public class DBManager implements Serializable {
             stm.setDouble(4, lng);
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), rs.getInt("id_luogo")));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo"))));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -984,7 +1014,7 @@ public class DBManager implements Serializable {
             stm.setString(1, tipo);
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), rs.getInt("id_luogo")));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo"))));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -1014,20 +1044,20 @@ public class DBManager implements Serializable {
         ResultSet rs = null;
         boolean res = false;
         try {
-            
+
             File file = new File(this.completePath + path);
             String content = "";
-            
+
             stm = con.prepareStatement("select ristorante.nome as nome from ristorante");
             rs = stm.executeQuery();
             while (rs.next()) {
                 content += rs.getString("nome") + ",";
             }
-            
+
             stm = con.prepareStatement("select * from luogo");
             rs = stm.executeQuery();
             while (rs.next()) {
-                content += rs.getString("street") + "," + rs.getString("city") + "," + rs.getString("area1") + "," + rs.getString("area2") + ","  + rs.getString("state") + ",";
+                content += rs.getString("street") + "," + rs.getString("city") + "," + rs.getString("area1") + "," + rs.getString("area2") + "," + rs.getString("state") + ",";
             }
 
             stm = con.prepareStatement("select cucina from ristorante group by cucina");

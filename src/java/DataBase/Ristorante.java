@@ -5,6 +5,7 @@
  */
 package DataBase;
 
+import static DataBase.DBManager.readJsonFromUrl;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,6 +20,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.glxn.qrgen.QRCode;
 import net.glxn.qrgen.image.ImageType;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  *
@@ -108,15 +112,7 @@ public class Ristorante implements Serializable {
     public String dirName;
     private final Utente utente;
     private int visite;
-
-    public int getId_luogo() {
-        return id_luogo;
-    }
-
-    public void setId_luogo(int id_luogo) {
-        this.id_luogo = id_luogo;
-    }
-    private int id_luogo;
+    private Luogo luogo;
 
     /**
      * Crea un nuovo oggetto di tipo Ristorante
@@ -130,9 +126,10 @@ public class Ristorante implements Serializable {
      * @param manager oggetto DBManager per la connessione e l'uso del DB
      * @param utente utente che possiede il ristorante, null altrimenti
      * @param visite numero di visite del ristorante
-     * @param id_luogo id del luogo riferito
+     * @param luogo
      */
-    public Ristorante(int id, String name, String descr, String linksito, String fascia, String cucina, DBManager manager, Utente utente, int visite, int id_luogo) {
+    public Ristorante(int id, String name, String descr, String linksito, String fascia, String cucina, DBManager manager, Utente utente, int visite, Luogo luogo) {
+        this.luogo = luogo;
         this.id = id;
         this.name = name;
         this.descr = descr;
@@ -276,38 +273,50 @@ public class Ristorante implements Serializable {
         boolean res = false;
         try {
             stm = con.prepareStatement("delete from Luogo where id = (select id_luogo from ristorante where id = ?)");
+            stm.setInt(1, getId());
             stm.executeUpdate();
-
-            Luogo luogo = manager.getLuogo(address);
 
             stm = con.prepareStatement("INSERT INTO Luogo (lat,lng,state,area1,area2,city,street,street_number) VALUES (?,?,?,?,?,?,?,?)");
-            stm.setDouble(1, luogo.getLat());
-            stm.setDouble(2, luogo.getLng());
-            stm.setString(3, luogo.getState());
-            stm.setString(4, luogo.getArea1());
-            stm.setString(5, luogo.getArea2());
-            stm.setString(6, luogo.getCity());
-            stm.setString(7, luogo.getStreet());
-            stm.setInt(8, luogo.getStreet_number());
 
-            stm.executeUpdate();
+            try {
+                String req = "https://maps.googleapis.com/maps/api/geocode/json?address=" + address.replace(' ', '+') + "&key=" + manager.googleKey;
+                JSONObject json = readJsonFromUrl(req);
+                if (json.getString("status").equals("OK")) {
+                    JSONArray faddress = json.getJSONArray("results").getJSONObject(0).getJSONArray("address_components");
+                    JSONObject location = json.getJSONArray("results").getJSONObject(0).getJSONObject("geometry").getJSONObject("location");
 
-            stm = con.prepareStatement("select id from Luogo where lat = ? AND lng = ?");
-            stm.setDouble(1, luogo.getLat());
-            stm.setDouble(2, luogo.getLng());
-            rs = stm.executeQuery();
-            int luogo_id;
-            if (rs.next()) {
-                luogo_id = rs.getInt("id");
-            } else {
-                throw new SQLException();
+                    stm.setDouble(1, location.getDouble("lat"));
+                    stm.setDouble(2, location.getDouble("lng"));
+                    stm.setString(3, faddress.getJSONObject(5).getString("long_name"));
+                    stm.setString(4, faddress.getJSONObject(3).getString("long_name"));
+                    stm.setString(5, faddress.getJSONObject(4).getString("long_name"));
+                    stm.setString(6, faddress.getJSONObject(2).getString("long_name"));
+                    stm.setString(7, faddress.getJSONObject(1).getString("long_name"));
+                    stm.setInt(8, Integer.parseInt(faddress.getJSONObject(0).getString("long_name")));
+
+                    stm.executeUpdate();
+
+                    stm = con.prepareStatement("select id from Luogo where lat = ? AND lng = ?");
+                    stm.setDouble(1, luogo.getLat());
+                    stm.setDouble(2, luogo.getLng());
+                    rs = stm.executeQuery();
+                    int luogo_id;
+                    if (rs.next()) {
+                        luogo_id = rs.getInt("id");
+                    } else {
+                        throw new SQLException();
+                    }
+                    luogo = new Luogo(rs.getInt("id"), rs.getDouble("lat"), rs.getDouble("lng"), rs.getInt("street_number"), rs.getString("street"), rs.getString("city"), rs.getString("area1"), rs.getString("area2"), rs.getString("state"));
+                    stm = con.prepareStatement("update ristorante set id_luogo = ? where id = ?");
+                    stm.setInt(1, luogo_id);
+                    stm.setInt(2, getId());
+                    stm.executeUpdate();
+                    res = true;
+                }
+            } catch (JSONException | IOException ex) {
+                Logger.getLogger(Luogo.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            stm = con.prepareStatement("update ristorante set id_luogo = ? where id = ?");
-            stm.setInt(1, luogo_id);
-            stm.setInt(2, getId());
-            stm.executeUpdate();
-            res = true;
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
@@ -374,6 +383,7 @@ public class Ristorante implements Serializable {
      * @return la posizione in classifica del ristorante
      */
     public int getPosizioneClassificaPerCitta() {
+        if(getLuogo() == null) return -1;
         PreparedStatement stm = null;
         ResultSet rs = null;
         int res = 1;
@@ -427,7 +437,7 @@ public class Ristorante implements Serializable {
             stm.setInt(2, giorno);
             rs = stm.executeQuery();
             if (rs.next()) {
-                Days d = new Days(rs.getInt("id"), manager.getRistorante(rs.getInt("id_rist")), rs.getInt("giorno"), manager); //////il secondo parametro this??
+                Days d = new Days(rs.getInt("id"), this, rs.getInt("giorno"), manager);
                 d.addTimes(inizio, fine);
             } else if (addDays(giorno)) {
                 stm = con.prepareStatement("select * from days where id_rist = ? AND giorno = ?");
@@ -435,7 +445,7 @@ public class Ristorante implements Serializable {
                 stm.setInt(2, giorno);
                 rs = stm.executeQuery();
                 if (rs.next()) {
-                    Days d = new Days(rs.getInt("id"), manager.getRistorante(rs.getInt("id_rist")), rs.getInt("giorno"), manager); //////il secondo parametro this??
+                    Days d = new Days(rs.getInt("id"), this, rs.getInt("giorno"), manager);
                     d.addTimes(inizio, fine);
                 }
             }
@@ -512,35 +522,7 @@ public class Ristorante implements Serializable {
      * @return L'oggetto Luogo riferito a questo ristorante
      */
     public Luogo getLuogo() {
-        PreparedStatement stm = null;
-        ResultSet rs = null;
-        Luogo res = null;
-        try {
-            stm = con.prepareStatement("select * from Luogo where luogo.id = ?");
-            stm.setInt(1, getId_luogo());
-            rs = stm.executeQuery();
-            if (rs.next()) {    //double lat, double lng, int street_number, String street, String city, String area1, String area2, String state, DBManager manager
-                res = new Luogo(rs.getDouble("lat"), rs.getDouble("lng"), rs.getInt("street_number"), rs.getString("street"), rs.getString("city"), rs.getString("area1"), rs.getString("area2"), rs.getString("state"), manager);
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if (stm != null) {
-                try {
-                    stm.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-        return res;
+        return luogo;
     }
 
     /**

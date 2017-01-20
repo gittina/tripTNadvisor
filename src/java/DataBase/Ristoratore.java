@@ -124,7 +124,7 @@ public class Ristoratore extends Utente {
             stm.setInt(1, getId());
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), manager, manager.getUtente(rs.getInt("id_utente")), rs.getInt("visite"), rs.getInt("id_luogo")));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), manager, manager.getUtente(rs.getInt("id_utente")), rs.getInt("visite"), manager.getLuogo(rs.getInt("id_luogo"))));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
