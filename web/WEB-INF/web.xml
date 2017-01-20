@@ -15,7 +15,7 @@
     </context-param>
     <context-param>
         <param-name>completePath</param-name>
-        <param-value>/Users/lucadiliello/Desktop/Progetti/Programmazione_web/tripTNadvisor</param-value>
+        <param-value>/home/martina/NetBeansProjects/tripTNadvisor</param-value>
     </context-param>
     <!-- FINE PARAMETRI DA CONFIGURARE -->
     <!-- inizializzatori -->
