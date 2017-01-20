@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package DataBase;
 
 import java.io.Serializable;
@@ -17,6 +12,7 @@ public class Times implements Serializable {
     private final int id;
     private final Time apertura;
     private final Time chiusura;
+    private final Days day;
 
     public int getId() {
         return id;
@@ -30,7 +26,8 @@ public class Times implements Serializable {
         return apertura;
     }
 
-    Times(int id, Time apertura, Time chiusura){
+    Times(int id, Time apertura, Time chiusura, Days day){
+        this.day = day; 
         this.apertura = apertura;
         this.chiusura = chiusura;
         this.id = id;
@@ -59,10 +56,7 @@ public class Times implements Serializable {
         if (!Objects.equals(this.apertura, other.apertura)) {
             return false;
         }
-        if (!Objects.equals(this.chiusura, other.chiusura)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.chiusura, other.chiusura);
     }    
     
     @Override

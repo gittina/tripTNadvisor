@@ -100,7 +100,7 @@ public class Days implements Serializable{
             stm.setInt(1, getId());
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Times(rs.getInt("id"), rs.getTime("apertura"), rs.getTime("chiusura")));
+                res.add(new Times(rs.getInt("id"), rs.getTime("apertura"), rs.getTime("chiusura"), this));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);

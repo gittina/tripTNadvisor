@@ -353,6 +353,7 @@ public class DBManager implements Serializable {
      * @param cognome cognome del nuovo utente
      * @param email email del nuovo utente
      * @param password password del nuovo utente
+     * @param privacy
      * @return l'oggetto Utente per la sessione
      */
     public Utente addRegistrato(String nome, String cognome, String email, String password, boolean privacy) {
@@ -478,46 +479,7 @@ public class DBManager implements Serializable {
         }
     }
 
-    /**
-     * Costruisce un oggetto di tipo Luogo sulla base dell'indirizzo fornito
-     *
-     * @return l'oggetto Luogo costruito
-     */
-    public Luogo getLuogo(int id) {
-        if (id == 0) {
-            return null;
-        }
-        PreparedStatement stm = null;
-        ResultSet rs = null;
-        Luogo res = null;
-        try {
-            stm = con.prepareStatement("select * from Luogo where id = ?");
-            stm.setInt(1, id);
-            rs = stm.executeQuery();
-            if (rs.next()) {
-                res = new Luogo(rs.getInt("id"), rs.getDouble("lat"), rs.getDouble("lng"), rs.getInt("street_number"), rs.getString("street"), rs.getString("city"), rs.getString("area1"), rs.getString("area2"), rs.getString("state"));
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if (stm != null) {
-                try {
-                    stm.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-        return res;
-    }
-
+    
     /**
      * Funzione di ricerca di base, implementata nella barra di ricerca
      * secondaria e non specifica (quella in alto sulla nav-bar). Esegue la
@@ -573,43 +535,7 @@ public class DBManager implements Serializable {
         return res;
     }
 
-    /**
-     * Per recupare l'oggetto ristorante con quell'id
-     *
-     * @param id id del ristorante da ottenere
-     * @return l'oggetto ristorante
-     */
-    public Ristorante getRistorante(int id) {
-        PreparedStatement stm = null;
-        ResultSet rs = null;
-        Ristorante res = null;
-        try {
-            stm = con.prepareStatement("select * from Ristorante where id = ?");
-            stm.setInt(1, id);
-            rs = stm.executeQuery();
-            if (rs.next()) {
-                res = new Ristorante(id, rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo")));
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if (stm != null) {
-                try {
-                    stm.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-        return res;
-    }
+    
 
     /**
      * Per ottenere la password di un utente
@@ -649,106 +575,7 @@ public class DBManager implements Serializable {
         return res;
     }
 
-    /**
-     * Per recupare l'oggetto recensione con quell'id
-     *
-     * @param id id della recensione da ottenere
-     * @return l'oggetto recensione
-     */
-    public Recensione getRecensione(int id) {
-        PreparedStatement stm = null;
-        ResultSet rs = null;
-        Recensione res = null;
-        try {
-            stm = con.prepareStatement("select * from Recensione where id = ?");
-            stm.setInt(1, id);
-            rs = stm.executeQuery();
-            if (rs.next()) {
-                res = new Recensione(rs.getInt("id"), getRistorante(rs.getInt("id_rist")), getUtente(rs.getInt("id_utente")), rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), this);
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if (stm != null) {
-                try {
-                    stm.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-        return res;
-    }
-
-    /**
-     * Per recupare l'oggetto utente con quell'id. Ad esso verrà effettuato un
-     * downcast ad utente Registrato, Ristoratore, Amministratore secondo le
-     * informazioni contenute nel DB
-     *
-     * @param id id dell'utente da ottenere
-     * @return l'oggetto utente
-     */
-    public Utente getUtente(int id) {
-        PreparedStatement stm = null;
-        Utente res = null;
-        ResultSet rs = null;
-        ResultSet rs2 = null;
-        try {
-            stm = con.prepareStatement("select * from Utente where id = ?");
-            stm.setInt(1, id);
-            rs = stm.executeQuery();
-            if (rs.next()) {
-                if (rs.getBoolean("amministratore")) {
-                    res = new Amministratore(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), this);
-                } else {
-                    stm = con.prepareStatement("SELECT COUNT(*) as res FROM RISTORANTE WHERE id_utente = ?");
-                    stm.setInt(1, id);
-                    rs2 = stm.executeQuery();
-                    if (rs2.next()) {
-                        //Ristoratore(int id, String nome, String cognome, String email, String avpath){
-                        if (rs2.getInt("res") > 0) {
-                            res = new Ristoratore(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), rs.getBoolean("attivato"), this);
-                        } else {
-                            res = new Registrato(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), rs.getBoolean("attivato"), this);
-                        }
-                    }
-                }
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if (stm != null) {
-                try {
-                    stm.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            if (rs2 != null) {
-                try {
-                    rs2.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-        return res;
-    }
-
+    
     /**
      * Per recupare l'oggetto utente con quell'id. Ad esso verrà effettuato un
      * downcast ad utente Registrato, Ristoratore, Amministratore secondo le
@@ -874,43 +701,7 @@ public class DBManager implements Serializable {
         return res;
     }
 
-    /**
-     * Per recupare l'oggetto foto con quell'id
-     *
-     * @param id id della foto da ottenere
-     * @return l'oggetto foto
-     */
-    public Foto getFoto(int id) {
-        PreparedStatement stm = null;
-        ResultSet rs = null;
-        Foto res = null;
-        try {
-            stm = con.prepareStatement("select * from foto where id = ?");
-            stm.setInt(1, id);
-            rs = stm.executeQuery();
-            if (rs.next()) {
-                res = new Foto(rs.getInt("id"), rs.getString("fotopath"), rs.getString("descr"), rs.getDate("data"), getUtente(rs.getInt("id_utente")), getRistorante(rs.getInt("id_rist")), this);
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if (stm != null) {
-                try {
-                    stm.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-        return res;
-    }
+    
 
     public ArrayList<Ristorante> advSearch1(String research, String spec) {
         ArrayList<Ristorante> res = new ArrayList<>();
@@ -1272,6 +1063,235 @@ public class DBManager implements Serializable {
         }
         return res;
     }
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //
+    //
+    //
+    //
+    //
+    ////////////// ESTRATTORI DA DB //////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    
+    /**
+     * Per recupare l'oggetto foto con quell'id
+     *
+     * @param id id della foto da ottenere
+     * @return l'oggetto foto
+     */
+    public Foto getFoto(int id) {
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        Foto res = null;
+        try {
+            stm = con.prepareStatement("select * from foto where id = ?");
+            stm.setInt(1, id);
+            rs = stm.executeQuery();
+            if (rs.next()) {
+                res = new Foto(rs.getInt("id"), rs.getString("fotopath"), rs.getString("descr"), rs.getDate("data"), getUtente(rs.getInt("id_utente")), getRistorante(rs.getInt("id_rist")), this);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
+    }
+    
+    /**
+     * Per recupare l'oggetto utente con quell'id. Ad esso verrà effettuato un
+     * downcast ad utente Registrato, Ristoratore, Amministratore secondo le
+     * informazioni contenute nel DB
+     *
+     * @param id id dell'utente da ottenere
+     * @return l'oggetto utente
+     */
+    public Utente getUtente(int id) {
+        PreparedStatement stm = null;
+        Utente res = null;
+        ResultSet rs = null;
+        ResultSet rs2 = null;
+        try {
+            stm = con.prepareStatement("select * from Utente where id = ?");
+            stm.setInt(1, id);
+            rs = stm.executeQuery();
+            if (rs.next()) {
+                if (rs.getBoolean("amministratore")) {
+                    res = new Amministratore(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), this);
+                } else {
+                    stm = con.prepareStatement("SELECT COUNT(*) as res FROM RISTORANTE WHERE id_utente = ?");
+                    stm.setInt(1, id);
+                    rs2 = stm.executeQuery();
+                    if (rs2.next()) {
+                        //Ristoratore(int id, String nome, String cognome, String email, String avpath){
+                        if (rs2.getInt("res") > 0) {
+                            res = new Ristoratore(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), rs.getBoolean("attivato"), this);
+                        } else {
+                            res = new Registrato(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), rs.getBoolean("attivato"), this);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs2 != null) {
+                try {
+                    rs2.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
+    }
+    
+    /**
+     * Per recupare l'oggetto recensione con quell'id
+     *
+     * @param id id della recensione da ottenere
+     * @return l'oggetto recensione
+     */
+    public Recensione getRecensione(int id) {
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        Recensione res = null;
+        try {
+            stm = con.prepareStatement("select * from Recensione where id = ?");
+            stm.setInt(1, id);
+            rs = stm.executeQuery();
+            if (rs.next()) {
+                res = new Recensione(rs.getInt("id"), getRistorante(rs.getInt("id_rist")), getUtente(rs.getInt("id_utente")), rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), this);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
+    }
+
+    /**
+     * Per recupare l'oggetto ristorante con quell'id
+     *
+     * @param id id del ristorante da ottenere
+     * @return l'oggetto ristorante
+     */
+    public Ristorante getRistorante(int id) {
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        Ristorante res = null;
+        try {
+            stm = con.prepareStatement("select * from Ristorante where id = ?");
+            stm.setInt(1, id);
+            rs = stm.executeQuery();
+            if (rs.next()) {
+                res = new Ristorante(id, rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo")));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
+    }
+
+    /**
+     * Costruisce un oggetto di tipo Luogo sulla base dell'indirizzo fornito
+     *
+     * @param id
+     * @return l'oggetto Luogo costruito
+     */
+    public Luogo getLuogo(int id) {
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        Luogo res = null;
+        try {
+            stm = con.prepareStatement("select * from Luogo where id = ?");
+            stm.setInt(1, id);
+            rs = stm.executeQuery();
+            if (rs.next()) {
+                res = new Luogo(rs.getInt("id"), rs.getDouble("lat"), rs.getDouble("lng"), rs.getInt("street_number"), rs.getString("street"), rs.getString("city"), rs.getString("area1"), rs.getString("area2"), rs.getString("state"));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return res;
+    }
+
+    
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////

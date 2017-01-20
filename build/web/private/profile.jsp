@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
@@ -190,9 +190,11 @@
                             <div class="col-md-4">
                                 <label class="control-label"><a href="<%= request.getContextPath()%>/private/modifica.jsp"><fmt:message key="edit.profile"/></a></label>
                                 <br>
-                                <label class="control-label"><a href="<%= request.getContextPath()%>/privateRistoratore/ConfigurazioneRistoranti"><fmt:message key="my.restaurant"/></a></label>
-                                <br>
-                                <label class="control-label"><a href="<%= request.getContextPath()%>/private/ConfigurazioneAddRistorante"><fmt:message key="add.restaurant"/></a></label>
+                                <c:if test="${utente.isRistoratore()}">
+                                    <label class="control-label"><a href="<%= request.getContextPath()%>/privateRistoratore/ConfigurazioneRistoranti"><fmt:message key="my.restaurant"/></a></label>
+                                    <br>
+                                    <label class="control-label"><a href="<%= request.getContextPath()%>/private/ConfigurazioneAddRistorante"><fmt:message key="add.restaurant"/></a></label>
+                                </c:if>
                             </div>
                         </div>
                     </div>
