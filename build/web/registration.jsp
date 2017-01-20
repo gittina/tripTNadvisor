@@ -196,7 +196,7 @@
                                 <br>
 
                                 <input type="checkbox" name="check"/>
-                                <fmt:message key="terms.accept"/>
+                                <a href="<%= request.getContextPath()%>/privacy.html" target="_blank"><fmt:message key="terms.accept"/></a>
                                 <span class="label label-danger"><c:out value="${checkMessage}"/></span>
                                 <br><br>
 
