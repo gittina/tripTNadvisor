@@ -106,16 +106,6 @@ public class AddRistorante extends HttpServlet {
             }
         }
     }
-
-    boolean isNumber(String s) {
-        for (int i = 0; i < s.length(); i++) {
-            if (s.charAt(i) < '0' || s.charAt(i) > '9') {
-                return false;
-            }
-        }
-        return true;
-    }
-
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.

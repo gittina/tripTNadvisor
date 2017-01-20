@@ -189,13 +189,15 @@ public abstract class Utente implements Serializable {
                     + "recensione.id = votorec.ID_REC group by recensione.id) as voti, recensione where voti.id = recensione.ID "
                     + "group by recensione.ID_UTENTE) as res right join (select * from utente where amministratore = false) as utente"
                     + " on res.id = utente.ID order by mid, utente.id");
-            
+
             rs = stm.executeQuery();
             boolean found = false;
-            while(rs.next() && !found){
-                if(rs.getInt("idU") == getId()){
+            while (rs.next() && !found) {
+                if (rs.getInt("idU") == getId()) {
                     found = true;
-                } else res++;
+                } else {
+                    res++;
+                }
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -399,7 +401,6 @@ public abstract class Utente implements Serializable {
         return res;
     }
 
-    
     /**
      * Per controllare se un utente è attivato, ovvero ha confermato la sua
      * registrazione via mail Un amministratore è sempre verificato, quindi per
@@ -441,8 +442,8 @@ public abstract class Utente implements Serializable {
         }
         return res;
     }
-    
-    public boolean accettaPrivacy(){
+
+    public boolean accettaPrivacy() {
         PreparedStatement stm = null;
         ResultSet rs = null;
         boolean res = false;
@@ -471,7 +472,7 @@ public abstract class Utente implements Serializable {
         }
         return res;
     }
-    
+
     /**
      *
      * @param nome nome completo del ristorante
@@ -503,12 +504,13 @@ public abstract class Utente implements Serializable {
             stm.setString(1, nome);
             stm.setString(2, linkSito);
             rs = stm.executeQuery();
-
-            Ristorante rist = manager.getRistorante(rs.getInt("id"));
-            rist.addFoto(fotoPath, fotoDescr, this);
-            rist.setLuogo(address);
-            res = true;
-
+            if (rs.next()) {
+                Ristorante rist = manager.getRistorante(rs.getInt("id"));
+                System.out.println("Ristooooo: " + rist);
+                rist.addFoto(fotoPath, fotoDescr, this);
+                rist.setLuogo(address);
+                res = true;
+            }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
