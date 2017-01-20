@@ -13,15 +13,15 @@ import java.io.Serializable;
  */
 public class Luogo implements Serializable {
 
-    private double lat;
-    private double lng;
-    private int street_number;
-    private String street;
-    private String city;
-    private String area1;
-    private String area2;
-    private String state;
-    private int id;
+    private final double lat;
+    private final double lng;
+    private final int street_number;
+    private final String street;
+    private final String city;
+    private final String area1;
+    private final String area2;
+    private final String state;
+    private final int id;
 
     public int getStreet_number() {
         return street_number;

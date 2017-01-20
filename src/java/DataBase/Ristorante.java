@@ -34,61 +34,47 @@ public class Ristorante implements Serializable {
     transient private final DBManager manager;
     transient private final Connection con;
 
+    public DBManager getManager() {
+        return manager;
+    }
+
+    public Connection getCon() {
+        return con;
+    }
+
     public int getId() {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public String getNome() {
+        return nome;
     }
 
     public String getDescr() {
         return descr;
     }
 
-    public void setDescr(String descr) {
-        this.descr = descr;
-    }
-
     public String getLinksito() {
         return linksito;
-    }
-
-    public void setLinksito(String linksito) {
-        this.linksito = linksito;
     }
 
     public String getFascia() {
         return fascia;
     }
 
-    public void setFascia(String fascia) {
-        this.fascia = fascia;
-    }
-
     public String getCucina() {
         return cucina;
     }
 
-    public void setCucina(String cucina) {
-        this.cucina = cucina;
+    public String getDirName() {
+        return dirName;
     }
 
     public int getVisite() {
         return visite;
     }
 
-    public void setVisite(int visite) {
-        this.visite = visite;
-    }
+   
 
     /**
      * Per ottenere il proprietario del ristorante
@@ -103,12 +89,12 @@ public class Ristorante implements Serializable {
         }
     }
 
-    private int id;
-    private String name;
-    private String descr;
-    private String linksito;
-    private String fascia;
-    private String cucina;
+    private final int id;
+    private final String nome;
+    private final String descr;
+    private final String linksito;
+    private final String fascia;
+    private final String cucina;
     public String dirName;
     private final Utente utente;
     private int visite;
@@ -118,7 +104,7 @@ public class Ristorante implements Serializable {
      * Crea un nuovo oggetto di tipo Ristorante
      *
      * @param id id del ristorante
-     * @param name nome del ristorante
+     * @param nome
      * @param descr descrizione del ristorante
      * @param linksito link al sito web del ristorante
      * @param fascia fascia di prezzo del ristorante
@@ -128,10 +114,10 @@ public class Ristorante implements Serializable {
      * @param visite numero di visite del ristorante
      * @param luogo
      */
-    public Ristorante(int id, String name, String descr, String linksito, String fascia, String cucina, DBManager manager, Utente utente, int visite, Luogo luogo) {
+    public Ristorante(int id, String nome, String descr, String linksito, String fascia, String cucina, Utente utente, int visite, Luogo luogo, DBManager manager) {
         this.luogo = luogo;
         this.id = id;
-        this.name = name;
+        this.nome = nome;
         this.descr = descr;
         this.linksito = linksito;
         this.fascia = fascia;
@@ -152,7 +138,7 @@ public class Ristorante implements Serializable {
             if (id != ristorante.id) {
                 return false;
             }
-            if (!name.equals(ristorante.name)) {
+            if (!nome.equals(ristorante.nome)) {
                 return false;
             }
             if (!linksito.equals(ristorante.linksito)) {
@@ -177,7 +163,7 @@ public class Ristorante implements Serializable {
     public int hashCode() {
         int hash = 7;
         hash = 17 * hash + this.id;
-        hash = 17 * hash + Objects.hashCode(this.name);
+        hash = 17 * hash + Objects.hashCode(this.nome);
         hash = 17 * hash + Objects.hashCode(this.linksito);
         return hash;
     }
@@ -437,7 +423,7 @@ public class Ristorante implements Serializable {
             stm.setInt(2, giorno);
             rs = stm.executeQuery();
             if (rs.next()) {
-                Days d = new Days(rs.getInt("id"), this, rs.getInt("giorno"), manager);
+                Days d = new Days(rs.getInt("id"), rs.getInt("giorno"), this, manager);
                 d.addTimes(inizio, fine);
             } else if (addDays(giorno)) {
                 stm = con.prepareStatement("select * from days where id_rist = ? AND giorno = ?");
@@ -445,7 +431,7 @@ public class Ristorante implements Serializable {
                 stm.setInt(2, giorno);
                 rs = stm.executeQuery();
                 if (rs.next()) {
-                    Days d = new Days(rs.getInt("id"), this, rs.getInt("giorno"), manager);
+                    Days d = new Days(rs.getInt("id"), rs.getInt("giorno"), this, manager);
                     d.addTimes(inizio, fine);
                 }
             }
@@ -540,7 +526,7 @@ public class Ristorante implements Serializable {
             rs = stm.executeQuery();
 
             while (rs.next()) {
-                res.add(new Days(rs.getInt("id"), manager.getRistorante(rs.getInt("id_rist")), rs.getInt("giorno"), manager));
+                res.add(new Days(rs.getInt("id"), rs.getInt("giorno"),this, manager));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -586,7 +572,7 @@ public class Ristorante implements Serializable {
             rs = stm.executeQuery();
 
             while (rs.next()) {
-                res.add(new Recensione(rs.getInt("id"), this, manager.getUtente(rs.getInt("id_utente")), rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), manager));
+                res.add(new Recensione(rs.getInt("id"), rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), this, manager.getUtente(rs.getInt("id_utente")), manager));
             }
             Comparator c = (Comparator<Recensione>) (Recensione o1, Recensione o2) -> {
                 if (o1.getData().after(o2.getData())) {
@@ -646,7 +632,7 @@ public class Ristorante implements Serializable {
             stm.setInt(2, getId());
             rs = stm.executeQuery();
             if (rs.next()) {
-                res = new Recensione(rs.getInt("id"), this, utente, rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), manager);
+                res = new Recensione(rs.getInt("id"), rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), this, utente, manager);
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -788,12 +774,12 @@ public class Ristorante implements Serializable {
      */
     public String creaQR() {
 
-        String pos = "/qr/" + this.getName().replace(' ', '_') + ".jpg";
+        String pos = "/qr/" + this.getNome().replace(' ', '_') + ".jpg";
         String savePath = manager.completePath + "/web" + pos;
 
         ArrayList<Days> days = getDays();
 
-        String forQR = "Nome ristorante: " + this.getName().trim() + "\n" + "Indirizzo: " + getLuogo().getAddress() + "\n";
+        String forQR = "Nome ristorante: " + this.getNome().trim() + "\n" + "Indirizzo: " + getLuogo().getAddress() + "\n";
 
         for (Days o : days) {
             for (Times t : o.getTimes()) {

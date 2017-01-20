@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 public class Registrato extends Utente {
 
     private final boolean attivato;
+    private final boolean accettato;
 
     /**
      *
@@ -28,11 +29,13 @@ public class Registrato extends Utente {
      * @param email indirizzo mail dell'utente
      * @param avpath path della foto del profilo dell'utente
      * @param attivato booleano per vedere se l'utente è attivato
+     * @param accettato
      * @param manager collegamento al DBManager per eseguire query su DB
      */
-    public Registrato(int id, String nome, String cognome, String email, String avpath, boolean attivato, DBManager manager) {
+    public Registrato(int id, String nome, String cognome, String email, String avpath, boolean attivato, boolean accettato, DBManager manager) {
         super(id, nome, cognome, email, avpath, manager);
         this.attivato = attivato;
+        this.accettato = accettato;
     }
 
     /**
@@ -71,6 +74,16 @@ public class Registrato extends Utente {
     @Override
     public ArrayList<Notifica> getNotifiche() {
         return new ArrayList<>();
+    }
+
+    @Override
+    public boolean isActivate() {
+        return attivato;
+    }
+
+    @Override
+    public boolean isAccettato() {
+        return accettato;
     }
 
 }

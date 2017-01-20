@@ -42,7 +42,7 @@ public class Days implements Serializable{
      * = Lunedì, 2 = Martedì, ... , 7 = Domenica
      * @param manager per eseguire operazioni sul database
      */
-    public Days(int id, Ristorante ristorante, int giorno, DBManager manager) {
+    public Days(int id, int giorno, Ristorante ristorante, DBManager manager) {
         this.giorno = giorno;
         this.id = id;
         this.ristorante = ristorante;

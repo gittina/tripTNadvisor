@@ -366,40 +366,8 @@ public abstract class Utente implements Serializable {
      *
      * @return true se l'utente è attivato, false altrimenti
      */
-    public boolean isActivate() {
-        if (this.getClass() == Amministratore.class) {
-            return true;
-        }
-        PreparedStatement stm = null;
-        ResultSet rs = null;
-        boolean res = false;
-        try {
-            stm = con.prepareStatement("select attivato from Utente where id = ?");
-            stm.setInt(1, getId());
-            rs = stm.executeQuery();
-            if (rs.next()) {
-                res = rs.getBoolean("attivato");
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if (stm != null) {
-                try {
-                    stm.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-        return res;
-    }
+    public abstract boolean isActivate();
+    public abstract boolean isAccettato();
 
     /**
      * Per controllare se un utente è attivato, ovvero ha confermato la sua

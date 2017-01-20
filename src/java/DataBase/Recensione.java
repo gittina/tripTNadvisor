@@ -19,42 +19,56 @@ public class Recensione implements Serializable{
 
     transient private final DBManager manager;
     transient private final Connection con;
-    private int id;
-    private String titolo;
-    private String testo;
-    private Date data;
+    private final int id;
+    private final String titolo;
+    private final String testo;
+    private final Date data;
     private String commento;
     private final Ristorante ristorante;
     private final Utente utente;
     private String fotoPath;
 
-    /**
-     * Per ottenere l'utente che ha scritto questa recensione
-     * @return l'utente che ha scritto la recensione
-     */
-    public Utente getUtente() {
-        return utente;
+    public DBManager getManager() {
+        return manager;
+    }
+
+    public Connection getCon() {
+        return con;
     }
 
     public int getId() {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public String getTitolo() {
+        return titolo;
+    }
+
+    public String getTesto() {
+        return testo;
+    }
+
+    public Date getData() {
+        return data;
+    }
+
+    public String getCommento() {
+        return commento;
+    }
+
+    public Ristorante getRistorante() {
+        return ristorante;
+    }
+
+    public Utente getUtente() {
+        return utente;
     }
 
     public String getFotoPath() {
         return fotoPath;
     }
 
-    public void setFotoPath(String fotoPath) {
-        this.fotoPath = fotoPath;
-    }
-
-    public void setCommento(String commento) {
-        this.commento = commento;
-    }
+    
     
     
 
@@ -70,7 +84,7 @@ public class Recensione implements Serializable{
      * @param fotoPath path della foto di questa recensione
      * @param manager collegamento al DBManager per utilizzare il DB
      */
-    public Recensione(int id, Ristorante ristorante, Utente utente, String titolo, String testo, Date data, String commento, String fotoPath, DBManager manager) {
+    public Recensione(int id, String titolo, String testo, Date data, String commento, String fotoPath, Ristorante ristorante, Utente utente, DBManager manager) {
         this.id = id;
         this.titolo = titolo;
         this.testo = testo;
@@ -84,13 +98,6 @@ public class Recensione implements Serializable{
     }
 
 
-    /**
-     * Per ottenere il ristorante su cui è stata scritta questa recensione
-     * @return il ristorante a cui è riferita questa recensione
-     */
-    public Ristorante getRistorante(){
-        return ristorante;
-    }
 
     /**
      * Aggiunge un commento alla recensione, scritto dal proprietario del
@@ -108,7 +115,7 @@ public class Recensione implements Serializable{
             stm.setString(1, commento);
             stm.setInt(2, getId());
             stm.executeUpdate();
-            setCommento(commento);
+            this.commento = commento;
             res = true;
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -190,7 +197,7 @@ public class Recensione implements Serializable{
             stm.setString(1, manager.defaultFolder + "/rec_default.png");
             stm.setInt(2, getId());
             stm.executeUpdate();
-            setFotoPath(manager.defaultFolder + "/rec_default.png");
+            fotoPath = manager.defaultFolder + "/rec_default.png";
             res = true;
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -280,33 +287,5 @@ public class Recensione implements Serializable{
     public boolean esisteCommento() {
 
         return commento != null;
-    }
-
-    public String getTitolo() {
-        return titolo;
-    }
-
-    public void setTitolo(String titolo) {
-        this.titolo = titolo;
-    }
-
-    public String getTesto() {
-        return testo;
-    }
-
-    public void setTesto(String testo) {
-        this.testo = testo;
-    }
-
-    public Date getData() {
-        return data;
-    }
-
-    public void setData(Date data) {
-        this.data = data;
-    }
-
-    public String getCommento() {
-        return commento;
     }
 }

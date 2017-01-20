@@ -42,41 +42,35 @@ public class Foto implements Serializable {
         this.con = manager.con;
     }
 
-    public int getId() {
-        return id;
+    public DBManager getManager() {
+        return manager;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public Connection getCon() {
+        return con;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getFotopath() {
         return fotopath;
     }
 
-    public void setFotopath(String fotopath) {
-        this.fotopath = fotopath;
-    }
-
     public String getDescr() {
         return descr;
-    }
-
-    public void setDescr(String descr) {
-        this.descr = descr;
     }
 
     public Date getData() {
         return data;
     }
 
-    public void setData(Date data) {
-        this.data = data;
-    }
-    private int id;
-    private String fotopath;
-    private String descr;
-    private Date data;
+ 
+    private final int id;
+    private final String fotopath;
+    private final String descr;
+    private final Date data;
     private final Utente utente;
     private final Ristorante ristorante;
 

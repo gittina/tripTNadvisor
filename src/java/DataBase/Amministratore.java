@@ -26,7 +26,6 @@ public class Amministratore extends Utente {
     
     public Amministratore(int id, String nome, String cognome, String email, String avpath, DBManager manager) {
         super(id, nome, cognome, email, avpath, manager);
-
     }
 
     @Override
@@ -180,6 +179,16 @@ public class Amministratore extends Utente {
             }
         }
         return res;
+    }
+
+    @Override
+    public boolean isActivate() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccettato() {
+        return true;
     }
 
 }

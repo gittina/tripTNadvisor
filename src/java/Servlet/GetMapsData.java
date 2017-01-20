@@ -43,7 +43,7 @@ public class GetMapsData extends HttpServlet {
         ArrayList<Ristorante> vicini = ristorante.getVicini();
         for (int i = 0; i < vicini.size(); i++) {
             Luogo l = vicini.get(i).getLuogo();
-            json += "{" + "\"id\":" + vicini.get(i).getId() + ", \"name\":\"" + vicini.get(i).getName() + "\", \"lat\":" + l.getLat() + ", \"lng\":" + l.getLng() + "}";
+            json += "{" + "\"id\":" + vicini.get(i).getId() + ", \"name\":\"" + vicini.get(i).getNome() + "\", \"lat\":" + l.getLat() + ", \"lng\":" + l.getLng() + "}";
             if(i != vicini.size()-1) json += ",";
         }
         json += "]}";

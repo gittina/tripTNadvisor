@@ -22,8 +22,13 @@ import java.util.logging.Logger;
  */
 public class Ristoratore extends Utente {
 
-    public Ristoratore(int id, String nome, String cognome, String email, String avpath, boolean attivato, DBManager manager) {
+    private final boolean attivato;
+    private final boolean accettato;
+
+    public Ristoratore(int id, String nome, String cognome, String email, String avpath, boolean attivato, boolean accettato, DBManager manager) {
         super(id, nome, cognome, email, avpath, manager);
+        this.accettato = accettato;
+        this.attivato = attivato;
     }
     
     @Override
@@ -124,7 +129,7 @@ public class Ristoratore extends Utente {
             stm.setInt(1, getId());
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), manager, manager.getUtente(rs.getInt("id_utente")), rs.getInt("visite"), manager.getLuogo(rs.getInt("id_luogo"))));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), manager.getUtente(rs.getInt("id_utente")), rs.getInt("visite"), manager.getLuogo(rs.getInt("id_luogo")), manager));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -145,5 +150,15 @@ public class Ristoratore extends Utente {
             }
         }
         return res;
+    }
+
+    @Override
+    public boolean isActivate() {
+        return attivato;
+    }
+
+    @Override
+    public boolean isAccettato() {
+        return accettato;
     }
 }

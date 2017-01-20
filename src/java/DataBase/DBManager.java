@@ -110,7 +110,7 @@ public class DBManager implements Serializable {
             stm = con.prepareStatement("select * from recensione order by data desc { limit 5 }");
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Recensione(rs.getInt("id"), getRistorante(rs.getInt("id_rist")), getUtente(rs.getInt("id_utente")), rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), this));
+                res.add(new Recensione(rs.getInt("id"), rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), getRistorante(rs.getInt("id_rist")), getUtente(rs.getInt("id_utente")),this));
             }
 
         } catch (SQLException ex) {
@@ -149,7 +149,7 @@ public class DBManager implements Serializable {
             stm = con.prepareStatement("select * from( select ristorante.ID, avg(rating) as media from votorist, ristorante where ristorante.ID = votorist.ID_RIST group by ristorante.ID) as res, ristorante as ristorante where res.id = ristorante.ID order by res.media DESC");
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo"))));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo")), this));
             }
 
         } catch (SQLException ex) {
@@ -187,7 +187,7 @@ public class DBManager implements Serializable {
             stm = con.prepareStatement("SELECT * FROM ristorante order by ristorante.VISITE desc { limit 5 }");
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo"))));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo")), this));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -501,12 +501,12 @@ public class DBManager implements Serializable {
                 stm = con.prepareStatement("SELECT * FROM RISTORANTE");
                 rs = stm.executeQuery();
                 while (rs.next()) {
-                    res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo"))));
+                    res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo")), this));
                 }
                 Iterator i = res.iterator();
                 while (i.hasNext()) {
                     Ristorante r = (Ristorante) i.next();
-                    String name = r.getName().toLowerCase();
+                    String name = r.getNome().toLowerCase();
                     String addr = r.getLuogo().getAddress().toLowerCase();
                     String cucina = r.getCucina().toLowerCase();
                     if (!name.contains((CharSequence) research) && !addr.contains((CharSequence) research) && !cucina.contains((CharSequence) research)) {
@@ -603,9 +603,9 @@ public class DBManager implements Serializable {
                     if (rs2.next()) {
                         //Ristoratore(int id, String nome, String cognome, String email, String avpath){
                         if (rs2.getInt("res") > 0) {
-                            res = new Ristoratore(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), rs.getBoolean("attivato"), this);
+                            res = new Ristoratore(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), rs.getBoolean("attivato"), rs.getBoolean("accettato"),this);
                         } else {
-                            res = new Registrato(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), rs.getBoolean("attivato"), this);
+                            res = new Registrato(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), rs.getBoolean("attivato"), rs.getBoolean("accettato"), this);
                         }
                     }
                 }
@@ -712,14 +712,14 @@ public class DBManager implements Serializable {
             stm = con.prepareStatement("SELECT * FROM RISTORANTE");
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo"))));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo")), this));
             }
             Iterator i = res.iterator();
             while (i.hasNext()) {
                 Ristorante r = (Ristorante) i.next();
                 switch (spec) {
                     case "nome":
-                        String name = r.getName().toLowerCase();
+                        String name = r.getNome().toLowerCase();
                         if (!name.contains((CharSequence) research)) {
                             i.remove();
                         }
@@ -773,7 +773,7 @@ public class DBManager implements Serializable {
             stm.setDouble(4, lng);
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo"))));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo")), this));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -805,7 +805,7 @@ public class DBManager implements Serializable {
             stm.setString(1, tipo);
             rs = stm.executeQuery();
             while (rs.next()) {
-                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo"))));
+                res.add(new Ristorante(rs.getInt("id"), rs.getString("nome"), rs.getString("descr"), rs.getString("linkSito"), rs.getString("fascia"), rs.getString("cucina"), getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo")), this));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -1142,9 +1142,9 @@ public class DBManager implements Serializable {
                     if (rs2.next()) {
                         //Ristoratore(int id, String nome, String cognome, String email, String avpath){
                         if (rs2.getInt("res") > 0) {
-                            res = new Ristoratore(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), rs.getBoolean("attivato"), this);
+                            res = new Ristoratore(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), rs.getBoolean("attivato"),rs.getBoolean("accettato"), this);
                         } else {
-                            res = new Registrato(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), rs.getBoolean("attivato"), this);
+                            res = new Registrato(rs.getInt("id"), rs.getString("nome"), rs.getString("cognome"), rs.getString("email"), rs.getString("avpath"), rs.getBoolean("attivato"), rs.getBoolean("accettato"), this);
                         }
                     }
                 }
@@ -1192,7 +1192,7 @@ public class DBManager implements Serializable {
             stm.setInt(1, id);
             rs = stm.executeQuery();
             if (rs.next()) {
-                res = new Recensione(rs.getInt("id"), getRistorante(rs.getInt("id_rist")), getUtente(rs.getInt("id_utente")), rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), this);
+                res = new Recensione(rs.getInt("id"),  rs.getString("titolo"), rs.getString("testo"), rs.getDate("data"), rs.getString("commento"), rs.getString("fotopath"), getRistorante(rs.getInt("id_rist")), getUtente(rs.getInt("id_utente")),this);
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -1230,7 +1230,7 @@ public class DBManager implements Serializable {
             stm.setInt(1, id);
             rs = stm.executeQuery();
             if (rs.next()) {
-                res = new Ristorante(id, rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), this, getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo")));
+                res = new Ristorante(id, rs.getString("nome"), rs.getString("descr"), rs.getString("linksito"), rs.getString("fascia"), rs.getString("cucina"), getUtente(rs.getInt("id_utente")), rs.getInt("visite"), getLuogo(rs.getInt("id_luogo")), this);
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).log(Level.SEVERE, null, ex);
